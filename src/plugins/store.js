@@ -9,7 +9,7 @@ const state = {
   stats: {
     totalCombo: 0,
   },
-  combo: 5000,
+  combo: 0,
   keys: [
     {
       key: ' ',
