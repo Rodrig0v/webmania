@@ -1,56 +1,36 @@
 <template>
-  <div>
-    <NavBar/>
-    <section class="main-content columns is-fullheight">
-      <aside class="column is-3 is-narrow-mobile is-fullheight section is-hidden-mobile">
-        <Stats/>
-      </aside>
-      <router-view/>
-    </section>
-    <BottomBar/>
-  </div>
+  <v-app>
+    <Header/>
+    <v-main>
+      <v-row class="fill-height">
+        <v-col cols="3">
+          <GameField/>
+        </v-col>
+        <v-col cols="6">
+          <router-view/>
+        </v-col>
+        <v-col cols="3">
+          <Stats/>
+        </v-col>
+      </v-row>
+    </v-main>
+    <Footer/>
+  </v-app>
 </template>
 
 <script>
-import NavBar from './components/NavBar';
+import Header from './components/Header';
+import GameField from './components/GameField';
 import Stats from './components/Stats';
-import BottomBar from './components/BottomBar';
-import { mapActions } from 'vuex'
+import Footer from './components/Footer';
 
 export default {
   name: 'App',
   components: {
-    NavBar,
+    Header,
+    GameField,
     Stats,
-    BottomBar
+    Footer
   },
-  data() {
-    return {
-      interval: null,
-    }
-    
-  },
-  created () {
-    addEventListener("keydown", this.myKeyPressListener);
-    this.interval = setInterval(this.myLoop, 100);
-  },
-  methods: {
-    ...mapActions([
-      'keyPressed',
-      'timePassed'
-    ]),
-    myKeyPressListener(event) {
-      if (!event.repeat &&
-        this.$store.state.keys.includes(event.key)) {
-        this.keyPressed()
-      }
-    },
-    myLoop() {
-      this.timePassed(0.100)
-    },
-  },
-  destroyed () {
-    clearInterval(this.interval)
-  }
 }
 </script>

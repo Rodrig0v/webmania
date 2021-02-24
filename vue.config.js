@@ -1,8 +1,12 @@
 // vue.config.js
 
 module.exports = {
-    publicPath: process.env.NODE_ENV === 'production'
-    ? '/osumaniaidle/'
-    : '/'
-  }
+  publicPath: process.env.NODE_ENV === 'production'
+  ? '/osumaniaidle/'
+  : '/',
+
+  transpileDependencies: [
+    'vuetify'
+  ]
+}
   

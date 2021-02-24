@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import router from './plugins/router.js'
 import store from './plugins/store.js'
-import vuetify from './plugins/vuetify.js'
+import vuetify from './plugins/vuetify';
 
 Vue.filter('decimal', function (value) {
   return value.toFixed(2)
