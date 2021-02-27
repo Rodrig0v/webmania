@@ -4,32 +4,32 @@
     <v-col><h2>Skills</h2></v-col>
     <v-col style="margin-bottom: 16px">
       <v-row align="center" justify="space-around">
-        <v-tooltip bottom v-for="(skill) in $store.state.skills" :key="skill.id">
+        <v-tooltip bottom v-for="(skill) in info.skills" :key="skill.id">
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <v-btn color="primary" :disabled="$store.state.combo < skill.cost" @click="buyPractice({id: skill.id, amount: 1})">
-                <span class="mr-2">{{ skill.buyTag }}</span>
+              <v-btn color="primary" :disabled="experience < skill.costFunction(skills[skill.id])" @click="buySkill({id: skill.id, amount: 1})">
+                <span class="mr-2">{{ $t(`skills.${skill.id}.buy`) }}</span>
               </v-btn>
             </div>
           </template>
-          <span>Cost: {{ skill.cost }} combo</span>
+          <span>{{ $t('tooltip.cost') }}: {{ skill.costFunction(skills[skill.id]) }} {{ $t('resources.experience') }}</span>
         </v-tooltip>
       </v-row>
     </v-col>
-    <div v-if="$store.state.keys.length == 7">
+    <div>
       <v-divider/>
       <v-col><h2>Cheats</h2></v-col>
       <v-col style="margin-bottom: 16px">
         <v-row align="center" justify="space-around">
-          <v-tooltip bottom v-for="(cheat) in $store.state.cheats" :key="cheat.id">
+          <v-tooltip bottom v-for="(cheat) in info.cheats" :key="cheat.id">
             <template v-slot:activator="{ on }">
               <div v-on="on">
-                <v-btn color="primary" :disabled="$store.state.combo < cheat.cost" @click="buyCheat({id: cheat.id, amount: 1})">
-                  <span class="mr-2">{{ cheat.buyTag }}</span>
+                <v-btn color="primary" :disabled="clout < cheat.costFunction(cheats[cheat.id])" @click="buyCheat({id: cheat.id, amount: 1})">
+                  <span class="mr-2">{{ $t(`cheats.${cheat.id}.buy`) }}</span>
                 </v-btn>
                 </div>
             </template>
-            <span>Cost: {{ cheat.cost }} combo</span>
+            <span>{{ $t('tooltip.cost') }}: {{ cheat.costFunction(cheats[cheat.id]) }} {{ $t('resources.clout') }}</span>
           </v-tooltip>
         </v-row>
       </v-col>
@@ -57,15 +57,25 @@
 <script>
 import { mapActions } from 'vuex'
 import { mapGetters } from 'vuex'
+import info from '../plugins/info'
 
 export default {
   name: 'Home',
+  data() {
+    return {
+      info: info
+    }
+  },
   computed: mapGetters([
-    'starRating',
+    'experience',
+    'money',
+    'clout',
+    'skills',
+    'cheats',
+    'pp',
   ]),
   methods: mapActions([
-    'buyKey',
-    'buyPractice',
+    'buySkill',
     'buyCheat',
   ]),
 }

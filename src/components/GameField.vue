@@ -2,19 +2,19 @@
   <v-container fill-height class="flex-column justify-space-between black">
     <div>
       <h1 class="text-center">
-        Playing <strong>{{ $store.state.keys.length | integer }}K</strong>
+        Playing <strong>{{ keyMode | integer }}K</strong>
       </h1>
-      <p class="text-center"><v-icon>mdi-star</v-icon> {{ starRating | decimal }}</p>
+      <p class="text-center"><v-icon>mdi-star</v-icon> {{ pp | decimal }}</p>
       <p class="text-center">{{ keysPerSecond * comboPerKey | integer }} keys per second</p>
     </div>
     <div>
       <h1 class="text-center">
-        {{ $store.state.combo | integer }}
+        {{ combo | integer }}
       </h1>
       <p class="text-center">combo</p>
     </div>
     <div class="d-flex flex-row">
-      <div v-for="(key) in $store.state.keys" :key="key.key" :style="'border: solid 1px black; padding: ' + key.padding + '; background: ' + key.background + '; color: ' + key.color">
+      <div v-for="(key) in currentKeys" :key="key.key" :style="'border: solid 1px black; padding: ' + key.padding + '; background: ' + key.background + '; color: ' + key.color">
         <strong>{{ key.key | space}}</strong>
       </div>
     </div>
@@ -34,13 +34,16 @@ export default {
     
   },
   created () {
-    addEventListener("keydown", this.myKeyPressListener);
-    this.interval = setInterval(this.myLoop, 100);
+    /*addEventListener("keydown", this.myKeyPressListener);
+    this.interval = setInterval(this.myLoop, 100);*/
   },
   computed: mapGetters([
+    'currentKeys',
     'comboPerKey',
-    'starRating',
-    'keysPerSecond'
+    'keysPerSecond',
+    'combo',
+    'keyMode',
+    'pp'
   ]),
   methods: {
     ...mapActions([
@@ -48,8 +51,8 @@ export default {
       'timePassed'
     ]),
     hasKey(eventKey) {
-      for(var key of this.$store.state.keys) {
-        if(eventKey == key.key) {
+      for(var keyConfig of this.currentKeys) {
+        if(eventKey == keyConfig.keyBind) {
           return true;
         }
       }

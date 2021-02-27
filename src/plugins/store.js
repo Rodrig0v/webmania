@@ -1,67 +1,107 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import info from './info'
 
 Vue.use(Vuex)
 
 // root state object.
 // each Vuex instance is just a single state tree.
 const state = {
-  stats: {
-    totalCombo: 0,
-  },
-  combo: 0,
-  keys: [
-    {
-      key: ' ',
-      background: 'gold',
-      color: 'black',
-      padding: '8px',
-    }
-  ],
-  skills: {
-    reading: {
-      id: 'reading',
-      buyTag: 'Practice Reading',
-      statTag: 'Reading',
-      level: 0,
-      cost: 5
+  loading: true,
+  player: {
+    stats: {
+      startTime: 0,
+      time: 0,
+      version: 0.1
     },
-    jacks: {
-      id: 'jacks',
-      buyTag: 'Practice Jacks',
-      statTag: 'Jacks',
-      level: 0,
-      cost: 5
+    keyConfigs: [
+      {
+        key: 's',
+        background: 'white',
+        color: 'black'
+      },
+      {
+        key: 'd',
+        background: 'dodgerblue',
+        color: 'black'
+      },
+      {
+        key: 'f',
+        background: 'white',
+        color: 'black'
+      },
+      {
+        key: ' ',
+        background: 'gold',
+        color: 'black'
+      },
+      {
+        key: 'j',
+        background: 'white',
+        color: 'black'
+      },
+      {
+        key: 'k',
+        background: 'dodgerblue',
+        color: 'black'
+      },
+      {
+        key: 'l',
+        background: 'white',
+        color: 'black'
+      },
+    ],
+    keyMode: 1,
+    gameMode: 'practice',
+    resources: {
+      experience: 0,
+      money: 0,
+      clout: 0,
+      stamina: 0,
+      combo: 0
     },
-    trilling: {
-      id: 'trilling',
-      buyTag: 'Practice Trilling',
-      statTag: 'Trilling',
-      level: 0,
-      cost: 5
+    skills: {
+      reading: 0,
+      jacks: 0,
+      trilling: 0,
+      technique: 0,
+      accuracy: 0,
+      focus: 0
     },
-    technique: {
-      id: 'technique',
-      buyTag: 'Practice Technique',
-      statTag: 'Technique',
-      level: 0,
-      cost: 5
+    setup: {
+      pc: 0,
+      keyboard: 0,
+      monitor: 0,
+      chair: 0,
+      headset: 0
     },
-  },
-  cheats: {
-    bots: {
-      id: 'bots',
-      buyTag: 'Build a Bot',
-      statTag: 'Bots',
-      level: 0,
-      cost: 10,
+    upgrades: {
+      0: false,
+      1: false,
+      2: false,
+      3: false,
     },
-    macros: {
-      id: 'macros',
-      buyTag: 'Program a Macro',
-      statTag: 'Macros',
-      level: 0,
-      cost: 10,
+    cheats: {
+      bot: 0,
+      macro: 0,
+      pause: 0
+    },
+    buffs: {
+      redbull: {
+        level: 0,
+        active: false,
+        lastActive: 0
+      },
+      vibro: {
+        level: 0,
+        active: false,
+        lastActive: 0
+      }
+    },
+    achievements: {
+      foolmoon: false,
+      firststream: false,
+      firsttournament: false
     }
   }
 }
@@ -72,260 +112,133 @@ const state = {
 // mutations must be synchronous and can be recorded by plugins
 // for debugging purposes.
 const mutations = {
-  mutateKeys (state, value) {
-    state.keys = value
+  mutateKeyMode (state, data) {
+    state.player.keyMode = data.mode
   },
-  incrementTotalCombo (state, value) {
-    state.stats.totalCombo += value
+  mutateGameMode (state, data) {
+    state.player.gameMode = data.mode
   },
-  incrementCombo(state, value) {
-    state.combo += value;
+  addResource(state, data) {
+    state.player.resources[data.id] += data.amount
   },
-  decrementCombo(state, value) {
-    state.combo -= value;
+  addSkill(state, data) {
+    state.player.skills[data.id] += data.amount
   },
-  incrementPractice(state, data) {
-    state.skills[data.id].level += data.amount
-    state.skills[data.id].cost += 1
+  addSetup(state, data) {
+    state.player.setup[data.id] += data.amount
   },
-  incrementCheat(state, data) {
-    state.cheats[data.id].level += data.amount
-    state.cheats[data.id].cost += 1
+  addCheat(state, data) {
+    state.player.cheats[data.id] += data.amount
   },
+  toggleUpgrade(state, data) {
+    state.player.upgrades[data.id] = !state.player.upgrades[data.id]
+  },
+  toggleAchievement(state, data) {
+    state.player.achievements[data.id] = !state.player.achievements[data.id]
+  },
+  reset(state) {
+    state.player = null //TODO
+  },
+  rebirth(state) {
+    state.player = null //TODO
+  }
 }
 
 // actions are functions that cause side effects and can involve
 // asynchronous operations.
 const actions = {
-  buyKey({ commit, state, getters }) {
-    if(state.keys.length == 7 || getters.starRating < 10 ) return
-    switch(state.keys.length) {
-      case 1:
-        commit('mutateKeys', [
-          {
-            key: 'f',
-            background: 'white',
-            color: 'black',
-            padding: '8px 20px',
-          },
-          {
-            key: 'j',
-            background: 'white',
-            color: 'black',
-            padding: '8px 20px',
-          }
-        ])
-        break;
-      case 2:
-        commit('mutateKeys', [
-          {
-            key: 'f',
-            background: 'white',
-            color: 'black',
-            padding: '8px 20px',
-          },
-          {
-            key: ' ',
-            background: 'gold',
-            color: 'black',
-            padding: '8px',
-          },
-          {
-            key: 'j',
-            background: 'white',
-            color: 'black',
-            padding: '8px 20px',
-          }
-        ])
-        break;
-      case 3:
-        commit('mutateKeys', [
-          {
-            key: 'd',
-            background: 'dodgerblue',
-            color: 'black',
-            padding: '8px 20px',
-          },
-          {
-            key: 'f',
-            background: 'white',
-            color: 'black',
-            padding: '8px 20px',
-          },
-          {
-            key: 'j',
-            background: 'white',
-            color: 'black',
-            padding: '8px 20px',
-          },
-          {
-            key: 'k',
-            background: 'dodgerblue',
-            color: 'black',
-            padding: '8px 20px',
-          }
-        ])
-        break;
-      case 4:
-        commit('mutateKeys', [
-          {
-            key: 'd',
-            background: 'dodgerblue',
-            color: 'black',
-            padding: '8px 20px',
-          },
-          {
-            key: 'f',
-            background: 'white',
-            color: 'black',
-            padding: '8px 20px',
-          },
-          {
-            key: ' ',
-            background: 'gold',
-            color: 'black',
-            padding: '8px 8px',
-          },
-          {
-            key: 'j',
-            background: 'white',
-            color: 'black',
-            padding: '8px 20px',
-          },
-          {
-            key: 'k',
-            background: 'dodgerblue',
-            color: 'black',
-            padding: '8px 20px',
-          }
-        ])
-        break;
-      case 5:
-        commit('mutateKeys', [
-          {
-            key: 's',
-            background: 'white',
-            color: 'black',
-            padding: '8px 20px',
-          },
-          {
-            key: 'd',
-            background: 'dodgerblue',
-            color: 'black',
-            padding: '8px 15px',
-          },
-          {
-            key: 'f',
-            background: 'white',
-            color: 'black',
-            padding: '8px 20px',
-          },
-          {
-            key: 'j',
-            background: 'white',
-            color: 'black',
-            padding: '8px 20px',
-          },
-          {
-            key: 'k',
-            background: 'dodgerblue',
-            color: 'black',
-            padding: '8px 15px',
-          },
-          {
-            key: 'l',
-            background: 'white',
-            color: 'black',
-            padding: '8px 20px',
-          },
-        ])
-        break;
-      case 6:
-        commit('mutateKeys', [
-          {
-            key: 's',
-            background: 'white',
-            color: 'black',
-            padding: '8px 20px',
-          },
-          {
-            key: 'd',
-            background: 'dodgerblue',
-            color: 'black',
-            padding: '8px 15px',
-          },
-          {
-            key: 'f',
-            background: 'white',
-            color: 'black',
-            padding: '8px 20px',
-          },
-          {
-            key: ' ',
-            background: 'gold',
-            color: 'black',
-            padding: '8px',
-          },
-          {
-            key: 'j',
-            background: 'white',
-            color: 'black',
-            padding: '8px 20px',
-          },
-          {
-            key: 'k',
-            background: 'dodgerblue',
-            color: 'black',
-            padding: '8px 15px',
-          },
-          {
-            key: 'l',
-            background: 'white',
-            color: 'black',
-            padding: '8px 20px',
-          },
-        ])
-        break;
-    }
+  changeKeyMode({ commit, state }, data) {
+    if(state.player.keyMode == 7) return
+    commit('changeKeyMode', data)
   },
-  buyPractice({ state, commit }, data) {
-    var skill = state.skills[data.id]
-    if(state.combo < skill.cost) return
-    commit('incrementPractice', {
-      id: data.id,
-      amount: data.amount
+  changeGameMode({ commit }, data) {
+    commit('changeGameMode', data)
+  },
+  giveResource({ commit }, data) {
+    commit('addResource', data)
+  },
+  buySkill({ state, commit }, data) {
+    var cost = info.skills[data.id].costFunction(state.player.skills[data.id]) * data.amount
+    if(state.player.resources.experience < cost) return
+    commit('addResource', {
+      id: 'experience',
+      amount: -cost
     })
-    commit('decrementCombo', skill.cost)
+    commit('addSkill', data)
+  },
+  buySetup({ state, commit }, data) {
+    var cost = info.setup[data.id][state.player.setup[data.id]].cost * data.amount
+    if(state.player.resources.money < cost) return
+    commit('addResource', {
+      id: 'money',
+      amount: -cost
+    })
+    commit('addSetup', data)
   },
   buyCheat({ state, commit }, data) {
-    var cheat = state.cheats[data.id]
-    if(state.combo < cheat.cost) return
-    commit('incrementCheat', {
-      id: data.id,
-      amount: data.amount
+    var cost = info.cheats[data.id].cost(state.player.cheats[data.id]) * data.amount
+    if(state.player.resources.clout < cost) return
+    commit('addResource', {
+      id: 'clout',
+      amount: -cost
     })
-    commit('decrementCombo', cheat.cost)
+    commit('addCheat', data)
   },
-  keyPressed({ commit, getters }) {
-    commit('incrementCombo', getters.comboPerKey)
-    commit('incrementTotalCombo', getters.comboPerKey)
+  unlockUpgrade({ state, commit }, data) {
+    var cost = info.upgrades[data.id].cost
+    if(state.player.upgrades[data.id] == true || state.player.resources.experience < info.upgrades[data.id].cost) return
+    commit('addResource', {
+      id: 'experience',
+      amount: -cost
+    })
+    commit('toggleUpgrade', data)
   },
-  timePassed({ commit, getters }, time) {
-    commit('incrementCombo', (getters.keysPerSecond * getters.comboPerKey * time))
-    commit('incrementTotalCombo', (getters.keysPerSecond * getters.comboPerKey * time))
-  }
+  unlockAchievement({ state, commit }, data) {
+    if(state.player.achievements[data.id] == true) return
+    commit('toggleAchievement', data)
+  },
 }
 
 // getters are functions.
 const getters = {
-  keysPerSecond: state => state.cheats.bots.level,
-  comboPerKey: state => state.cheats.macros.level + 1,
-  starRating: state => {
-    var sum = 0
-    for(var skill of Object.values(state.skills)) {
-      sum += skill.level
+  gameMode: state => state.player.gameMode,
+  keyMode: state => state.player.keyMode,
+  experience: state => state.player.resources.experience,
+  money: state => state.player.resources.money,
+  clout: state => state.player.resources.clout,
+  combo: state => state.player.resources.combo,
+  skills: state => state.player.skills,
+  setup: state => state.player.setup,
+  cheats: state => state.player.cheats,
+  upgrades: state => state.player.upgrades,
+  achievements: state => state.player.achievements,
+  currentKeys: state => {
+    switch(state.player.keyMode) {
+      case 1:
+        return [state.player.keyConfigs[3]];
+        case 2:
+        return [state.player.keyConfigs[2], state.player.keyConfigs[4]];
+        case 3:
+        return [state.player.keyConfigs[2], state.player.keyConfigs[3], state.player.keyConfigs[4]];
+        case 4:
+        return [state.player.keyConfigs[1], state.player.keyConfigs[2], state.player.keyConfigs[4], state.player.keyConfigs[5]];
+        case 5:
+        return [state.player.keyConfigs[1], state.player.keyConfigs[2], state.player.keyConfigs[3], state.player.keyConfigs[4], state.player.keyConfigs[5]];
+        case 6:
+        return [state.player.keyConfigs[0], state.player.keyConfigs[1], state.player.keyConfigs[2], state.player.keyConfigs[4], state.player.keyConfigs[5], state.player.keyConfigs[6]];
+        case 7:
+        return [state.player.keyConfigs[0], state.player.keyConfigs[1], state.player.keyConfigs[2], state.player.keyConfigs[3], state.player.keyConfigs[4], state.player.keyConfigs[5], state.player.keyConfigs[6]];
     }
-    return sum / (4 * state.keys.length)
+    return state.player.keyConfigs;
+  },
+  keysPerSecond: state => state.player.cheats.bots, //TODO
+  comboPerKey: state => state.player.cheats.macros + 1, //TODO
+  pp: state => {
+    var sum = 0
+    for(var skill of Object.values(state.player.skills)) {
+      sum += skill
+    }
+    return sum / (4 * state.player.keyMode)
   }  
 }
 

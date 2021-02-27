@@ -1,17 +1,17 @@
 <template>
   <v-list class="fill-height">
-    <v-subheader>Skills</v-subheader>
-    <v-list-item v-for="(skill) in $store.state.skills" :key="skill.id">
+    <v-subheader>{{ $t('skills.name') }}</v-subheader>
+    <v-list-item v-for="(skill) in info.skills" :key="skill.id">
       <v-list-item-content>
-        <v-list-item-title>{{ skill.statTag }} {{ skill.level | integer }}</v-list-item-title>
+        <v-list-item-title>{{ $t(`skills.${skill.id}.name`) }} {{ skills[skill.id] | integer }}</v-list-item-title>
       </v-list-item-content>
     </v-list-item>
-    <div v-if="$store.state.keys.length == 7">
+    <div>
       <v-divider></v-divider>
-      <v-subheader>Cheats</v-subheader>
-      <v-list-item v-for="(cheat) in $store.state.cheats" :key="cheat.id">
+      <v-subheader>{{ $t('cheats.name') }}</v-subheader>
+      <v-list-item v-for="(cheat) in info.cheats" :key="cheat.id">
         <v-list-item-content>
-          <v-list-item-title>{{ cheat.statTag }} {{ cheat.level | integer }}</v-list-item-title>
+          <v-list-item-title>{{ $t(`cheats.${cheat.id}.name`) }} {{ cheats[cheat.id] | integer }}</v-list-item-title>
         </v-list-item-content>
       </v-list-item>
     </div>
@@ -32,11 +32,19 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import info from '../plugins/info'
 
 export default {
   name: 'Stats',
+  data() {
+    return {
+      info: info
+    }
+  },
   computed: mapGetters([
-    'starRating',
+    'pp',
+    'cheats',
+    'skills',
     'keysPerSecond'
   ]),
 }
