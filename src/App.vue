@@ -1,36 +1,38 @@
 <template>
   <v-app>
-    <Header/>
-    <v-main>
-      <v-row class="fill-height">
-        <v-col cols="3">
-          <GameField/>
-        </v-col>
-        <v-col cols="6">
-          <router-view/>
-        </v-col>
-        <v-col cols="3">
-          <Stats/>
-        </v-col>
-      </v-row>
-    </v-main>
-    <Footer/>
+    <Game v-if="!loading" class="fill-height"/>
+    <Loading v-if="loading"/>
   </v-app>
 </template>
 
 <script>
-import Header from './components/Header';
-import GameField from './components/GameField';
-import Stats from './components/Stats';
-import Footer from './components/Footer';
+import { mapActions, mapGetters } from 'vuex';
+import Game from './components/Game';
+import Loading from './components/Loading';
 
 export default {
   name: 'App',
   components: {
-    Header,
-    GameField,
-    Stats,
-    Footer
+    Game,
+    Loading
   },
+  computed: mapGetters([
+    'loading',
+  ]),
+  methods: mapActions([
+    'loadGame',
+    'resetGame',
+    'toggleLoading',
+  ]),
+  created: function () {
+    this.loadGame()
+    if(this.$store.state.player == null) {
+      var playerName = prompt('Please enter your username', 'Jadong');
+      if(playerName == null) playerName = 'Jadong'
+      this.resetGame({ name: playerName })
+    }
+    this.toggleLoading({ value: false })
+  }
+
 }
 </script>

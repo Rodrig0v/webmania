@@ -1,4 +1,12 @@
 {
+  "general": {
+    "loading": "A carregar..."
+  },
+  "settings": {
+    "name": "Configurações",
+    "import": "Importar",
+    "export": "Exportar"
+  },
   "footer": {
     "message": "— Feito por {author} e {community} — ",
     "author": "Rodrig0v",
@@ -6,50 +14,52 @@
     "donate": "Doar"
   },
   "tooltip": {
-    "cost": "Cost"
+    "cost": "Custo"
   },
   "resources": {
-    "experience": "Experience",
-    "money": "Money",
-    "clout": "Clout",
-    "combo": "Combo"
+    "experience": "Experiência",
+    "money": "Dinheiro",
+    "clout": "Influência",
+    "combo": "Combo",
+    "stamina": "Energia",
+    "genes": "Genes"
   },
   "skills": {
-    "name": "Skills",
+    "name": "Habilidades",
     "description": " TO DO",
     "reading": {
-      "name": "Reading",
-      "buy": "Practice reading",
+      "name": "Leitura",
+      "buy": "Practicar reading",
       "description": "Increases your accuracy rates.",
       "effect": "Increases your accuracy rates by {value} %"
     },
     "accuracy": {
-      "name": "Accuracy",
-      "buy": "Practice accuracy",
+      "name": "Precisão",
+      "buy": "Practicar accuracy",
       "description": "Increases your accuracy rates.",
       "effect": "Increases your accuracy rates by {value} %"
     },
     "focus": {
-      "name": "Focus",
-      "buy": "Practice focus",
+      "name": "Concentração",
+      "buy": "Practicar focus",
       "description": "Decreases your miss rate.",
       "effect": "Decreases your miss rate by {value} %"
     } ,
     "technique": {
-      "name": "Technique",
-      "buy": "Practice technique",
+      "name": "Técnica",
+      "buy": "Practicar technique",
       "description": "Decreases your miss rate.",
       "effect": "Decreases your miss rate by {value} %"
     },
     "jacks": {
       "name": "Jacks",
-      "buy": "Practice jacks",
+      "buy": "Practicar jacks",
       "description": "Decreases your miss rate.",
       "effect": "Increases star rating cap by {value}"
     },
     "trilling": {
       "name": "Trilling",
-      "buy": "Practice trilling",
+      "buy": "Practicar trilling",
       "description": "Decreases your miss rate.",
       "effect": "Increases star rating cap by {value}"
     }
@@ -158,8 +168,8 @@
     }
   },
   "cheats": {
-    "name": "Cheats",
-    "description": "TO DO",
+    "name": "Batotas",
+    "description": "Trade other players respect for #1 ranks in the leaderboard.",
     "bot": {
       "name": "Bot",
       "buy": "Build a bot",
@@ -169,16 +179,22 @@
     "macro": {
       "name": "Macro",
       "buy": "Program a macro",
-      "description": "TO DO",
+      "description": "Gengaozo Fucc time.",
       "effect": "Every key tap counts as {value}."
+    },
+    "pause": {
+      "name": "Pause",
+      "buy": "Pause the game",
+      "description": "Pausing is not cheating.",
+      "effect": "Increases Stamina regeneration by {value}."
     }
   },
   "upgrades": {
-    "name": "Upgrades",
+    "name": "Melhoramentos",
     "description": "TO DO"
   },
   "achievements": {
-    "name": "Achievements",
+    "name": "Conquistas",
     "description": "TO DO",
     "foolmoon": {
       "name": "Fool Moon Night",
@@ -186,17 +202,27 @@
       "requirement": "Reach 70 kps.",
       "effect": "TO DO"
     },
-      "firststream": {
-        "name": "First stream",
-        "description": "0 viewers, but who cares.",
-        "requirement": "Enter streamer mode.",
-        "effect": "TO DO"
-      },
-      "firsttournament": {
-        "name": "First tournament",
-        "description": "Imagine the nerves.",
-        "requirement": "Enter tournament mode.",
-        "effect": "TO DO"
-      }
+    "firststream": {
+      "name": "First stream",
+      "description": "0 viewers, but who cares.",
+      "requirement": "Enter streamer mode.",
+      "effect": "TO DO"
+    },
+    "firsttournament": {
+      "name": "First tournament",
+      "description": "Imagine the nerves.",
+      "requirement": "Enter tournament mode.",
+      "effect": "TO DO"
+    }
+  },
+  "mutations": {
+    "name": "Mutações",
+    "description": "TO DO",
+    "xp": {
+      "name": "Fool Moon Night",
+      "description": "WTF 70 KPS PogChamp.",
+      "requirement": "Reach 70 kps.",
+      "effect": "TO DO"
+    }
   }
 }

@@ -32,7 +32,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import info from '../plugins/info'
+import info from '../models/info'
 
 export default {
   name: 'Stats',

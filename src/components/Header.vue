@@ -39,7 +39,7 @@
         </v-btn>
       </router-link>
 
-      <v-btn>
+      <v-btn @click="saveGame">
         <v-icon>mdi-content-save</v-icon>
         <span class="mr-2">Save</span>
       </v-btn>
@@ -47,12 +47,17 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
+
 export default {
   name: 'Header',
   computed: {
     getLogo() {
       return this.$vuetify.theme.dark ? require('../assets/logo-dark.png') : require('./../assets/logo-light.png')
     }
-  }
+  },
+  methods: mapActions([
+    'saveGame'
+  ])
 }
 </script>

@@ -1,4 +1,12 @@
 {
+  "general": {
+    "loading": "Loading..."
+  },
+  "settings": {
+    "name": "Settings",
+    "import": "Import",
+    "export": "Export"
+  },
   "footer": {
     "message": "— Made by {author} and {community} — ",
     "author": "Rodrig0v",
@@ -12,7 +20,9 @@
     "experience": "Experience",
     "money": "Money",
     "clout": "Clout",
-    "combo": "Combo"
+    "combo": "Combo",
+    "stamina": "Stamina",
+    "genes": "Genes"
   },
   "skills": {
     "name": "Skills",
@@ -159,7 +169,7 @@
   },
   "cheats": {
     "name": "Cheats",
-    "description": "TO DO",
+    "description": "Trade other players respect for #1 ranks in the leaderboard.",
     "bot": {
       "name": "Bot",
       "buy": "Build a bot",
@@ -169,8 +179,14 @@
     "macro": {
       "name": "Macro",
       "buy": "Program a macro",
-      "description": "TO DO",
+      "description": "Gengaozo Fucc time.",
       "effect": "Every key tap counts as {value}."
+    },
+    "pause": {
+      "name": "Pause",
+      "buy": "Pause the game",
+      "description": "Pausing is not cheating.",
+      "effect": "Increases Stamina regeneration by {value}."
     }
   },
   "upgrades": {
@@ -186,17 +202,27 @@
       "requirement": "Reach 70 kps.",
       "effect": "TO DO"
     },
-      "firststream": {
-        "name": "First stream",
-        "description": "0 viewers, but who cares.",
-        "requirement": "Enter streamer mode.",
-        "effect": "TO DO"
-      },
-      "firsttournament": {
-        "name": "First tournament",
-        "description": "Imagine the nerves.",
-        "requirement": "Enter tournament mode.",
-        "effect": "TO DO"
-      }
+    "firststream": {
+      "name": "First stream",
+      "description": "0 viewers, but who cares.",
+      "requirement": "Enter streamer mode.",
+      "effect": "TO DO"
+    },
+    "firsttournament": {
+      "name": "First tournament",
+      "description": "Imagine the nerves.",
+      "requirement": "Enter tournament mode.",
+      "effect": "TO DO"
+    }
+  },
+  "mutations": {
+    "name": "Mutations",
+    "description": "TO DO",
+    "xp": {
+      "name": "Fool Moon Night",
+      "description": "WTF 70 KPS PogChamp.",
+      "requirement": "Reach 70 kps.",
+      "effect": "TO DO"
+    }
   }
 }

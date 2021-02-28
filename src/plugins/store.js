@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import info from './info'
+import info from '../models/info'
+import LZString from 'lz-string'
 
 Vue.use(Vuex)
 
@@ -8,102 +9,8 @@ Vue.use(Vuex)
 // each Vuex instance is just a single state tree.
 const state = {
   loading: true,
-  player: {
-    stats: {
-      startTime: 0,
-      time: 0,
-      version: 0.1
-    },
-    keyConfigs: [
-      {
-        key: 's',
-        background: 'white',
-        color: 'black'
-      },
-      {
-        key: 'd',
-        background: 'dodgerblue',
-        color: 'black'
-      },
-      {
-        key: 'f',
-        background: 'white',
-        color: 'black'
-      },
-      {
-        key: ' ',
-        background: 'gold',
-        color: 'black'
-      },
-      {
-        key: 'j',
-        background: 'white',
-        color: 'black'
-      },
-      {
-        key: 'k',
-        background: 'dodgerblue',
-        color: 'black'
-      },
-      {
-        key: 'l',
-        background: 'white',
-        color: 'black'
-      },
-    ],
-    keyMode: 1,
-    gameMode: 'practice',
-    resources: {
-      experience: 0,
-      money: 0,
-      clout: 0,
-      stamina: 0,
-      combo: 0
-    },
-    skills: {
-      reading: 0,
-      jacks: 0,
-      trilling: 0,
-      technique: 0,
-      accuracy: 0,
-      focus: 0
-    },
-    setup: {
-      pc: 0,
-      keyboard: 0,
-      monitor: 0,
-      chair: 0,
-      headset: 0
-    },
-    upgrades: {
-      0: false,
-      1: false,
-      2: false,
-      3: false,
-    },
-    cheats: {
-      bot: 0,
-      macro: 0,
-      pause: 0
-    },
-    buffs: {
-      redbull: {
-        level: 0,
-        active: false,
-        lastActive: 0
-      },
-      vibro: {
-        level: 0,
-        active: false,
-        lastActive: 0
-      }
-    },
-    achievements: {
-      foolmoon: false,
-      firststream: false,
-      firsttournament: false
-    }
-  }
+  shift: false,
+  player: null,
 }
 
 // mutations are operations that actually mutate the state.
@@ -112,6 +19,15 @@ const state = {
 // mutations must be synchronous and can be recorded by plugins
 // for debugging purposes.
 const mutations = {
+  toggleLoading(state, data) {
+    state.loading = data.value
+  },
+  toggleShift(state, data) {
+    state.shift = data.value
+  },
+  mutatePlayer(state, data) {
+    state.player = data.player
+  },
   mutateKeyMode (state, data) {
     state.player.keyMode = data.mode
   },
@@ -131,22 +47,187 @@ const mutations = {
     state.player.cheats[data.id] += data.amount
   },
   toggleUpgrade(state, data) {
-    state.player.upgrades[data.id] = !state.player.upgrades[data.id]
+    state.player.upgrades[data.id] = data.value
   },
   toggleAchievement(state, data) {
-    state.player.achievements[data.id] = !state.player.achievements[data.id]
+    state.player.achievements[data.id] = data.value
   },
-  reset(state) {
-    state.player = null //TODO
+  reset(state, data) {
+    state.player = {
+      stats: {
+        name: data.name,
+        startTime: 0,
+        time: 0,
+        version: 0.1,
+        rebirths: 0,
+      },
+      keyConfigs: [
+        {
+          keyBind: 's',
+          background: 'white',
+          color: 'black'
+        },
+        {
+          keyBind: 'd',
+          background: 'dodgerblue',
+          color: 'black'
+        },
+        {
+          keyBind: 'f',
+          background: 'white',
+          color: 'black'
+        },
+        {
+          keyBind: ' ',
+          background: 'gold',
+          color: 'black'
+        },
+        {
+          keyBind: 'j',
+          background: 'white',
+          color: 'black'
+        },
+        {
+          keyBind: 'k',
+          background: 'dodgerblue',
+          color: 'black'
+        },
+        {
+          keyBind: 'l',
+          background: 'white',
+          color: 'black'
+        },
+      ],
+      keyMode: 1,
+      gameMode: 'practice',
+      resources: {
+        experience: 0,
+        money: 0,
+        clout: 0,
+        stamina: 0,
+        combo: 0,
+        genes: 0,
+      },
+      skills: {
+        reading: 0,
+        jacks: 0,
+        trilling: 0,
+        technique: 0,
+        accuracy: 0,
+        focus: 0,
+      },
+      setup: {
+        pc: 0,
+        keyboard: 0,
+        monitor: 0,
+        chair: 0,
+        headset: 0,
+      },
+      upgrades: {
+        0: false,
+        1: false,
+        2: false,
+        3: false,
+      },
+      cheats: {
+        bot: 0,
+        macro: 0,
+        pause: 0,
+      },
+      buffs: {
+        redbull: {
+          level: 0,
+          active: false,
+          lastActive: 0,
+        },
+        vibro: {
+          level: 0,
+          active: false,
+          lastActive: 0,
+        },
+      },
+      achievements: {
+        foolmoon: false,
+        firststream: false,
+        firsttournament: false
+      },
+      mutations: {
+        xp: 0,
+      },
+    }
   },
-  rebirth(state) {
-    state.player = null //TODO
+  rebirth(state, data) {
+    state.player = {
+      stats: {
+        startTime: state.player.stats.startTime,
+        time: state.player.stats.time,
+        version: state.player.stats.version,
+        rebirths: state.player.stats.rebirths + 1,
+      },
+      keyConfigs: state.keyConfigs,
+      keyMode: 1,
+      gameMode: 'practice',
+      resources: {
+        experience: 0,
+        money: 0,
+        clout: 0,
+        stamina: 0,
+        combo: 0,
+        genes: state.resources.genes + data.amount,
+      },
+      skills: {
+        reading: 0,
+        jacks: 0,
+        trilling: 0,
+        technique: 0,
+        accuracy: 0,
+        focus: 0,
+      },
+      setup: {
+        pc: 0,
+        keyboard: 0,
+        monitor: 0,
+        chair: 0,
+        headset: 0,
+      },
+      upgrades: {
+        0: false,
+        1: false,
+        2: false,
+        3: false,
+      },
+      cheats: {
+        bot: 0,
+        macro: 0,
+        pause: 0,
+      },
+      buffs: {
+        redbull: {
+          level: 0,
+          active: false,
+          lastActive: 0,
+        },
+        vibro: {
+          level: 0,
+          active: false,
+          lastActive: 0,
+        },
+      },
+      achievements: state.player.achievements,
+      genes: state.player.genes,
+    }
   }
 }
 
 // actions are functions that cause side effects and can involve
 // asynchronous operations.
 const actions = {
+  toggleLoading({ commit }, data) {
+    commit('toggleLoading', data)
+  },
+  toggleShift({ commit }, data) {
+    commit('toggleShift', data)
+  },
   changeKeyMode({ commit, state }, data) {
     if(state.player.keyMode == 7) return
     commit('changeKeyMode', data)
@@ -191,27 +272,55 @@ const actions = {
       id: 'experience',
       amount: -cost
     })
-    commit('toggleUpgrade', data)
+    commit('toggleUpgrade', { id: data.id, value: true })
   },
   unlockAchievement({ state, commit }, data) {
     if(state.player.achievements[data.id] == true) return
-    commit('toggleAchievement', data)
+    commit('toggleAchievement', { id: data.id, value: true })
+  },
+  importGame({ commit }, data) {
+    commit('mutatePlayer', data)
+  },
+  saveGame({ state }) {
+    localStorage.setItem('osumaniaidle', LZString.compressToBase64(JSON.stringify(state.player)))
+  },
+  loadGame({ commit }) {
+    var player;
+    try {
+      player = JSON.parse(LZString.decompressFromBase64(localStorage.getItem('osumaniaidle')))
+    } catch(Exception) {
+      return
+    }
+    commit('mutatePlayer', {
+      player: player
+    })
+  },
+  resetGame({ commit }, data) {
+    commit('reset', data)
+  },
+  rebirth({ commit }) {
+    commit('rebirth')
   },
 }
 
 // getters are functions.
 const getters = {
+  loading: state => state.loading,
+  importExportText: state => state.importExportText,
   gameMode: state => state.player.gameMode,
   keyMode: state => state.player.keyMode,
   experience: state => state.player.resources.experience,
   money: state => state.player.resources.money,
   clout: state => state.player.resources.clout,
   combo: state => state.player.resources.combo,
+  stamina: state => state.player.resources.stamina,
+  genes: state => state.player.resources.genes,
   skills: state => state.player.skills,
   setup: state => state.player.setup,
   cheats: state => state.player.cheats,
   upgrades: state => state.player.upgrades,
   achievements: state => state.player.achievements,
+  mutations: state => state.player.mutations,
   currentKeys: state => {
     switch(state.player.keyMode) {
       case 1:
@@ -231,8 +340,8 @@ const getters = {
     }
     return state.player.keyConfigs;
   },
-  keysPerSecond: state => state.player.cheats.bots, //TODO
-  comboPerKey: state => state.player.cheats.macros + 1, //TODO
+  keysPerSecond: state => state.player.cheats.bot, //TODO
+  keysPerTap: state => state.player.cheats.macro + 1, //TODO
   pp: state => {
     var sum = 0
     for(var skill of Object.values(state.player.skills)) {
