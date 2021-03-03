@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions } from 'vuex';
 import Header from './Header';
 import GameField from './GameField';
 import Stats from './Stats';
@@ -40,59 +40,23 @@ export default {
     }
   },
   created () {
-    addEventListener("keydown", this.processKeyDown)
-    addEventListener("keyup", this.processKeyUp)
     addEventListener("beforeunload", this.processUnload)
 
-    this.interval = setInterval(this.processTime, this.intervalDuration)
+    this.interval = setInterval(this.newTimeFrame, this.intervalDuration)
   },
-  computed: mapGetters([
-    'currentKeys',
-    'keysPerTap',
-    'keysPerSecond',
-  ]),
   methods: {
     ...mapActions([
-      'giveResource',
-      'toggleShift',
+      'processTimeFrame',
       'saveGame',
     ]),
-    hasKey(eventKey) {
-      for(var keyConfig of this.currentKeys) {
-        if(eventKey == keyConfig.keyBind) {
-          return true;
-        }
-      }
-      return false;
-    },
     processUnload() {
       this.saveGame()
     },
-    processKeyDown(event) {
-      if(!event.repeat) {
-        if (event.key == 'Shift') {
-          this.toggleShift({ value: true })
-        }
-        if (this.hasKey(event.key)) {
-          this.process(this.keysPerTap)
-        }
-      }
+    newTimeFrame() {
+      this.processTimeFrame({ time: this.intervalDuration })
     },
-    processKeyUp(event) {
-      if (event.key == 'Shift') {
-        this.toggleShift({ value: false })
-      }
-    },
-    processTime() {
-      this.process(this.intervalDuration * this.keysPerSecond)
-    },
-    process(totalkeys) {
-      this.giveResource({id: 'experience', amount: totalkeys})
-      this.giveResource({id: 'combo', amount: totalkeys})
-    }
   },
   destroyed () {
-    removeEventListener("keydown", this.myKeyPressListener);
     clearInterval(this.interval)
   }
 }

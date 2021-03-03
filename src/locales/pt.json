@@ -5,7 +5,13 @@
   "settings": {
     "name": "Configurações",
     "import": "Importar",
-    "export": "Exportar"
+    "export": "Exportar",
+    "reset": "Recomeçar",
+    "scrollspeed": "Velocidade de deslizamento",
+    "fps": "FPS (Fotogramas  por segundo)",
+    "bpm": "BPM (Batidas por minuto)",
+    "importcode": "Código de importação",
+    "fullscreen": "Meter ecrã inteiro"
   },
   "footer": {
     "message": "— Feito por {author} e {community} — ",

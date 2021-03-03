@@ -23,11 +23,11 @@ export default {
       locales: [
         {
           code: 'en',
-          image: require('../assets/en.png')
+          image: require('@/assets/locales/en.png')
         },
         {
           code: 'pt',
-          image: require('../assets/pt.png')
+          image: require('@/assets/locales/pt.png')
         }
       ]
     }

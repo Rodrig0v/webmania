@@ -28,11 +28,29 @@ const mutations = {
   mutatePlayer(state, data) {
     state.player = data.player
   },
+  mutateTime (state, data) {
+    state.player.config.time = data.value
+  },
+  mutateScrollSpeed (state, data) {
+    state.player.config.scrollSpeed = data.value
+  },
+  mutateBpm (state, data) {
+    state.player.config.bpm = data.value
+  },
+  mutateFps (state, data) {
+    state.player.config.fps = data.value
+  },
+  toggleEffectsOn (state, data) {
+    state.player.config.effectsOn = data.value
+  },
+  mutateName (state, data) {
+    state.player.config.name = data.value
+  },
   mutateKeyMode (state, data) {
-    state.player.keyMode = data.mode
+    state.player.config.keyMode = data.mode
   },
   mutateGameMode (state, data) {
-    state.player.gameMode = data.mode
+    state.player.config.gameMode = data.mode
   },
   addResource(state, data) {
     state.player.resources[data.id] += data.amount
@@ -54,52 +72,65 @@ const mutations = {
   },
   reset(state, data) {
     state.player = {
-      stats: {
+      config: {
         name: data.name,
-        startTime: 0,
         time: 0,
         version: 0.1,
+        effectsOn: true,
+        scrollSpeed: 31,
+        bpm: 180,
+        fps: 60,
+        keyMode: 7,
+        gameMode: 'practice',
+      },
+      stats: {
+        startTime: 0, //TODO
         rebirths: 0,
       },
       keyConfigs: [
         {
+          id: 0,
           keyBind: 's',
           background: 'white',
           color: 'black'
         },
         {
+          id: 1,
           keyBind: 'd',
           background: 'dodgerblue',
           color: 'black'
         },
         {
+          id: 2,
           keyBind: 'f',
           background: 'white',
           color: 'black'
         },
         {
+          id: 3,
           keyBind: ' ',
           background: 'gold',
           color: 'black'
         },
         {
+          id: 4,
           keyBind: 'j',
           background: 'white',
           color: 'black'
         },
         {
+          id: 5,
           keyBind: 'k',
           background: 'dodgerblue',
           color: 'black'
         },
         {
+          id: 6,
           keyBind: 'l',
           background: 'white',
           color: 'black'
         },
       ],
-      keyMode: 1,
-      gameMode: 'practice',
       resources: {
         experience: 0,
         money: 0,
@@ -158,15 +189,22 @@ const mutations = {
   },
   rebirth(state, data) {
     state.player = {
+      config: {
+        name: state.player.config.name,
+        time: state.player.config.time,
+        version: state.player.config.version,
+        effectsOn: state.player.config.effectsOn,
+        scrollSpeed: state.player.config.scrollSpeed,
+        bpm: state.player.config.bpm,
+        fps: state.player.config.fps,
+        keyMode: 1,
+        gameMode: 'practice',
+      },
       stats: {
-        startTime: state.player.stats.startTime,
         time: state.player.stats.time,
-        version: state.player.stats.version,
         rebirths: state.player.stats.rebirths + 1,
       },
       keyConfigs: state.keyConfigs,
-      keyMode: 1,
-      gameMode: 'practice',
       resources: {
         experience: 0,
         money: 0,
@@ -228,6 +266,25 @@ const actions = {
   toggleShift({ commit }, data) {
     commit('toggleShift', data)
   },
+  changeScrollSpeed ({ commit }, data) {
+    commit('mutateScrollSpeed', data)
+  },
+  changeBpm ({ commit }, data) {
+    commit('mutateBpm', data)
+    let changeBpmEvent = new CustomEvent('bpmChanged');
+    document.getElementById('gameCanvas').dispatchEvent(changeBpmEvent);
+  },
+  changeFps ({ commit }, data) {
+    commit('mutateFps', data)
+    let changeFpsEvent = new CustomEvent('fpsChanged');
+    document.getElementById('gameCanvas').dispatchEvent(changeFpsEvent);
+  },
+  toggleEffectsOn ({ commit }, data) {
+    commit('toggleEffectsOn', data)
+  },
+  changeName ({ commit }, data) {
+    commit('mutateName', data)
+  },
   changeKeyMode({ commit, state }, data) {
     if(state.player.keyMode == 7) return
     commit('changeKeyMode', data)
@@ -281,6 +338,9 @@ const actions = {
   importGame({ commit }, data) {
     commit('mutatePlayer', data)
   },
+  exportGame({ commit }, data) {
+    commit('mutatePlayer', data)
+  },
   saveGame({ state }) {
     localStorage.setItem('osumaniaidle', LZString.compressToBase64(JSON.stringify(state.player)))
   },
@@ -298,17 +358,34 @@ const actions = {
   resetGame({ commit }, data) {
     commit('reset', data)
   },
+  breakCombo({ state, commit }) {
+    commit('addResource', { id: 'combo', amount: -state.player.resources.combo})
+  },
   rebirth({ commit }) {
     commit('rebirth')
   },
+  processKeyTap({ getters, dispatch }, data) {
+    dispatch('process', { amount: data.amount * getters.keysPerTap })
+  },
+  processTimeFrame({ getters, dispatch}, data) {
+    dispatch('process', { amount: data.time * getters.keysPerSecond * getters.keysPerTap })
+  },
+  process({ dispatch }, data) {
+    dispatch('giveResource', {id: 'experience', amount: data.amount})
+    dispatch('giveResource', {id: 'combo', amount: data.amount})
+  }
 }
 
 // getters are functions.
 const getters = {
   loading: state => state.loading,
   importExportText: state => state.importExportText,
-  gameMode: state => state.player.gameMode,
-  keyMode: state => state.player.keyMode,
+  effectsOn: state => state.player.config.effectsOn,
+  scrollSpeed: state => state.player.config.scrollSpeed,
+  bpm: state => state.player.config.bpm,
+  fps: state => state.player.config.fps,
+  gameMode: state => state.player.config.gameMode,
+  keyMode: state => state.player.config.keyMode,
   experience: state => state.player.resources.experience,
   money: state => state.player.resources.money,
   clout: state => state.player.resources.clout,

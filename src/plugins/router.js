@@ -3,12 +3,11 @@ import VueRouter from 'vue-router'
 
 Vue.use(VueRouter)
 
-import Home from '../components/Home';
 import Achievements from '../components/Achievements';
 import Settings from '../components/Settings';
 
 const routes = [
-  { path: '/', component: Home },
+  { path: '/', component: Settings },
   { path: '/achievements', component: Achievements },
   { path: '/settings', component: Settings }
 ]

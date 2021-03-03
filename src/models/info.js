@@ -1,4 +1,11 @@
 export default {
+  judgementWindows: [
+    16, // rainbow
+    64, // 300
+    97, // 200
+    127, // 100
+    151, // 50
+    188], // miss
   skills: {
     reading: {
       id: 'reading',
@@ -196,4 +203,67 @@ export default {
       id: 'experience'
     },
   },
+  skins: {
+    default: {
+      lightingImages: [
+        require('@/assets/skins/default/lighting-red.png'),
+        require('@/assets/skins/default/lighting-blue.png'),
+        require('@/assets/skins/default/lighting-red.png'),
+        require('@/assets/skins/default/lighting-yellow.png'),
+        require('@/assets/skins/default/lighting-red.png'),
+        require('@/assets/skins/default/lighting-blue.png'),
+        require('@/assets/skins/default/lighting-red.png'),
+      ],
+      receptorImages: [
+        require('@/assets/skins/default/receptor-black.png'),
+        require('@/assets/skins/default/receptor-white.png'),
+        require('@/assets/skins/default/receptor-black.png'),
+        require('@/assets/skins/default/receptor-white.png'),
+        require('@/assets/skins/default/receptor-black.png'),
+        require('@/assets/skins/default/receptor-white.png'),
+        require('@/assets/skins/default/receptor-black.png'),
+      ],
+      pressedReceptorImages: [
+        require('@/assets/skins/default/receptor-black-pressed.png'),
+        require('@/assets/skins/default/receptor-white-pressed.png'),
+        require('@/assets/skins/default/receptor-black-pressed.png'),
+        require('@/assets/skins/default/receptor-white-pressed.png'),
+        require('@/assets/skins/default/receptor-black-pressed.png'),
+        require('@/assets/skins/default/receptor-white-pressed.png'),
+        require('@/assets/skins/default/receptor-black-pressed.png'),
+      ],
+      judgementImages: [
+        require('@/assets/skins/default/judgement-rainbow.png'),
+        require('@/assets/skins/default/judgement-300.png'),
+        require('@/assets/skins/default/judgement-200.png'),
+        require('@/assets/skins/default/judgement-100.png'),
+        require('@/assets/skins/default/judgement-50.png'),
+        require('@/assets/skins/default/judgement-miss.png'),
+    
+      ],
+      hintImage: require('@/assets/skins/default/hint.png'),
+      effectImages: [
+        require('@/assets/skins/default/effect-0.png'),
+        require('@/assets/skins/default/effect-1.png'),
+        require('@/assets/skins/default/effect-2.png'),
+        require('@/assets/skins/default/effect-3.png'),
+        require('@/assets/skins/default/effect-4.png'),
+        require('@/assets/skins/default/effect-5.png'),
+        require('@/assets/skins/default/effect-6.png'),
+        require('@/assets/skins/default/effect-7.png'),
+        require('@/assets/skins/default/effect-8.png'),
+      ],
+      noteImages: [
+        require('@/assets/skins/default/note-white.png'),
+        require('@/assets/skins/default/note-blue.png'),
+        require('@/assets/skins/default/note-white.png'),
+        require('@/assets/skins/default/note-yellow.png'),
+        require('@/assets/skins/default/note-white.png'),
+        require('@/assets/skins/default/note-blue.png'),
+        require('@/assets/skins/default/note-white.png'),
+    
+      ],
+      hitPosition: 100,
+    }
+  }
 }

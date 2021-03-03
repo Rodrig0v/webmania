@@ -53,7 +53,7 @@ export default {
   name: 'Header',
   computed: {
     getLogo() {
-      return this.$vuetify.theme.dark ? require('../assets/logo-dark.png') : require('./../assets/logo-light.png')
+      return this.$vuetify.theme.dark ? require('@/assets/app/logo-dark.png') : require('@/assets/app/logo-light.png')
     }
   },
   methods: mapActions([

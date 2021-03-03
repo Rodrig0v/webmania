@@ -5,7 +5,13 @@
   "settings": {
     "name": "Settings",
     "import": "Import",
-    "export": "Export"
+    "export": "Export",
+    "reset": "Reset",
+    "scrollspeed": "Scroll Speed",
+    "bpm": "BPM (Beats per minute)",
+    "fps": "FPS (Frames per second)",
+    "importcode": "Import code",
+    "fullscreen": "Make fullscreen"
   },
   "footer": {
     "message": "— Made by {author} and {community} — ",
