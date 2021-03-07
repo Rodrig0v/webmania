@@ -20,6 +20,15 @@
       v-model="computedShowFps"
       :label="$t('settings.showfps')"
     ></v-switch>
+    <v-text-field
+      :label="$t('settings.volume')"
+      v-model="computedVolume"
+      hide-details="auto"
+    ></v-text-field>
+    <v-switch
+      v-model="computedSoundOn"
+      :label="$t('settings.enablesound')"
+    ></v-switch>
     <v-select
       :items="keyModes"
       v-model="computedKeyMode"
@@ -111,6 +120,8 @@ export default {
       'comboPosition',
       'judgementPosition',
       'hitPosition',
+      'volume',
+      'soundOn'
     ]),
     computedBpm: {
       get () {
@@ -192,6 +203,22 @@ export default {
         this.changeHitPosition({ value: value })
       }
     },
+    computedSoundOn: {
+      get () {
+        return this.soundOn
+      },
+      set (value) {
+        this.toggleSoundOn({ value: value })
+      }
+    },
+    computedVolume: {
+      get () {
+        return this.volume * 100
+      },
+      set (value) {
+        this.changeVolume({ value: value / 100 })
+      }
+    },
   },
   methods: {
     ...mapActions([
@@ -207,7 +234,9 @@ export default {
       'changeComboPosition',
       'changeJudgementPosition',
       'changeHitPosition',
+      'changeVolume',
       'toggleShowFps',
+      'toggleSoundOn',
     ]),
     exportPlayer() {
       this.importExportText = LZString.compressToBase64(JSON.stringify(this.$store.state.player))

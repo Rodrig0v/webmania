@@ -21,7 +21,9 @@
     "showfps": "Mostrar FPS",
     "comboposition": "Posição do combo",
     "judgementposition": "Posição da precisão",
-    "hitposition": "Posição de toque"
+    "hitposition": "Posição de toque",
+    "enablesound": "Ativar som",
+    "volume": "Volume"
   },
   "footer": {
     "message": "— Feito por {author} e {community} — ",

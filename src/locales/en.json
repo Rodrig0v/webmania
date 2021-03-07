@@ -21,7 +21,9 @@
     "showfps": "Show FPS",
     "comboposition": "Combo position",
     "judgementposition": "Judgement Position",
-    "hitposition": "Hit Position"
+    "hitposition": "Hit Position",
+    "enablesound": "Enable sound",
+    "volume": "Volume"
   },
   "footer": {
     "message": "— Made by {author} and {community} — ",

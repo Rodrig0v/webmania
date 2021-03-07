@@ -31,6 +31,9 @@ const mutations = {
   mutateTime (state, data) {
     state.player.config.time = data.value
   },
+  mutateVolume (state, data) {
+    state.player.config.volume = data.value
+  },
   mutateScrollSpeed (state, data) {
     state.player.config.scrollSpeed = data.value
   },
@@ -57,6 +60,9 @@ const mutations = {
   },
   toggleEffectsOn (state, data) {
     state.player.config.effectsOn = data.value
+  },
+  toggleSoundOn (state, data) {
+    state.player.config.soundOn = data.value
   },
   toggleShowFps (state, data) {
     state.player.config.showFps = data.value
@@ -102,8 +108,10 @@ const mutations = {
         judgementPosition: 1080 * 0.6,
         hitPosition: 164,
         effectsOn: true,
+        soundOn: true,
         showFps: true,
-        scrollSpeed: 31,
+        volume: 0.2,
+        scrollSpeed: 20,
         bpm: 180,
         fps: 0,
         od: 0,
@@ -289,6 +297,11 @@ const actions = {
   changeScrollSpeed ({ commit }, data) {
     commit('mutateScrollSpeed', data)
   },
+  changeVolume ({ commit }, data) {
+    commit('mutateVolume', data)
+    let volumeChangedEvent = new CustomEvent('volumeChanged');
+    document.getElementById('gameCanvas').dispatchEvent(volumeChangedEvent);
+  },
   changeComboPosition ({ commit }, data) {
     commit('mutateComboPosition', data)
   },
@@ -318,6 +331,11 @@ const actions = {
   },
   toggleEffectsOn ({ commit }, data) {
     commit('toggleEffectsOn', data)
+  },
+  toggleSoundOn ({ commit }, data) {
+    commit('toggleSoundOn', data)
+    let soundChangedEvent = new CustomEvent('soundChanged');
+    document.getElementById('gameCanvas').dispatchEvent(soundChangedEvent);
   },
   toggleShowFps ({ commit }, data) {
     commit('toggleShowFps', data)
@@ -425,6 +443,8 @@ const getters = {
   loading: state => state.loading,
   importExportText: state => state.importExportText,
   effectsOn: state => state.player.config.effectsOn,
+  soundOn: state => state.player.config.soundOn,
+  volume: state => state.player.config.volume,
   showFps: state => state.player.config.showFps,
   scrollSpeed: state => state.player.config.scrollSpeed,
   comboPosition: state => state.player.config.comboPosition,

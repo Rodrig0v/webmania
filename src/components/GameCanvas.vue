@@ -6,6 +6,7 @@
 import { mapActions, mapGetters } from 'vuex';
 import info from '../models/info';
 import Queue from 'denque';
+import { Howl } from 'howler';
 
 export default {
   name: 'GameField',
@@ -16,6 +17,13 @@ export default {
     this.loadKeyMode()
 
     this.loadSkin()
+
+    this.sound = new Howl({
+      src: [require('@/assets/sound/cyber-loop.ogg')],
+      loop: true,
+      volume: this.volume,
+      rate: this.bpm / 191,
+    });
 
     this.start()
   },
@@ -41,7 +49,9 @@ export default {
       notes: null,
       lastNoteAddedTime: 0,
       lastFps: new Queue(),
-      lastColumn: null
+      lastColumns: [],
+      pattern: [2,1],
+      patternIndex: 0
     }
   },
   computed: mapGetters([
@@ -57,7 +67,9 @@ export default {
     'od',
     'skin',
     'combo',
-    'showFps'
+    'showFps',
+    'volume',
+    'soundOn'
   ]),
   methods: {
     ...mapActions([
@@ -156,6 +168,11 @@ export default {
       this.canvas.addEventListener("keyModeChanged", this.processKeyModeChange)
       this.canvas.addEventListener("skinChanged", this.processSkinChange)
       this.canvas.addEventListener("makeFullscreen", this.processFullScreen)
+      this.canvas.addEventListener("volumeChanged", this.processVolumeChange)
+      this.canvas.addEventListener("soundChanged", this.processSoundChange)
+      if(this.soundOn) {
+        this.sound.play()
+      }
     },
     updateCanvas() {
       this.checkMisses()
@@ -308,17 +325,31 @@ export default {
         offset = 30000
       }
       for(let i = init + (60000 / (this.bpm * 4)); i < init + offset; i += (60000 / (this.bpm * 4)) ) {
-        if(this.keyMode == 1 < 3 || this.lastColumn == null) {
+        if(this.keyMode == 1 < 3 || this.lastColumns == null) {
+          this.lastColumns = []
           let column = Math.floor((Math.random() * this.keyMode))
           this.notes[column].push({ time: i })
           this.lastNoteAddedTime = i
-          this.lastColumn = column
+          this.lastColumns.push(column)
+        } else if(this.keyMode == 4) {
+          let availableNumbers = Array.from(Array(this.keyMode).keys()).filter((i) => !this.lastColumns.includes(i))
+          if(this.patternIndex == 1)
+            this.lastColumns = []
+          for(let j = 0; j < this.pattern[this.patternIndex]; j++) {
+            let column = Math.floor(Math.random() * availableNumbers.length)
+            this.notes[availableNumbers[column]].push({ time: i })
+            this.lastNoteAddedTime = i
+            this.lastColumns.push(availableNumbers[column])
+            availableNumbers.splice(column, 1)
+          }
+          this.patternIndex = (this.patternIndex + 1) % this.pattern.length
         } else {
-          let availableNumbers = Array.from(Array(this.keyMode).keys()).filter((i) => i != this.lastColumn)
-          let column = Math.floor((Math.random() * (this.keyMode - 1)))
+          let availableNumbers = Array.from(Array(this.keyMode).keys()).filter((i) => !this.lastColumns.includes(i))
+          this.lastColumns = []
+          let column = Math.floor(Math.random() * availableNumbers.length)
           this.notes[availableNumbers[column]].push({ time: i })
           this.lastNoteAddedTime = i
-          this.lastColumn = availableNumbers[column]
+          this.lastColumns.push(availableNumbers[column])
         }
       }
     },
@@ -347,7 +378,8 @@ export default {
     processBpmChange() {
       this.clearNotes()
       this.lastNoteAddedTime = 0
-      this.lastColumn = null
+      this.lastColumns = null
+      this.sound.rate(this.bpm / 191)
       this.addNotes()
     },
     processFpsChange() {
@@ -367,8 +399,18 @@ export default {
       if(this.canvas.webkitRequestFullScreen) {
         this.canvas.webkitRequestFullScreen()
       } else {
-        this.canvas.requestFullScreen()
+        this.canvas.requestFullscreen()
       }
+    },
+    processSoundChange() {
+      if(this.soundOn) {
+        this.sound.play()
+      } else {
+        this.sound.stop()
+      }
+    },
+    processVolumeChange() {
+      this.sound.volume(this.volume)
     },
     loadSkin() {
       this.lightingImages = Array.from({length: info.skins[this.skin][this.keyMode].lightingImages.length}, () => new Image())
