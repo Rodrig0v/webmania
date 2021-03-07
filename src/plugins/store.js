@@ -26,7 +26,7 @@ const mutations = {
     state.shift = data.value
   },
   mutatePlayer(state, data) {
-    state.player = data.player
+    state.player = data.value
   },
   mutateTime (state, data) {
     state.player.config.time = data.value
@@ -40,29 +40,51 @@ const mutations = {
   mutateFps (state, data) {
     state.player.config.fps = data.value
   },
+  mutateOd (state, data) {
+    state.player.config.od = data.value
+  },
+  mutateSkin (state, data) {
+    state.player.config.skin = data.value
+  },
+  mutateComboPosition (state, data) {
+    state.player.config.comboPosition = data.value
+  },
+  mutateJudgementPosition (state, data) {
+    state.player.config.judgementPosition = data.value
+  },
+  mutateHitPosition (state, data) {
+    state.player.config.hitPosition = data.value
+  },
   toggleEffectsOn (state, data) {
     state.player.config.effectsOn = data.value
+  },
+  toggleShowFps (state, data) {
+    state.player.config.showFps = data.value
   },
   mutateName (state, data) {
     state.player.config.name = data.value
   },
+  mutateKeyBind (state, data) {
+    state.player.keyConfigs[state.player.keyMode][data.id].code = data.code
+    state.player.keyConfigs[state.player.keyMode][data.id].key = data.key
+  },
   mutateKeyMode (state, data) {
-    state.player.config.keyMode = data.mode
+    state.player.keyMode = data.value
   },
   mutateGameMode (state, data) {
-    state.player.config.gameMode = data.mode
+    state.player.gameMode = data.value
   },
   addResource(state, data) {
-    state.player.resources[data.id] += data.amount
+    state.player.resources[data.id] += data.value
   },
   addSkill(state, data) {
-    state.player.skills[data.id] += data.amount
+    state.player.skills[data.id] += data.value
   },
   addSetup(state, data) {
-    state.player.setup[data.id] += data.amount
+    state.player.setup[data.id] += data.value
   },
   addCheat(state, data) {
-    state.player.cheats[data.id] += data.amount
+    state.player.cheats[data.id] += data.value
   },
   toggleUpgrade(state, data) {
     state.player.upgrades[data.id] = data.value
@@ -73,64 +95,70 @@ const mutations = {
   reset(state, data) {
     state.player = {
       config: {
-        name: data.name,
+        name: data.value,
         time: 0,
         version: 0.1,
+        comboPosition: 1080 * 0.3,
+        judgementPosition: 1080 * 0.6,
+        hitPosition: 164,
         effectsOn: true,
+        showFps: true,
         scrollSpeed: 31,
         bpm: 180,
-        fps: 60,
-        keyMode: 7,
-        gameMode: 'practice',
+        fps: 0,
+        od: 0,
+        skin: 'bars',
       },
+      keyMode: 7,
+      gameMode: 'practice',
       stats: {
-        startTime: 0, //TODO
+        startTime: Date.now(),
         rebirths: 0,
       },
-      keyConfigs: [
-        {
-          id: 0,
-          keyBind: 's',
-          background: 'white',
-          color: 'black'
-        },
-        {
-          id: 1,
-          keyBind: 'd',
-          background: 'dodgerblue',
-          color: 'black'
-        },
-        {
-          id: 2,
-          keyBind: 'f',
-          background: 'white',
-          color: 'black'
-        },
-        {
-          id: 3,
-          keyBind: ' ',
-          background: 'gold',
-          color: 'black'
-        },
-        {
-          id: 4,
-          keyBind: 'j',
-          background: 'white',
-          color: 'black'
-        },
-        {
-          id: 5,
-          keyBind: 'k',
-          background: 'dodgerblue',
-          color: 'black'
-        },
-        {
-          id: 6,
-          keyBind: 'l',
-          background: 'white',
-          color: 'black'
-        },
-      ],
+      keyConfigs: {
+        1: [
+          { code: 'Space', key: ' ' },
+        ],
+        2: [
+          { code: 'KeyF', key: 'F' },
+          { code: 'KeyJ', key: 'J' },
+        ],
+        3: [
+          { code: 'KeyF', key: 'F' },
+          { code: 'Space', key: ' ' },
+          { code: 'KeyJ', key: 'J' },
+        ],
+        4: [
+          { code: 'KeyD', key: 'D' },
+          { code: 'KeyF', key: 'F' },
+          { code: 'KeyJ', key: 'J' },
+          { code: 'KeyK', key: 'K' },
+        ],
+        5: [
+          { code: 'KeyD', key: 'D' },
+          { code: 'KeyF', key: 'F' },
+          { code: 'Space', key: ' ' },
+          { code: 'KeyJ', key: 'J' },
+          { code: 'KeyK', key: 'K' },
+        ],
+        6: [
+          { code: 'KeyS', key: 'S' },
+          { code: 'KeyD', key: 'D' },
+          { code: 'KeyF', key: 'F' },
+          { code: 'KeyJ', key: 'J' },
+          { code: 'KeyK', key: 'K' },
+          { code: 'KeyL', key: 'L' },
+        ],
+        7: [
+          { code: 'KeyS', key: 'S' },
+          { code: 'KeyD', key: 'D' },
+          { code: 'KeyF', key: 'F' },
+          { code: 'Space', key: ' ' },
+          { code: 'KeyJ', key: 'J' },
+          { code: 'KeyK', key: 'K' },
+          { code: 'KeyL', key: 'L' },
+        ]
+      },
       resources: {
         experience: 0,
         money: 0,
@@ -189,17 +217,9 @@ const mutations = {
   },
   rebirth(state, data) {
     state.player = {
-      config: {
-        name: state.player.config.name,
-        time: state.player.config.time,
-        version: state.player.config.version,
-        effectsOn: state.player.config.effectsOn,
-        scrollSpeed: state.player.config.scrollSpeed,
-        bpm: state.player.config.bpm,
-        fps: state.player.config.fps,
-        keyMode: 1,
-        gameMode: 'practice',
-      },
+      config: state.player.config,
+      keyMode: 1,
+      gameMode: 'practice',
       stats: {
         time: state.player.stats.time,
         rebirths: state.player.stats.rebirths + 1,
@@ -211,7 +231,7 @@ const mutations = {
         clout: 0,
         stamina: 0,
         combo: 0,
-        genes: state.resources.genes + data.amount,
+        genes: state.resources.genes + data.value,
       },
       skills: {
         reading: 0,
@@ -269,25 +289,49 @@ const actions = {
   changeScrollSpeed ({ commit }, data) {
     commit('mutateScrollSpeed', data)
   },
+  changeComboPosition ({ commit }, data) {
+    commit('mutateComboPosition', data)
+  },
+  changeJudgementPosition ({ commit }, data) {
+    commit('mutateJudgementPosition', data)
+  },
+  changeHitPosition({ commit }, data) {
+    commit('mutateHitPosition', data)
+  },
+  changeOd ({ commit }, data) {
+    commit('mutateOd', data)
+  },
   changeBpm ({ commit }, data) {
     commit('mutateBpm', data)
-    let changeBpmEvent = new CustomEvent('bpmChanged');
-    document.getElementById('gameCanvas').dispatchEvent(changeBpmEvent);
+    let bpmChangedEvent = new CustomEvent('bpmChanged');
+    document.getElementById('gameCanvas').dispatchEvent(bpmChangedEvent);
   },
   changeFps ({ commit }, data) {
     commit('mutateFps', data)
-    let changeFpsEvent = new CustomEvent('fpsChanged');
-    document.getElementById('gameCanvas').dispatchEvent(changeFpsEvent);
+    let fpsChangedEvent = new CustomEvent('fpsChanged');
+    document.getElementById('gameCanvas').dispatchEvent(fpsChangedEvent);
+  },
+  changeSkin ({ commit }, data) {
+    commit('mutateSkin', data)
+    let skinChangedEvent = new CustomEvent('skinChanged');
+    document.getElementById('gameCanvas').dispatchEvent(skinChangedEvent);
   },
   toggleEffectsOn ({ commit }, data) {
     commit('toggleEffectsOn', data)
   },
+  toggleShowFps ({ commit }, data) {
+    commit('toggleShowFps', data)
+  },
   changeName ({ commit }, data) {
     commit('mutateName', data)
   },
-  changeKeyMode({ commit, state }, data) {
-    if(state.player.keyMode == 7) return
-    commit('changeKeyMode', data)
+  changeKeyMode({ commit }, data) {
+    commit('mutateKeyMode', data)
+    let keyModeChangedEvent = new CustomEvent('keyModeChanged');
+    document.getElementById('gameCanvas').dispatchEvent(keyModeChangedEvent);
+  },
+  changeKeyBind({ commit }, data) {
+    commit('mutateKeyBind', data)
   },
   changeGameMode({ commit }, data) {
     commit('changeGameMode', data)
@@ -296,29 +340,29 @@ const actions = {
     commit('addResource', data)
   },
   buySkill({ state, commit }, data) {
-    var cost = info.skills[data.id].costFunction(state.player.skills[data.id]) * data.amount
+    var cost = info.skills[data.id].costFunction(state.player.skills[data.id]) * data.value
     if(state.player.resources.experience < cost) return
     commit('addResource', {
       id: 'experience',
-      amount: -cost
+      value: -cost
     })
     commit('addSkill', data)
   },
   buySetup({ state, commit }, data) {
-    var cost = info.setup[data.id][state.player.setup[data.id]].cost * data.amount
+    var cost = info.setup[data.id][state.player.setup[data.id]].cost * data.value
     if(state.player.resources.money < cost) return
     commit('addResource', {
       id: 'money',
-      amount: -cost
+      value: -cost
     })
     commit('addSetup', data)
   },
   buyCheat({ state, commit }, data) {
-    var cost = info.cheats[data.id].cost(state.player.cheats[data.id]) * data.amount
+    var cost = info.cheats[data.id].cost(state.player.cheats[data.id]) * data.value
     if(state.player.resources.clout < cost) return
     commit('addResource', {
       id: 'clout',
-      amount: -cost
+      value: -cost
     })
     commit('addCheat', data)
   },
@@ -327,7 +371,7 @@ const actions = {
     if(state.player.upgrades[data.id] == true || state.player.resources.experience < info.upgrades[data.id].cost) return
     commit('addResource', {
       id: 'experience',
-      amount: -cost
+      value: -cost
     })
     commit('toggleUpgrade', { id: data.id, value: true })
   },
@@ -352,27 +396,27 @@ const actions = {
       return
     }
     commit('mutatePlayer', {
-      player: player
+      value: player
     })
   },
   resetGame({ commit }, data) {
     commit('reset', data)
   },
   breakCombo({ state, commit }) {
-    commit('addResource', { id: 'combo', amount: -state.player.resources.combo})
+    commit('addResource', { id: 'combo', value: -state.player.resources.combo})
   },
   rebirth({ commit }) {
     commit('rebirth')
   },
   processKeyTap({ getters, dispatch }, data) {
-    dispatch('process', { amount: data.amount * getters.keysPerTap })
+    dispatch('process', { value: data.value * getters.keysPerTap })
   },
   processTimeFrame({ getters, dispatch}, data) {
-    dispatch('process', { amount: data.time * getters.keysPerSecond * getters.keysPerTap })
+    dispatch('process', { value: data.value * getters.keysPerSecond * getters.keysPerTap })
   },
   process({ dispatch }, data) {
-    dispatch('giveResource', {id: 'experience', amount: data.amount})
-    dispatch('giveResource', {id: 'combo', amount: data.amount})
+    dispatch('giveResource', {id: 'experience', value: data.value})
+    dispatch('giveResource', {id: 'combo', value: data.value})
   }
 }
 
@@ -381,11 +425,17 @@ const getters = {
   loading: state => state.loading,
   importExportText: state => state.importExportText,
   effectsOn: state => state.player.config.effectsOn,
+  showFps: state => state.player.config.showFps,
   scrollSpeed: state => state.player.config.scrollSpeed,
+  comboPosition: state => state.player.config.comboPosition,
+  judgementPosition: state => state.player.config.judgementPosition,
+  hitPosition: state => state.player.config.hitPosition,
   bpm: state => state.player.config.bpm,
   fps: state => state.player.config.fps,
-  gameMode: state => state.player.config.gameMode,
-  keyMode: state => state.player.config.keyMode,
+  od: state => state.player.config.od,
+  skin: state => state.player.config.skin,
+  gameMode: state => state.player.gameMode,
+  keyMode: state => state.player.keyMode,
   experience: state => state.player.resources.experience,
   money: state => state.player.resources.money,
   clout: state => state.player.resources.clout,
@@ -398,25 +448,7 @@ const getters = {
   upgrades: state => state.player.upgrades,
   achievements: state => state.player.achievements,
   mutations: state => state.player.mutations,
-  currentKeys: state => {
-    switch(state.player.keyMode) {
-      case 1:
-        return [state.player.keyConfigs[3]];
-        case 2:
-        return [state.player.keyConfigs[2], state.player.keyConfigs[4]];
-        case 3:
-        return [state.player.keyConfigs[2], state.player.keyConfigs[3], state.player.keyConfigs[4]];
-        case 4:
-        return [state.player.keyConfigs[1], state.player.keyConfigs[2], state.player.keyConfigs[4], state.player.keyConfigs[5]];
-        case 5:
-        return [state.player.keyConfigs[1], state.player.keyConfigs[2], state.player.keyConfigs[3], state.player.keyConfigs[4], state.player.keyConfigs[5]];
-        case 6:
-        return [state.player.keyConfigs[0], state.player.keyConfigs[1], state.player.keyConfigs[2], state.player.keyConfigs[4], state.player.keyConfigs[5], state.player.keyConfigs[6]];
-        case 7:
-        return [state.player.keyConfigs[0], state.player.keyConfigs[1], state.player.keyConfigs[2], state.player.keyConfigs[3], state.player.keyConfigs[4], state.player.keyConfigs[5], state.player.keyConfigs[6]];
-    }
-    return state.player.keyConfigs;
-  },
+  currentKeys: state => state.player.keyConfigs[state.player.keyMode],
   keysPerSecond: state => state.player.cheats.bot, //TODO
   keysPerTap: state => state.player.cheats.macro + 1, //TODO
   pp: state => {

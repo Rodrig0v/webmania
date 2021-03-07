@@ -35,29 +35,33 @@ export default {
   },
   data() {
     return {
-      interval: null,
-      intervalDuration: 100
+      gameInterval: null,
+      saveInterval: null,
+      gameDuration: 100,
+      saveDuration: 5000
     }
   },
   created () {
-    addEventListener("beforeunload", this.processUnload)
+    addEventListener("beforeunload", this.processSave)
 
-    this.interval = setInterval(this.newTimeFrame, this.intervalDuration)
+    this.interval = setInterval(this.processFrame, this.gameDuration)
+    this.saveInterval = setInterval(this.processSave, this.saveDuration)
   },
   methods: {
     ...mapActions([
       'processTimeFrame',
       'saveGame',
     ]),
-    processUnload() {
+    processSave() {
       this.saveGame()
     },
-    newTimeFrame() {
-      this.processTimeFrame({ time: this.intervalDuration })
+    processFrame() {
+      this.processTimeFrame({ value: this.gameDuration })
     },
   },
   destroyed () {
-    clearInterval(this.interval)
+    clearInterval(this.gameInterval)
+    clearInterval(this.saveInterval)
   }
 }
 </script>

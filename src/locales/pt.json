@@ -8,10 +8,20 @@
     "export": "Exportar",
     "reset": "Recomeçar",
     "scrollspeed": "Velocidade de deslizamento",
-    "fps": "FPS (Fotogramas  por segundo)",
     "bpm": "BPM (Batidas por minuto)",
+    "fps": "FPS (Fotogramas  por segundo) - 0 é ilimitado",
+    "od": "OD (Dificuldade / Janela para acertar)",
+    "skin": "Skin",
     "importcode": "Código de importação",
-    "fullscreen": "Meter ecrã inteiro"
+    "fullscreen": "Meter ecrã inteiro",
+    "keymode": "Modo de teclas",
+    "keybinds": "Teclas",
+    "changekeybind": "Mudar tecla",
+    "presskey": "Pressione a nova tecla.",
+    "showfps": "Mostrar FPS",
+    "comboposition": "Posição do combo",
+    "judgementposition": "Posição da precisão",
+    "hitposition": "Posição de toque"
   },
   "footer": {
     "message": "— Feito por {author} e {community} — ",

@@ -5,6 +5,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import info from '../models/info';
+import Queue from 'denque';
 
 export default {
   name: 'GameField',
@@ -12,42 +13,9 @@ export default {
     addEventListener("keydown", this.processKeyDown)
     addEventListener("keyup", this.processKeyUp)
 
-    this.lightingImages = Array.from({length: info.skins.default.lightingImages.length}, () => new Image())
-    for(let i = 0; i < this.lightingImages.length; i++) {
-      this.lightingImages[i].src = info.skins.default.lightingImages[i]
-    }
+    this.loadKeyMode()
 
-    this.receptorImages = Array.from({length: info.skins.default.receptorImages.length}, () => new Image())
-    for(let i = 0; i < this.receptorImages.length; i++) {
-      this.receptorImages[i].src = info.skins.default.receptorImages[i]
-    }
-
-    this.pressedReceptorImages = Array.from({length: info.skins.default.pressedReceptorImages.length}, () => new Image())
-    for(let i = 0; i < this.pressedReceptorImages.length; i++) {
-      this.pressedReceptorImages[i].src = info.skins.default.pressedReceptorImages[i]
-    }
-
-    this.hintImage = new Image()
-    this.hintImage.src = info.skins.default.hintImage
-
-    this.judgementImages = Array.from({length: info.skins.default.judgementImages.length}, () => new Image())
-    for(let i = 0; i < this.judgementImages.length; i++) {
-      this.judgementImages[i].src = info.skins.default.judgementImages[i]
-    }
-
-    this.effectImages = Array.from({length: info.skins.default.effectImages.length}, () => new Image())
-    for(let i = 0; i < this.effectImages.length; i++) {
-      this.effectImages[i].src = info.skins.default.effectImages[i]
-    }
-
-    this.noteImages = Array.from({length: info.skins.default.noteImages.length}, () => new Image());
-    for(let i = 0; i < this.noteImages.length; i++) {
-      this.noteImages[i].src = info.skins.default.noteImages[i]
-    }
-
-    this.hitPosition = info.skins.default.hitPosition
-
-    this.judgementWindows = info.judgementWindows
+    this.loadSkin()
 
     this.start()
   },
@@ -55,7 +23,6 @@ export default {
     return {
       width: 600,
       height: 1080,
-      hitPosition: null,
       canvas: null,
       context: null,
       interval: null,
@@ -69,11 +36,12 @@ export default {
       lastJudgement: null,
       lastHitId: 0,
       lastHitTime: 0,
-      keysDown: [false, false, false, false, false, false, false],
-      onGoingEffects: [],
-      notes: [[],[],[],[],[],[],[]],
+      keysDown: null,
+      onGoingEffects: new Queue(),
+      notes: null,
       lastNoteAddedTime: 0,
-      judgementWindows: null
+      lastFps: new Queue(),
+      lastColumn: null
     }
   },
   computed: mapGetters([
@@ -82,7 +50,14 @@ export default {
     'effectsOn',
     'bpm',
     'scrollSpeed',
-    'fps'
+    'hitPosition',
+    'comboPosition',
+    'judgementPosition',
+    'fps',
+    'od',
+    'skin',
+    'combo',
+    'showFps'
   ]),
   methods: {
     ...mapActions([
@@ -125,25 +100,25 @@ export default {
         // replace image source with canvas data
         imgElement.src = canvas.toDataURL()
     },
-    hasKey(eventKey) {
-      for(let keyConfig of this.currentKeys) {
-        if(eventKey.toLowerCase() == keyConfig.keyBind.toLowerCase()) {
-          return keyConfig.id;
+    hasKey(keyCode) {
+      for(let i = 0; i < this.currentKeys.length; i++) {
+        if(keyCode == this.currentKeys[i].code) {
+          return i;
         }
       }
       return null;
     },
     processKeyDown(event) {
       if(!event.repeat) {
-        if (event.key == 'Shift') {
+        if (event.char == 'Shift') {
           this.toggleShift({ value: true })
         }
         let now = Date.now();
-        let id = this.hasKey(event.key)
+        let id = this.hasKey(event.code)
         if(id != null) {
           this.keysDown[id] = true
-          let difference = this.notes[id].length > 0 ? Math.abs(this.notes[id][0].time - now) : Number.POSITIVE_INFINITY
-          if(difference < this.judgementWindows[5]) {
+          let difference = this.notes[id].length > 0 ? Math.abs(this.notes[id].peekFront().time - now) : Number.POSITIVE_INFINITY
+          if(difference < info.judgementWindows[this.od][info.judgementWindows[this.od].length - 1]) {
             this.notes[id].shift()
             this.lastHitTime = now
             this.lastJudgement = this.getJudgement(difference)
@@ -151,17 +126,17 @@ export default {
               this.breakCombo()
             } else {
               this.onGoingEffects.push({ id: id, time: Date.now() })
-              this.processKeyTap({ amount: 1 })
+              this.processKeyTap({ value: 1 })
             }
           }
         }
       }
     },
     processKeyUp(event) {
-      if (event.key == 'Shift') {
+      if (event.code == 'Shift') {
         this.toggleShift({ value: false })
       }
-      let id = this.hasKey(event.key)
+      let id = this.hasKey(event.code)
         if (id != null) {
         this.keysDown[id] = false
       }
@@ -173,11 +148,13 @@ export default {
       this.canvas.height = this.height
       this.context = this.canvas.getContext("2d")
       //this.context.globalCompositeOperation = "screen"
-      this.addNotes(Date.now(), 30000)
-      this.addNotesInterval = setInterval(() => this.addNotes(this.lastNoteAddedTime, 1000), 1000)
-      this.interval = setInterval(this.updateCanvas, 1 / this.fps)
+      this.addNotes()
+      this.addNotesInterval = setInterval(() => this.addNotes(), 1000.0)
+      this.interval = setInterval(this.updateCanvas, 1000.0 / this.fps)
       this.canvas.addEventListener("bpmChanged", this.processBpmChange)
       this.canvas.addEventListener("fpsChanged", this.processFpsChange)
+      this.canvas.addEventListener("keyModeChanged", this.processKeyModeChange)
+      this.canvas.addEventListener("skinChanged", this.processSkinChange)
       this.canvas.addEventListener("makeFullscreen", this.processFullScreen)
     },
     updateCanvas() {
@@ -186,10 +163,13 @@ export default {
       this.drawHint()
       this.drawLighting()
       this.drawNotes()
+      this.drawCombo()
       this.drawJudgement()
       this.drawReceptors()
       if(this.effectsOn)
         this.drawEffects()
+      if(this.showFps)
+        this.drawFps()
     },
     clear() {
       this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
@@ -197,16 +177,30 @@ export default {
     drawHint() {
       this.context.drawImage(
           this.hintImage,
-          0,
+          (this.canvas.width - (this.canvas.width / 7 * this.keyMode)) / 2 ,
           this.canvas.height - this.hitPosition - 64,
-          this.canvas.width,
+          this.canvas.width / 7 * this.keyMode,
           128)
     },
     drawLighting() {
-      for(let keyConfig of this.currentKeys) {
-        if (this.keysDown[keyConfig.id]) {
-          this.context.drawImage(this.lightingImages[keyConfig.id], (this.canvas.width / 7) * keyConfig.id, this.canvas.height - 640 - this.hitPosition, (this.canvas.width / 7), 640)
+      for(let i = 0; i < this.currentKeys.length ; i++) {
+        if (this.keysDown[i]) {
+          this.context.drawImage(this.lightingImages[i], ((this.canvas.width - (this.canvas.width / 7 * this.keyMode)) / 2) + ((this.canvas.width / 7) * i), this.canvas.height - 640 - this.hitPosition, (this.canvas.width / 7), 640)
         }
+      }
+    },
+    drawCombo() {
+      if(this.combo == 0) return
+      var comboString = this.combo.toString()
+      var comboWidth = 30
+      var comboHeight = 60
+      for(let i = 0; i < comboString.length; i++) {
+        this.context.drawImage(
+          this.comboImages[comboString[i]],
+          (this.canvas.width / 2) - (comboWidth * comboString.length / 2) + (comboWidth * i),
+          this.comboPosition - (comboHeight / 2),
+          comboWidth,
+          comboHeight) //TODO
       }
     },
     drawJudgement() {
@@ -218,7 +212,7 @@ export default {
         this.context.drawImage(
           this.judgementImages[this.lastJudgement],
           (this.canvas.width / 2) - (judgeWidth / 2),
-          this.canvas.height * 0.6 - (judgeHeight / 2),
+          this.judgementPosition - (judgeHeight / 2),
           judgeWidth,
           judgeHeight)
       }
@@ -228,12 +222,12 @@ export default {
       let multiplier = 0.38
       this.context.globalCompositeOperation = 'screen';
       this.removeOldItems(this.onGoingEffects, this.effectTime, () => {} )
-      for(let hitEffect of this.onGoingEffects) {
-        let difference = now - hitEffect.time
+      for(let i = 0; i < this.onGoingEffects.length; i++) {
+        let difference = now - this.onGoingEffects.peekAt(i).time
         let index = Math.floor((difference / this.effectTime) * this.effectImages.length )
         this.context.drawImage(
           this.effectImages[index],
-          hitEffect.id * (this.canvas.width / 7) + (this.canvas.width / 14) - this.canvas.width * multiplier,
+          this.onGoingEffects.peekAt(i).id * (this.canvas.width / 7) + (this.canvas.width / 7 / 2) - this.canvas.width * multiplier + ((this.canvas.width - (this.canvas.width / 7 * this.keyMode)) / 2),
           this.canvas.height - this.hitPosition - this.canvas.width * multiplier,
           this.canvas.width * multiplier * 2,
           this.canvas.width * multiplier * 2)
@@ -241,11 +235,25 @@ export default {
       this.context.globalCompositeOperation = 'source-over';
     },
     drawReceptors() {
-      for(let keyConfig of this.currentKeys) {
-        if (this.keysDown[keyConfig.id]) {
-          this.context.drawImage(this.pressedReceptorImages[keyConfig.id], (this.canvas.width / 7) * keyConfig.id, this.canvas.height - this.hitPosition + 5, (this.canvas.width / 7), this.hitPosition - 5)
+      for(let i = 0; i < this.currentKeys.length ; i++) {
+        let receptorWidth = (this.canvas.width / 7)
+        let receptorHeight =  receptorWidth * this.pressedReceptorImages[i].height / this.pressedReceptorImages[i].width
+        if (this.keysDown[i]) {
+          this.context.drawImage(
+            this.pressedReceptorImages[i],
+            ((this.canvas.width - (receptorWidth * this.keyMode)) / 2) + (receptorWidth * i),
+            this.canvas.height - this.hitPosition - (receptorHeight / 2),
+            receptorWidth,
+            receptorHeight
+          )
         } else {
-          this.context.drawImage(this.receptorImages[keyConfig.id], (this.canvas.width / 7) * keyConfig.id, this.canvas.height - this.hitPosition + 5, (this.canvas.width / 7), this.hitPosition - 5)
+          this.context.drawImage(
+            this.receptorImages[i],
+            ((this.canvas.width - (receptorWidth * this.keyMode)) / 2) + (receptorWidth * i),
+            this.canvas.height - this.hitPosition - (receptorHeight / 2),
+            receptorWidth,
+            receptorHeight
+          )
         }
       }
     },
@@ -254,14 +262,14 @@ export default {
       let playableHeight = this.canvas.height - this.hitPosition
       let offset = playableHeight / (this.scrollSpeed / 15) //miliseconds that will appear on screen
       let noteWidth = this.canvas.width / 7
-      let noteHeight = noteWidth * (82 / 256)
       for(let column = 0; column < this.notes.length; column++) {
         for(let i = 0; i < this.notes[column].length; i++) {
-          let difference = this.notes[column][i].time - now
+          let difference = this.notes[column].peekAt(i).time - now
           if(difference < offset) {
+            let noteHeight = noteWidth * this.noteImages[column].height / this.noteImages[column].width
             this.context.drawImage(
               this.noteImages[column],
-              (noteWidth * column),
+              ((this.canvas.width - (noteWidth * this.keyMode)) / 2) + (noteWidth * column),
               playableHeight - (difference * playableHeight / offset) - (noteHeight / 2), //height
               noteWidth,
               noteHeight,
@@ -272,27 +280,51 @@ export default {
         }
       }
     },
-    removeOldItems(array, interval, onRemove) {
-      let now = Date.now()
-      for(let i = 0; i < array.length; i++) {
-        if(now - array[i].time >= interval) {
-          onRemove(array.shift())
-          i--
-        } else {
-          break
-        }
+    drawFps() {
+      this.lastFps.push(Date.now())
+      if(this.lastFps.length == 1) {
+        return
+      }
+      this.context.font = "30px Arial";
+      this.context.fillStyle = "red";
+      this.context.textAlign = "bottom";
+      this.context.fillText((1000.0 * this.lastFps.length / (this.lastFps.peekBack() - this.lastFps.peekFront())).toFixed(0), this.canvas.width - 60, this.canvas.height)
+      if(this.lastFps.length > 100) {
+        this.lastFps.shift()
       }
     },
-    addNotes(init, offset) {
+    removeOldItems(queue, interval, onRemove) {
+      let now = Date.now()
+      while(queue.peekFront() != null && now - queue.peekFront().time >= interval) {
+        onRemove(queue.shift())
+      }
+    },
+    addNotes() {
+      let now = Date.now()
+      let init = this.lastNoteAddedTime
+      let offset = now - this.lastNoteAddedTime + 30000
+      if(offset > 30000) {
+        init = Date.now()
+        offset = 30000
+      }
       for(let i = init + (60000 / (this.bpm * 4)); i < init + offset; i += (60000 / (this.bpm * 4)) ) {
-        let column = Math.floor((Math.random() * 7))
-        this.notes[column].push({ time: i })
-        this.lastNoteAddedTime = i
+        if(this.keyMode == 1 < 3 || this.lastColumn == null) {
+          let column = Math.floor((Math.random() * this.keyMode))
+          this.notes[column].push({ time: i })
+          this.lastNoteAddedTime = i
+          this.lastColumn = column
+        } else {
+          let availableNumbers = Array.from(Array(this.keyMode).keys()).filter((i) => i != this.lastColumn)
+          let column = Math.floor((Math.random() * (this.keyMode - 1)))
+          this.notes[availableNumbers[column]].push({ time: i })
+          this.lastNoteAddedTime = i
+          this.lastColumn = availableNumbers[column]
+        }
       }
     },
     checkMisses() {
       for(let column of this.notes) {
-        this.removeOldItems(column, this.judgementWindows[5], () => {
+        this.removeOldItems(column, info.judgementWindows[this.od][info.judgementWindows[this.od].length - 1], () => {
           this.lastHitTime = Date.now()
           this.lastJudgement = 5
           this.breakCombo()
@@ -300,24 +332,90 @@ export default {
       }
     },
     getJudgement(difference) {
-      for(let i = 0; i < this.judgementWindows.length; i++) {
-        if(difference < this.judgementWindows[i]) {
+      for(let i = 0; i < info.judgementWindows[this.od].length; i++) {
+        if(difference < info.judgementWindows[this.od][i]) {
           return i;
         }
       }
       return 5;
     },
+    clearNotes() {
+      for(var queue of this.notes) {
+        queue.clear()
+      }
+    },
     processBpmChange() {
-      this.notes = [[],[],[],[],[],[],[]]
-      this.addNotes(Date.now(), 30000)
+      this.clearNotes()
+      this.lastNoteAddedTime = 0
+      this.lastColumn = null
+      this.addNotes()
     },
     processFpsChange() {
       clearInterval(this.interval)
-      console.log(this.fps)
-      this.interval = setInterval(this.updateCanvas, 1000 / this.fps)
+      this.interval = setInterval(this.updateCanvas, 1000.0 / this.fps)
+      this.lastFps.clear()
+    },
+    processSkinChange() {
+      this.loadSkin()
+    },
+    processKeyModeChange() {
+      this.loadKeyMode()
+      this.processSkinChange()
+      this.processBpmChange()
     },
     processFullScreen() {
-      this.canvas.webkitRequestFullScreen()
+      if(this.canvas.webkitRequestFullScreen) {
+        this.canvas.webkitRequestFullScreen()
+      } else {
+        this.canvas.requestFullScreen()
+      }
+    },
+    loadSkin() {
+      this.lightingImages = Array.from({length: info.skins[this.skin][this.keyMode].lightingImages.length}, () => new Image())
+      for(let i = 0; i < this.lightingImages.length; i++) {
+        this.lightingImages[i].src = info.skins[this.skin][this.keyMode].lightingImages[i]
+      }
+
+      this.comboImages = Array.from({length: info.skins[this.skin].comboImages.length}, () => new Image())
+      for(let i = 0; i < this.comboImages.length; i++) {
+        this.comboImages[i].src = info.skins[this.skin].comboImages[i]
+      }
+
+      this.receptorImages = Array.from({length: info.skins[this.skin][this.keyMode].receptorImages.length}, () => new Image())
+      for(let i = 0; i < this.receptorImages.length; i++) {
+        this.receptorImages[i].src = info.skins[this.skin][this.keyMode].receptorImages[i]
+      }
+
+      this.pressedReceptorImages = Array.from({length: info.skins[this.skin][this.keyMode].pressedReceptorImages.length}, () => new Image())
+      for(let i = 0; i < this.pressedReceptorImages.length; i++) {
+        this.pressedReceptorImages[i].src = info.skins[this.skin][this.keyMode].pressedReceptorImages[i]
+      }
+
+      this.hintImage = new Image()
+      this.hintImage.src = info.skins[this.skin].hintImage
+
+      this.judgementImages = Array.from({length: info.skins[this.skin].judgementImages.length}, () => new Image())
+      for(let i = 0; i < this.judgementImages.length; i++) {
+        this.judgementImages[i].src = info.skins[this.skin].judgementImages[i]
+      }
+
+      this.effectImages = Array.from({length: info.skins[this.skin].effectImages.length}, () => new Image())
+      for(let i = 0; i < this.effectImages.length; i++) {
+        this.effectImages[i].src = info.skins[this.skin].effectImages[i]
+      }
+
+      this.noteImages = Array.from({length: info.skins[this.skin][this.keyMode].noteImages.length}, () => new Image());
+      for(let i = 0; i < this.noteImages.length; i++) {
+        this.noteImages[i].src = info.skins[this.skin][this.keyMode].noteImages[i]
+      }
+    },
+    loadKeyMode() {
+      this.keysDown = []
+      this.notes = []
+      for(let i = 0; i < this.keyMode; i++) {
+        this.keysDown.push(false)
+        this.notes.push(new Queue())
+      }
     }
   },
   destroyed () {
@@ -325,6 +423,8 @@ export default {
     removeEventListener("keyup", this.processKeyUp);
     this.canvas.removeEventListener("bpmChanged", this.processBpmChange)
     this.canvas.removeEventListener("fpsChanged", this.processFpsChange)
+    this.canvas.removeEventListener("skinChanged", this.processSkinChange)
+    this.canvas.removeEventListener("keyModeChanged", this.processKeyModeChange)
     this.canvas.removeEventListener("makeFullscreen", this.processFullScreen)
 
     clearInterval(this.interval)

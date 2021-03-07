@@ -29,7 +29,7 @@ export default {
     if(this.$store.state.player == null) {
       var playerName = prompt('Please enter your username', 'Jadong');
       if(playerName == null) playerName = 'Jadong'
-      this.resetGame({ name: playerName })
+      this.resetGame({ value: playerName })
     }
     this.toggleLoading({ value: false })
   }

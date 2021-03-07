@@ -7,7 +7,7 @@
         <v-tooltip bottom v-for="(skill) in info.skills" :key="skill.id">
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <v-btn color="primary" :disabled="experience < skill.costFunction(skills[skill.id])" @click="buySkill({id: skill.id, amount: 1})">
+              <v-btn color="primary" :disabled="experience < skill.costFunction(skills[skill.id])" @click="buySkill({id: skill.id, value: 1})">
                 <span class="mr-2">{{ $t(`skills.${skill.id}.buy`) }}</span>
               </v-btn>
             </div>
@@ -24,7 +24,7 @@
           <v-tooltip bottom v-for="(cheat) in info.cheats" :key="cheat.id">
             <template v-slot:activator="{ on }">
               <div v-on="on">
-                <v-btn color="primary" :disabled="clout < cheat.costFunction(cheats[cheat.id])" @click="buyCheat({id: cheat.id, amount: 1})">
+                <v-btn color="primary" :disabled="clout < cheat.costFunction(cheats[cheat.id])" @click="buyCheat({id: cheat.id, value: 1})">
                   <span class="mr-2">{{ $t(`cheats.${cheat.id}.buy`) }}</span>
                 </v-btn>
                 </div>

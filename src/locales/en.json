@@ -9,9 +9,19 @@
     "reset": "Reset",
     "scrollspeed": "Scroll Speed",
     "bpm": "BPM (Beats per minute)",
-    "fps": "FPS (Frames per second)",
+    "fps": "FPS (Frames per second) - 0 is unlimited",
+    "od": "OD (Overall Difficulty / Hit windows)",
+    "skin": "Skin",
     "importcode": "Import code",
-    "fullscreen": "Make fullscreen"
+    "fullscreen": "Make fullscreen",
+    "keymode": "Key mode",
+    "keybinds": "Key binds",
+    "changekeybind": "Change key binding",
+    "presskey": "Press the new key.",
+    "showfps": "Show FPS",
+    "comboposition": "Combo position",
+    "judgementposition": "Judgement Position",
+    "hitposition": "Hit Position"
   },
   "footer": {
     "message": "— Made by {author} and {community} — ",
