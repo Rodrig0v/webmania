@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar app flat color="primary">
+  <v-app-bar id="header" app flat color="primary">
     <div class="d-flex align-center">
       
         <v-img
@@ -11,53 +11,104 @@
         />
 
         <v-toolbar-title>Osu!Mania Idle</v-toolbar-title>
-
-        <div style="width: 32px">
-        </div>
-
-        <router-link to="/">
-          <v-btn text>
-            <v-icon>mdi-home</v-icon>
-            <span class="mr-2">Home</span>
-          </v-btn>
-        </router-link>
-
-        <router-link to="/achievements">
-          <v-btn text>
-            <v-icon>mdi-medal</v-icon>
-            <span class="mr-2">Achievements</span>
-          </v-btn>
-        </router-link>
       </div>
+
+      <div style="width: 15px"></div>
+
+      <v-dialog
+        v-model="optionsDialog"
+        max-width="700"
+        @input="blur()"
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn v-bind="attrs" v-on="on">
+            <v-icon>mdi-cog</v-icon>
+            <span class="mr-2">{{ $t('header.options') }}</span>
+          </v-btn>
+        </template>
+
+        <Options v-on:close="optionsDialog = false; blur()"/>
+      </v-dialog>
 
       <v-spacer></v-spacer>
 
-      <router-link to="/settings">
-        <v-btn text>
-          <v-icon>mdi-cog</v-icon>
-          <span class="mr-2">Settings</span>
-        </v-btn>
-      </router-link>
+      <v-dialog
+        v-model="pickPatternDialog"
+        max-width="700"
+        @input="blur()"
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn v-bind="attrs" v-on="on">
+            <v-icon>mdi-gamepad</v-icon>
+            <span class="mr-2">{{ $t('header.pickpattern') }}</span>
+          </v-btn>
+        </template>
 
-      <v-btn @click="saveGame">
-        <v-icon>mdi-content-save</v-icon>
-        <span class="mr-2">Save</span>
+        <PickPattern v-on:close="pickPatternDialog = false; blur()"/>
+      </v-dialog>
+
+      <div style="width: 15px"></div>
+
+      <v-dialog
+        v-model="pickSongDialog"
+        max-width="700"
+        @input="blur()"
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn v-bind="attrs" v-on="on">
+            <v-icon>mdi-music</v-icon>
+            <span class="mr-2">{{ $t('header.picksong') }}</span>
+          </v-btn>
+        </template>
+
+        <PickSong v-on:close="pickSongDialog = false; blur()"/>
+      </v-dialog>
+
+      <div style="width: 15px"></div>
+
+      <v-btn @click="makeFullscreen">
+        <v-icon>mdi-fullscreen</v-icon>
+        <span class="mr-2">{{ $t('header.fullscreen') }}</span>
       </v-btn>
   </v-app-bar>
 </template>
 
 <script>
 import { mapActions } from 'vuex'
+import Options from './Options';
+import PickPattern from './PickPattern';
+import PickSong from './PickSong';
 
 export default {
   name: 'Header',
+  components: {
+    Options,
+    PickPattern,
+    PickSong
+  },
+  data() {
+    return {
+      optionsDialog: false,
+      pickPatternDialog: false,
+      pickSongDialog: false,
+    }
+  },
   computed: {
     getLogo() {
       return this.$vuetify.theme.dark ? require('@/assets/app/logo-dark.png') : require('@/assets/app/logo-light.png')
     }
   },
-  methods: mapActions([
-    'saveGame'
-  ])
+  methods: {
+    ...mapActions([
+      'saveGame'
+    ]),
+    makeFullscreen() {
+      let makeFullscreenEvent = new CustomEvent('makeFullscreen')
+      document.getElementById('gameCanvas').dispatchEvent(makeFullscreenEvent)
+    },
+    blur() {
+      setTimeout(() => { document.activeElement.blur() }, 0)
+    }
+  }
 }
 </script>

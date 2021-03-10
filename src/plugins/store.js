@@ -19,11 +19,21 @@ const state = {
 // mutations must be synchronous and can be recorded by plugins
 // for debugging purposes.
 const mutations = {
+  /* Game */
   toggleLoading(state, data) {
     state.loading = data.value
   },
-  toggleShift(state, data) {
-    state.shift = data.value
+  mutateCombo(state, data) {
+    state.player.gameplay.combo = data.value
+  },
+  mutateJudgement(state, data) {
+    state.player.gameplay.judgement[data.id] = data.value
+  },
+  mutateScore(state, data) {
+    state.player.gameplay.score = data.value
+  },
+  mutateAccuracy(state, data) {
+    state.player.gameplay.accuracy = data.value
   },
   mutatePlayer(state, data) {
     state.player = data.value
@@ -47,19 +57,28 @@ const mutations = {
     state.player.config.od = data.value
   },
   mutateSkin (state, data) {
-    state.player.config.skin = data.value
-  },
-  mutateComboPosition (state, data) {
-    state.player.config.comboPosition = data.value
-  },
-  mutateJudgementPosition (state, data) {
-    state.player.config.judgementPosition = data.value
+    state.player.skin.skin = data.value
   },
   mutateHitPosition (state, data) {
-    state.player.config.hitPosition = data.value
+    state.player.skin.hitPosition = data.value
   },
-  toggleEffectsOn (state, data) {
-    state.player.config.effectsOn = data.value
+  mutateColumnSize (state, data) {
+    state.player.skin.columnSize = data.value
+  },
+  mutateJudgementPosition (state, data) {
+    state.player.skin.judgementPosition = data.value
+  },
+  mutateJudgementSize (state, data) {
+    state.player.skin.judgementSize = data.value
+  },
+  mutateComboPosition (state, data) {
+    state.player.skin.comboPosition = data.value
+  },
+  mutateComboSize (state, data) {
+    state.player.skin.comboSize = data.value
+  },
+  mutateEffectSize (state, data) {
+    state.player.skin.EffectSize = data.value
   },
   toggleSoundOn (state, data) {
     state.player.config.soundOn = data.value
@@ -71,8 +90,8 @@ const mutations = {
     state.player.config.name = data.value
   },
   mutateKeyBind (state, data) {
-    state.player.keyConfigs[state.player.keyMode][data.id].code = data.code
-    state.player.keyConfigs[state.player.keyMode][data.id].key = data.key
+    state.player.keyConfigs[data.mode][data.id].code = data.code
+    state.player.keyConfigs[data.mode][data.id].key = data.key
   },
   mutateKeyMode (state, data) {
     state.player.keyMode = data.value
@@ -80,43 +99,36 @@ const mutations = {
   mutateGameMode (state, data) {
     state.player.gameMode = data.value
   },
-  addResource(state, data) {
-    state.player.resources[data.id] += data.value
-  },
-  addSkill(state, data) {
-    state.player.skills[data.id] += data.value
-  },
-  addSetup(state, data) {
-    state.player.setup[data.id] += data.value
-  },
-  addCheat(state, data) {
-    state.player.cheats[data.id] += data.value
-  },
-  toggleUpgrade(state, data) {
-    state.player.upgrades[data.id] = data.value
-  },
-  toggleAchievement(state, data) {
-    state.player.achievements[data.id] = data.value
-  },
   reset(state, data) {
     state.player = {
       config: {
+        bpm: 191,
+        fps: 255,
         name: data.value,
-        time: 0,
-        version: 0.1,
-        comboPosition: 1080 * 0.3,
-        judgementPosition: 1080 * 0.6,
-        hitPosition: 164,
-        effectsOn: true,
-        soundOn: true,
-        showFps: true,
-        volume: 0.2,
-        scrollSpeed: 20,
-        bpm: 180,
-        fps: 0,
         od: 0,
-        skin: 'bars',
+        scrollSpeed: 444,
+        showFps: true,
+        soundOn: true,
+        volume: 0.2,
       },
+      skin: {
+          skin: 'bars',
+          columnSize: 0.05,
+          comboPosition: 0.75,
+          comboSize: 0.05,
+          judgementPosition: 0.4,
+          judgementSize: 0.07,
+          hitPosition: 0.1,
+          effectSize: 0.15
+      },
+      gameplay: {
+        accuracy: 0,
+        combo: 0,
+        judgements: [0,0,0,0,0,0],
+        score: 0,
+      },
+      version: 0.2,
+      time: Date.now(),
       keyMode: 7,
       gameMode: 'practice',
       stats: {
@@ -168,27 +180,26 @@ const mutations = {
         ]
       },
       resources: {
-        experience: 0,
-        money: 0,
         clout: 0,
-        stamina: 0,
-        combo: 0,
+        experience: 0,
         genes: 0,
+        money: 0,
+        stamina: 0,
       },
       skills: {
-        reading: 0,
-        jacks: 0,
-        trilling: 0,
-        technique: 0,
         accuracy: 0,
         focus: 0,
+        jacks: 0,
+        reading: 0,
+        technique: 0,
+        trilling: 0,
       },
       setup: {
-        pc: 0,
-        keyboard: 0,
-        monitor: 0,
         chair: 0,
         headset: 0,
+        keyboard: 0,
+        monitor: 0,
+        pc: 0,
       },
       upgrades: {
         0: false,
@@ -197,9 +208,9 @@ const mutations = {
         3: false,
       },
       cheats: {
-        bot: 0,
-        macro: 0,
         pause: 0,
+        macro: 0,
+        bot: 0,
       },
       buffs: {
         redbull: {
@@ -214,18 +225,49 @@ const mutations = {
         },
       },
       achievements: {
-        foolmoon: false,
         firststream: false,
-        firsttournament: false
+        firsttournament: false,
+        foolmoon: false
       },
       mutations: {
         xp: 0,
       },
     }
   },
+  /* Idle */
+  toggleShift(state, data) {
+    state.shift = data.value
+  },
+  addResource(state, data) {
+    state.player.resources[data.id] += data.value
+  },
+  addSkill(state, data) {
+    state.player.skills[data.id] += data.value
+  },
+  addSetup(state, data) {
+    state.player.setup[data.id] += data.value
+  },
+  addCheat(state, data) {
+    state.player.cheats[data.id] += data.value
+  },
+  toggleUpgrade(state, data) {
+    state.player.upgrades[data.id] = data.value
+  },
+  toggleAchievement(state, data) {
+    state.player.achievements[data.id] = data.value
+  },
   rebirth(state, data) {
     state.player = {
       config: state.player.config,
+      skin: state.player.skin,
+      gameplay: {
+        accuracy: 0,
+        combo: 0,
+        judgements: [0,0,0,0,0,0],
+        score: 0,
+      },
+      time: state.player.time,
+      version: state.player.version,
       keyMode: 1,
       gameMode: 'practice',
       stats: {
@@ -234,27 +276,26 @@ const mutations = {
       },
       keyConfigs: state.keyConfigs,
       resources: {
-        experience: 0,
-        money: 0,
         clout: 0,
-        stamina: 0,
-        combo: 0,
+        experience: 0,
         genes: state.resources.genes + data.value,
+        money: 0,
+        stamina: 0,
       },
       skills: {
-        reading: 0,
-        jacks: 0,
-        trilling: 0,
-        technique: 0,
         accuracy: 0,
         focus: 0,
+        jacks: 0,
+        reading: 0,
+        technique: 0,
+        trilling: 0,
       },
       setup: {
-        pc: 0,
-        keyboard: 0,
-        monitor: 0,
         chair: 0,
         headset: 0,
+        keyboard: 0,
+        monitor: 0,
+        pc: 0,
       },
       upgrades: {
         0: false,
@@ -263,9 +304,9 @@ const mutations = {
         3: false,
       },
       cheats: {
-        bot: 0,
-        macro: 0,
         pause: 0,
+        macro: 0,
+        bot: 0,
       },
       buffs: {
         redbull: {
@@ -288,54 +329,85 @@ const mutations = {
 // actions are functions that cause side effects and can involve
 // asynchronous operations.
 const actions = {
+  /* Game */
   toggleLoading({ commit }, data) {
     commit('toggleLoading', data)
   },
-  toggleShift({ commit }, data) {
-    commit('toggleShift', data)
+  changeCombo({ commit }, data) {
+    commit('mutateCombo', data)
+  },
+  changeScore({ commit }, data) {
+    commit('mutateScore', data)
+  },
+  changeJudgement({ commit }, data) {
+    commit('mutateJudgement', data)
+  },
+  changeAccuracy({ commit }, data) {
+    commit('mutateAccuracy', data)
   },
   changeScrollSpeed ({ commit }, data) {
     commit('mutateScrollSpeed', data)
   },
   changeVolume ({ commit }, data) {
     commit('mutateVolume', data)
-    let volumeChangedEvent = new CustomEvent('volumeChanged');
-    document.getElementById('gameCanvas').dispatchEvent(volumeChangedEvent);
+    let volumeChangedEvent = new CustomEvent('volumeChanged')
+    document.getElementById('gameCanvas').dispatchEvent(volumeChangedEvent)
   },
-  changeComboPosition ({ commit }, data) {
-    commit('mutateComboPosition', data)
+  changeColumnSize ({ commit }, data) {
+    commit('mutateColumnSize', data)
+  },
+  changeHitPosition ({ commit }, data) {
+    commit('mutateHitPosition', data)
   },
   changeJudgementPosition ({ commit }, data) {
     commit('mutateJudgementPosition', data)
   },
-  changeHitPosition({ commit }, data) {
-    commit('mutateHitPosition', data)
+  changeJudgementSize ({ commit }, data) {
+    commit('mutateJudgementSize', data)
+  },
+  changeComboPosition ({ commit }, data) {
+    commit('mutateComboPosition', data)
+  },
+  changeComboSize ({ commit }, data) {
+    commit('mutateComboSize', data)
+  },
+  changeEffectSize ({ commit }, data) {
+    commit('mutateEffectSize', data)
   },
   changeOd ({ commit }, data) {
     commit('mutateOd', data)
   },
   changeBpm ({ commit }, data) {
     commit('mutateBpm', data)
-    let bpmChangedEvent = new CustomEvent('bpmChanged');
-    document.getElementById('gameCanvas').dispatchEvent(bpmChangedEvent);
+    let canvas = document.getElementById('gameCanvas')
+    if(canvas != null) {
+      let bpmChangedEvent = new CustomEvent('bpmChanged')
+      canvas.dispatchEvent(bpmChangedEvent)
+    }
   },
   changeFps ({ commit }, data) {
     commit('mutateFps', data)
-    let fpsChangedEvent = new CustomEvent('fpsChanged');
-    document.getElementById('gameCanvas').dispatchEvent(fpsChangedEvent);
+    let canvas = document.getElementById('gameCanvas')
+    if(canvas != null) {
+      let fpsChangedEvent = new CustomEvent('fpsChanged')
+      canvas.dispatchEvent(fpsChangedEvent)
+    }
   },
   changeSkin ({ commit }, data) {
     commit('mutateSkin', data)
-    let skinChangedEvent = new CustomEvent('skinChanged');
-    document.getElementById('gameCanvas').dispatchEvent(skinChangedEvent);
-  },
-  toggleEffectsOn ({ commit }, data) {
-    commit('toggleEffectsOn', data)
+    let canvas = document.getElementById('gameCanvas')
+    if(canvas != null) {
+      let skinChangedEvent = new CustomEvent('skinChanged')
+      canvas.dispatchEvent(skinChangedEvent)
+    }
   },
   toggleSoundOn ({ commit }, data) {
     commit('toggleSoundOn', data)
-    let soundChangedEvent = new CustomEvent('soundChanged');
-    document.getElementById('gameCanvas').dispatchEvent(soundChangedEvent);
+    let canvas = document.getElementById('gameCanvas')
+    if(canvas != null) {
+      let soundChangedEvent = new CustomEvent('soundChanged')
+      canvas.dispatchEvent(soundChangedEvent)
+    }
   },
   toggleShowFps ({ commit }, data) {
     commit('toggleShowFps', data)
@@ -345,14 +417,52 @@ const actions = {
   },
   changeKeyMode({ commit }, data) {
     commit('mutateKeyMode', data)
-    let keyModeChangedEvent = new CustomEvent('keyModeChanged');
-    document.getElementById('gameCanvas').dispatchEvent(keyModeChangedEvent);
+    let canvas = document.getElementById('gameCanvas')
+    if(canvas != null) {
+      let keyModeChangedEvent = new CustomEvent('keyModeChanged')
+      canvas.dispatchEvent(keyModeChangedEvent)
+    }
   },
   changeKeyBind({ commit }, data) {
     commit('mutateKeyBind', data)
   },
   changeGameMode({ commit }, data) {
     commit('changeGameMode', data)
+  },
+  importGame({ commit }, data) {
+    commit('mutatePlayer', data)
+  },
+  exportGame({ commit }, data) {
+    commit('mutatePlayer', data)
+  },
+  saveGame({ state }) {
+    localStorage.setItem('osumaniaidle', LZString.compressToBase64(JSON.stringify(state.player)))
+  },
+  loadGame({ commit }) {
+    var player;
+    try {
+      player = JSON.parse(LZString.decompressFromBase64(localStorage.getItem('osumaniaidle')))
+    } catch(Exception) {
+      return
+    }
+    commit('mutatePlayer', {
+      value: player
+    })
+  },
+  resetGame({ commit }, data) {
+    commit('reset', data)
+    let canvas = document.getElementById('gameCanvas')
+    if(canvas != null) {
+      let resetGameEvent = new CustomEvent('resetGame')
+      canvas.dispatchEvent(resetGameEvent)
+    }
+  },
+  breakCombo({ commit }) {
+    commit('mutateCombo', { value: 0 })
+  },
+  /* Idle */
+  toggleShift({ commit }, data) {
+    commit('toggleShift', data)
   },
   giveResource({ commit }, data) {
     commit('addResource', data)
@@ -397,32 +507,6 @@ const actions = {
     if(state.player.achievements[data.id] == true) return
     commit('toggleAchievement', { id: data.id, value: true })
   },
-  importGame({ commit }, data) {
-    commit('mutatePlayer', data)
-  },
-  exportGame({ commit }, data) {
-    commit('mutatePlayer', data)
-  },
-  saveGame({ state }) {
-    localStorage.setItem('osumaniaidle', LZString.compressToBase64(JSON.stringify(state.player)))
-  },
-  loadGame({ commit }) {
-    var player;
-    try {
-      player = JSON.parse(LZString.decompressFromBase64(localStorage.getItem('osumaniaidle')))
-    } catch(Exception) {
-      return
-    }
-    commit('mutatePlayer', {
-      value: player
-    })
-  },
-  resetGame({ commit }, data) {
-    commit('reset', data)
-  },
-  breakCombo({ state, commit }) {
-    commit('addResource', { id: 'combo', value: -state.player.resources.combo})
-  },
   rebirth({ commit }) {
     commit('rebirth')
   },
@@ -432,52 +516,62 @@ const actions = {
   processTimeFrame({ getters, dispatch}, data) {
     dispatch('process', { value: data.value * getters.keysPerSecond * getters.keysPerTap })
   },
-  process({ dispatch }, data) {
+  process({ getters, dispatch }, data) {
     dispatch('giveResource', {id: 'experience', value: data.value})
-    dispatch('giveResource', {id: 'combo', value: data.value})
+    dispatch('changeCombo', { value: getters.combo + 1})
   }
 }
 
 // getters are functions.
 const getters = {
+  /* Game */
+  accuracy: state => state.player.gameplay.accuracy,
+  allKeys: state => state.player.keyConfigs,
+  bpm: state => state.player.config.bpm,
+  columnSize: state => state.player.skin.columnSize,
+  combo: state => state.player.gameplay.combo,
+  comboPosition: state => state.player.skin.comboPosition,
+  comboSize: state => state.player.skin.comboSize,
+  currentKeys: state => state.player.keyConfigs[state.player.keyMode],
+  effectSize: state => state.player.skin.effectSize,
+  fps: state => state.player.config.fps,
+  gameMode: state => state.player.gameMode,
+  hitPosition: state => state.player.skin.hitPosition,
+  judgementPosition: state => state.player.skin.judgementPosition,
+  judgementSize: state => state.player.skin.judgementSize,
+  judgements: state => state.player.gameplay.judgements,
+  keyMode: state => state.player.keyMode,
   loading: state => state.loading,
-  importExportText: state => state.importExportText,
-  effectsOn: state => state.player.config.effectsOn,
+  name: state => state.player.config.name,
+  od: state => state.player.config.od,
+  score: state => state.player.gameplay.score,
+  scrollSpeed: state => state.player.config.scrollSpeed,
+  showFps: state => state.player.config.showFps,
+  skin: state => state.player.skin.skin,
   soundOn: state => state.player.config.soundOn,
   volume: state => state.player.config.volume,
-  showFps: state => state.player.config.showFps,
-  scrollSpeed: state => state.player.config.scrollSpeed,
-  comboPosition: state => state.player.config.comboPosition,
-  judgementPosition: state => state.player.config.judgementPosition,
-  hitPosition: state => state.player.config.hitPosition,
-  bpm: state => state.player.config.bpm,
-  fps: state => state.player.config.fps,
-  od: state => state.player.config.od,
-  skin: state => state.player.config.skin,
-  gameMode: state => state.player.gameMode,
-  keyMode: state => state.player.keyMode,
-  experience: state => state.player.resources.experience,
-  money: state => state.player.resources.money,
-  clout: state => state.player.resources.clout,
-  combo: state => state.player.resources.combo,
-  stamina: state => state.player.resources.stamina,
-  genes: state => state.player.resources.genes,
-  skills: state => state.player.skills,
-  setup: state => state.player.setup,
-  cheats: state => state.player.cheats,
-  upgrades: state => state.player.upgrades,
+  /* Idle */
   achievements: state => state.player.achievements,
-  mutations: state => state.player.mutations,
-  currentKeys: state => state.player.keyConfigs[state.player.keyMode],
+  cheats: state => state.player.cheats,
+  clout: state => state.player.resources.clout,
+  experience: state => state.player.resources.experience,
+  genes: state => state.player.resources.genes,
   keysPerSecond: state => state.player.cheats.bot, //TODO
   keysPerTap: state => state.player.cheats.macro + 1, //TODO
+  money: state => state.player.resources.money,
+  mutations: state => state.player.mutations,
   pp: state => {
     var sum = 0
     for(var skill of Object.values(state.player.skills)) {
       sum += skill
     }
     return sum / (4 * state.player.keyMode)
-  }  
+  },
+  setup: state => state.player.setup,
+  skills: state => state.player.skills,
+  stamina: state => state.player.resources.stamina,
+  upgrades: state => state.player.upgrades,
+    
 }
 
 // A Vuex instance is created by combining the state, mutations, actions,

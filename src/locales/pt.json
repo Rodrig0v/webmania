@@ -1,29 +1,53 @@
 {
   "general": {
-    "loading": "A carregar..."
+    "apply": "Aplicar",
+    "loading": "A carregar...",
+    "reset": "Reset"
   },
-  "settings": {
-    "name": "Configurações",
-    "import": "Importar",
-    "export": "Exportar",
-    "reset": "Recomeçar",
-    "scrollspeed": "Velocidade de deslizamento",
-    "bpm": "BPM (Batidas por minuto)",
-    "fps": "FPS (Fotogramas  por segundo) - 0 é ilimitado",
-    "od": "OD (Dificuldade / Janela para acertar)",
-    "skin": "Skin",
-    "importcode": "Código de importação",
-    "fullscreen": "Meter ecrã inteiro",
-    "keymode": "Modo de teclas",
+  "header": {
+    "fullscreen": "Ecrã inteiro",
+    "gameplay": "Jogo",
     "keybinds": "Teclas",
-    "changekeybind": "Mudar tecla",
-    "presskey": "Pressione a nova tecla.",
-    "showfps": "Mostrar FPS",
-    "comboposition": "Posição do combo",
-    "judgementposition": "Posição da precisão",
-    "hitposition": "Posição de toque",
-    "enablesound": "Ativar som",
-    "volume": "Volume"
+    "options": "Opções",
+    "pickpattern": "Escolher padrão",
+    "picksong": "Escolher música",
+    "skin": "Skin"
+  },
+  "rules": {
+    "number": "Valor tem de ser um número.",
+    "value": "Valor tem de estar entre {min} e {max}."
+  },
+  "options": {
+    "gameplay": {
+      "fps": "Fotogramas  por segundo (0-255)",
+      "mutesound": "Silenciar som",
+      "name": "Nome",
+      "od": "Dificuldade",
+      "scrollspeed": "Velocidade de deslizamento (0-9999 ms)",
+      "showfps": "Mostrar FPS",
+      "volume": "Volume (0-100%)"
+    },
+    "skin": {
+      "skin": "Skin",
+      "columnsize": "Tamanho da coluna (0-100% do comprimento total)",
+      "comboposition": "Posição do combo (0-100% da altura total)",
+      "combosize": "Tamanho do combo (0-100% da altura total)",
+      "judgementposition": "Posição da precisão (0-100% da altura total)",
+      "judgementsize": "Tamanho da precisão (0-100% da altura total)",
+      "hitposition": "Posição de toque (0-100% da altura total)",
+      "effectSize": "Tamanho do efeito (0-100% do comprimento total)"
+    },
+    "keybinds": {
+      "changekeybind": "Mudar tecla",
+      "presskey": "Pressione a nova tecla."
+    }
+  },
+  "pickpattern": {
+    "bpm": "Batidas por minuto (0-9999)",
+    "keymode": "Número de teclas"
+  },
+  "picksong": {
+    "teste": "teste"
   },
   "footer": {
     "message": "— Feito por {author} e {community} — ",

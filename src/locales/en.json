@@ -1,29 +1,53 @@
 {
   "general": {
-    "loading": "Loading..."
+    "apply": "Apply",
+    "loading": "Loading...",
+    "reset": "Reset"
   },
-  "settings": {
-    "name": "Settings",
-    "import": "Import",
-    "export": "Export",
-    "reset": "Reset",
-    "scrollspeed": "Scroll Speed",
-    "bpm": "BPM (Beats per minute)",
-    "fps": "FPS (Frames per second) - 0 is unlimited",
-    "od": "OD (Overall Difficulty / Hit windows)",
-    "skin": "Skin",
-    "importcode": "Import code",
-    "fullscreen": "Make fullscreen",
-    "keymode": "Key mode",
+  "header": {
+    "fullscreen": "Fullscreen",
+    "gameplay": "Gameplay",
     "keybinds": "Key binds",
-    "changekeybind": "Change key binding",
-    "presskey": "Press the new key.",
-    "showfps": "Show FPS",
-    "comboposition": "Combo position",
-    "judgementposition": "Judgement Position",
-    "hitposition": "Hit Position",
-    "enablesound": "Enable sound",
-    "volume": "Volume"
+    "options": "Options",
+    "pickpattern": "Pick pattern",
+    "picksong": "Pick song",
+    "skin": "Skin"
+  },
+  "rules": {
+    "number": "Value must be a number.",
+    "value": "Value must be between {min} and {max}."
+  },
+  "options": {
+    "gameplay": {
+      "fps": "Frames per second (0-255)",
+      "mutesound": "Mute sound",
+      "name": "Name",
+      "od": "Overall Difficulty",
+      "scrollspeed": "Scroll Speed (0-9999 ms)",
+      "showfps": "Show FPS",
+      "volume": "Volume (0-100%)"
+    },
+    "skin": {
+      "skin": "Skin",
+      "columnsize": "Column size (0-100% of total width)",
+      "comboposition": "Combo position (0-100% of total height)",
+      "combosize": "Combo size (0-100% of total height)",
+      "judgementposition": "Judgement position (0-100% of total height)",
+      "judgementsize": "Judgement size (0-100% of total height)",
+      "hitposition": "Hit position (0-100% of total height)",
+      "effectSize": "Effect Size (0-100% of total width)"
+    },
+    "keybinds": {
+      "changekeybind": "Change key binding",
+      "presskey": "Press the new key."
+    }
+  },
+  "pickpattern": {
+    "bpm": "Beats per minute (0-9999)",
+    "keymode": "Key mode"
+  },
+  "picksong": {
+    "teste": "teste"
   },
   "footer": {
     "message": "— Made by {author} and {community} — ",

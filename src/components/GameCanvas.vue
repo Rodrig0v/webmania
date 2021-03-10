@@ -1,5 +1,9 @@
 <template>
-  <canvas id="gameCanvas"></canvas>
+  <v-main>
+    <div id="canvasWrapper">
+      <canvas id="gameCanvas"></canvas>
+    </div>
+  </v-main>
 </template>
 
 <script>
@@ -29,53 +33,54 @@ export default {
   },
   data() {
     return {
-      width: 600,
-      height: 1080,
+      addNotesInterval: null,
       canvas: null,
       context: null,
-      interval: null,
-      addNotesInterval: null,
-      hintImage: null,
-      lightingImage: null,
-      judgementImages: null,
-      judgementTime: 400,
       effectImages: null,
       effectTime: 300,
-      lastJudgement: null,
+      hintImage: null,
+      interval: null,
+      judgementImages: null,
+      judgementTime: 400,
+      keysDown: null,
+      lastColumns: [],
+      lastFps: new Queue(),
       lastHitId: 0,
       lastHitTime: 0,
-      keysDown: null,
-      onGoingEffects: new Queue(),
-      notes: null,
+      lastJudgement: null,
       lastNoteAddedTime: 0,
-      lastFps: new Queue(),
-      lastColumns: [],
+      lightingImage: null,
+      notes: null,
+      onGoingEffects: new Queue(),
       pattern: [2,1],
       patternIndex: 0
     }
   },
   computed: mapGetters([
-    'currentKeys',
-    'keyMode',
-    'effectsOn',
     'bpm',
-    'scrollSpeed',
-    'hitPosition',
-    'comboPosition',
-    'judgementPosition',
-    'fps',
-    'od',
-    'skin',
+    'columnSize',
     'combo',
+    'comboPosition',
+    'comboSize',
+    'currentKeys',
+    'effectSize',
+    'fps',
+    'hitPosition',
+    'judgementPosition',
+    'judgementSize',
+    'keyMode',
+    'od',
+    'scrollSpeed',
     'showFps',
-    'volume',
-    'soundOn'
+    'skin',
+    'soundOn',
+    'volume'
   ]),
   methods: {
     ...mapActions([
-      'toggleShift',
+      'breakCombo',
       'processKeyTap',
-      'breakCombo'
+      'toggleShift'
     ]),
     tintImage(imgElement,tintColor) {
         // create hidden canvas (using image dimensions)
@@ -156,13 +161,13 @@ export default {
     },
     start() {
       this.canvas = document.getElementById("gameCanvas")
-      this.canvas.width = this.width
-      this.canvas.height = this.height
+      this.processResize()
       this.context = this.canvas.getContext("2d")
       //this.context.globalCompositeOperation = "screen"
       this.addNotes()
       this.addNotesInterval = setInterval(() => this.addNotes(), 1000.0)
       this.interval = setInterval(this.updateCanvas, 1000.0 / this.fps)
+      window.addEventListener("resize", this.processResize)
       this.canvas.addEventListener("bpmChanged", this.processBpmChange)
       this.canvas.addEventListener("fpsChanged", this.processFpsChange)
       this.canvas.addEventListener("keyModeChanged", this.processKeyModeChange)
@@ -170,6 +175,7 @@ export default {
       this.canvas.addEventListener("makeFullscreen", this.processFullScreen)
       this.canvas.addEventListener("volumeChanged", this.processVolumeChange)
       this.canvas.addEventListener("soundChanged", this.processSoundChange)
+      this.canvas.addEventListener("resetGame", this.processReset)
       if(this.soundOn) {
         this.sound.play()
       }
@@ -183,8 +189,7 @@ export default {
       this.drawCombo()
       this.drawJudgement()
       this.drawReceptors()
-      if(this.effectsOn)
-        this.drawEffects()
+      this.drawEffects()
       if(this.showFps)
         this.drawFps()
     },
@@ -194,49 +199,47 @@ export default {
     drawHint() {
       this.context.drawImage(
           this.hintImage,
-          (this.canvas.width - (this.canvas.width / 7 * this.keyMode)) / 2 ,
-          this.canvas.height - this.hitPosition - 64,
-          this.canvas.width / 7 * this.keyMode,
-          128)
+          (this.canvas.width - (this.canvas.width * this.columnSize * this.keyMode)) / 2 ,
+          this.canvas.height - (this.hitPosition * this.canvas.height) - (this.hintImage.height / 2),
+          this.canvas.width * this.columnSize * this.keyMode,
+          this.hintImage.height)
     },
     drawLighting() {
       for(let i = 0; i < this.currentKeys.length ; i++) {
         if (this.keysDown[i]) {
-          this.context.drawImage(this.lightingImages[i], ((this.canvas.width - (this.canvas.width / 7 * this.keyMode)) / 2) + ((this.canvas.width / 7) * i), this.canvas.height - 640 - this.hitPosition, (this.canvas.width / 7), 640)
+          this.context.drawImage(this.lightingImages[i], ((this.canvas.width - (this.columnSize * this.canvas.width * this.keyMode)) / 2) + (this.columnSize * this.canvas.width * i), this.canvas.height - 640 - (this.hitPosition * this.canvas.height), this.columnSize * this.canvas.width, 640)
         }
       }
     },
     drawCombo() {
       if(this.combo == 0) return
       var comboString = this.combo.toString()
-      var comboWidth = 30
-      var comboHeight = 60
+      var comboHeight = this.comboSize * this.canvas.height
       for(let i = 0; i < comboString.length; i++) {
+        var comboWidth = comboHeight * this.comboImages[comboString[i]].width / this.comboImages[comboString[i]].height
         this.context.drawImage(
           this.comboImages[comboString[i]],
           (this.canvas.width / 2) - (comboWidth * comboString.length / 2) + (comboWidth * i),
-          this.comboPosition - (comboHeight / 2),
+          this.canvas.height - (this.comboPosition * this.canvas.height) - (comboHeight / 2),
           comboWidth,
           comboHeight) //TODO
       }
     },
     drawJudgement() {
       let difference = Date.now() - this.lastHitTime
-      let multiplier = 0.12;
       if(difference < this.judgementTime) {
-        let judgeHeight = Math.max(this.width * multiplier * 1.5 - difference / (this.judgementTime / 2) * (this.width * multiplier * 1.5 - this.width * multiplier), this.width * multiplier)
-        let judgeWidth = judgeHeight * (188 / 91)
+        let judgementHeight = Math.max(this.canvas.height * this.judgementSize * 1.5 - difference / (this.judgementTime / 2) * (this.canvas.height * this.judgementSize * 1.5 - this.canvas.height * this.judgementSize), this.canvas.height * this.judgementSize)
+        let judgementWidth = judgementHeight * this.judgementImages[this.lastJudgement].width / this.judgementImages[this.lastJudgement].height
         this.context.drawImage(
           this.judgementImages[this.lastJudgement],
-          (this.canvas.width / 2) - (judgeWidth / 2),
-          this.judgementPosition - (judgeHeight / 2),
-          judgeWidth,
-          judgeHeight)
+          (this.canvas.width / 2) - (judgementWidth / 2),
+          this.canvas.height - (this.judgementPosition * this.canvas.height) - (judgementHeight / 2),
+          judgementWidth,
+          judgementHeight)
       }
     },
     drawEffects() {
       let now = Date.now();
-      let multiplier = 0.38
       this.context.globalCompositeOperation = 'screen';
       this.removeOldItems(this.onGoingEffects, this.effectTime, () => {} )
       for(let i = 0; i < this.onGoingEffects.length; i++) {
@@ -244,22 +247,22 @@ export default {
         let index = Math.floor((difference / this.effectTime) * this.effectImages.length )
         this.context.drawImage(
           this.effectImages[index],
-          this.onGoingEffects.peekAt(i).id * (this.canvas.width / 7) + (this.canvas.width / 7 / 2) - this.canvas.width * multiplier + ((this.canvas.width - (this.canvas.width / 7 * this.keyMode)) / 2),
-          this.canvas.height - this.hitPosition - this.canvas.width * multiplier,
-          this.canvas.width * multiplier * 2,
-          this.canvas.width * multiplier * 2)
+          this.onGoingEffects.peekAt(i).id * (this.canvas.width * this.columnSize) + (this.canvas.width * this.columnSize / 2) - this.canvas.width * this.effectSize + ((this.canvas.width - (this.canvas.width * this.columnSize * this.keyMode)) / 2),
+          this.canvas.height - (this.hitPosition * this.canvas.height) - this.canvas.width * this.effectSize,
+          this.canvas.width * this.effectSize * 2,
+          this.canvas.width * this.effectSize * 2)
       }
       this.context.globalCompositeOperation = 'source-over';
     },
     drawReceptors() {
       for(let i = 0; i < this.currentKeys.length ; i++) {
-        let receptorWidth = (this.canvas.width / 7)
+        let receptorWidth = this.columnSize * this.canvas.width
         let receptorHeight =  receptorWidth * this.pressedReceptorImages[i].height / this.pressedReceptorImages[i].width
         if (this.keysDown[i]) {
           this.context.drawImage(
             this.pressedReceptorImages[i],
             ((this.canvas.width - (receptorWidth * this.keyMode)) / 2) + (receptorWidth * i),
-            this.canvas.height - this.hitPosition - (receptorHeight / 2),
+            this.canvas.height - (this.hitPosition * this.canvas.height) - (receptorHeight / 2),
             receptorWidth,
             receptorHeight
           )
@@ -267,7 +270,7 @@ export default {
           this.context.drawImage(
             this.receptorImages[i],
             ((this.canvas.width - (receptorWidth * this.keyMode)) / 2) + (receptorWidth * i),
-            this.canvas.height - this.hitPosition - (receptorHeight / 2),
+            this.canvas.height - (this.hitPosition * this.canvas.height) - (receptorHeight / 2),
             receptorWidth,
             receptorHeight
           )
@@ -276,9 +279,9 @@ export default {
     },
     drawNotes() {
       let now = Date.now();
-      let playableHeight = this.canvas.height - this.hitPosition
-      let offset = playableHeight / (this.scrollSpeed / 15) //miliseconds that will appear on screen
-      let noteWidth = this.canvas.width / 7
+      let playableHeight = this.canvas.height - (this.hitPosition * this.canvas.height)
+      let offset = this.scrollSpeed //miliseconds that will appear on screen
+      let noteWidth = this.columnSize * this.canvas.width
       for(let column = 0; column < this.notes.length; column++) {
         for(let i = 0; i < this.notes[column].length; i++) {
           let difference = this.notes[column].peekAt(i).time - now
@@ -412,6 +415,37 @@ export default {
     processVolumeChange() {
       this.sound.volume(this.volume)
     },
+    processReset() {
+      this.processSkinChange()
+      this.processKeyModeChange()
+      this.processFpsChange()
+      this.processVolumeChange()
+      this.processSoundChange()
+    },
+    processResize() {
+      var screenWidth = window.screen.width
+      var screenHeight = window.screen.height
+      var width = window.innerWidth
+      var height = document.fullscreenElement ? window.innerHeight : window.innerHeight - document.getElementById('header').offsetHeight - document.getElementById('footer').offsetHeight
+      var screenScale = screenWidth / screenHeight
+      var scale = width / height
+      var canvasWrapper = document.getElementById('canvasWrapper')
+      canvasWrapper.style.width = Math.round(width) + 'px'
+      canvasWrapper.style.height = Math.round(height) + 'px'
+
+      if ( screenScale > scale ) {
+        this.canvas.width = width
+        this.canvas.height = width / screenScale
+        this.canvas.style.width = Math.round(width) + 'px'
+        this.canvas.style.height = Math.round(width / screenScale) + 'px'
+      }
+      else {
+        this.canvas.width = height * screenScale
+        this.canvas.height = height
+        this.canvas.style.width = Math.round(height * screenScale) + 'px'
+        this.canvas.style.height = Math.round(height) + 'px'
+      }
+    },
     loadSkin() {
       this.lightingImages = Array.from({length: info.skins[this.skin][this.keyMode].lightingImages.length}, () => new Image())
       for(let i = 0; i < this.lightingImages.length; i++) {
@@ -463,11 +497,15 @@ export default {
   destroyed () {
     removeEventListener("keydown", this.processKeyDown);
     removeEventListener("keyup", this.processKeyUp);
+    window.removeEventListener("resize", this.processResize)
     this.canvas.removeEventListener("bpmChanged", this.processBpmChange)
     this.canvas.removeEventListener("fpsChanged", this.processFpsChange)
     this.canvas.removeEventListener("skinChanged", this.processSkinChange)
     this.canvas.removeEventListener("keyModeChanged", this.processKeyModeChange)
     this.canvas.removeEventListener("makeFullscreen", this.processFullScreen)
+    this.canvas.removeEventListener("volumeChanged", this.processVolumeChange)
+    this.canvas.removeEventListener("soundChanged", this.processSoundChange)
+    this.canvas.removeEventListener("resetGame", this.processReset)
 
     clearInterval(this.interval)
   }
@@ -476,8 +514,13 @@ export default {
 
 <style>
 #gameCanvas {
-    position: absolute;
-    width: 450px;
-    height: 800px;
+    width: 100%;
+    height: 100%;
+    background: black;
+}
+#canvasWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>

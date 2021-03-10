@@ -26,8 +26,8 @@ export default {
   ]),
   created: function () {
     this.loadGame()
-    if(this.$store.state.player == null) {
-      var playerName = prompt('Please enter your username', 'Jadong');
+    if(this.$store.state.player == null || this.$store.state.player.version == null) {
+      let playerName = prompt('Please enter your username', 'Jadong');
       if(playerName == null) playerName = 'Jadong'
       this.resetGame({ value: playerName })
     }
@@ -36,3 +36,9 @@ export default {
 
 }
 </script>
+
+<style>
+html {
+  overflow: hidden !important;
+}
+</style>
