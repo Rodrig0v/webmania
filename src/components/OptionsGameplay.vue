@@ -3,13 +3,11 @@
     <v-text-field
       :label="$t('options.gameplay.name')"
       v-model="computedName"
-      hide-details="auto"
     ></v-text-field>
     <v-text-field
       :label="$t('options.gameplay.scrollspeed')"
       :rules="scrollSpeedRules"
       v-model="computedScrollSpeed"
-      hide-details="auto"
     ></v-text-field>
     <v-select
       :items="ods"
@@ -24,7 +22,6 @@
       :label="$t('options.gameplay.fps')"
       :rules="fpsRules"
       v-model="computedFps"
-      hide-details="auto"
     ></v-text-field>
     <v-switch
       v-model="computedSoundOn"
@@ -34,7 +31,6 @@
       :label="$t('options.gameplay.volume')"
       :rules="percentageRules"
       v-model="computedVolume"
-      hide-details="auto"
     ></v-text-field>
   </div>
 </template>

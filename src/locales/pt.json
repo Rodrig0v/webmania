@@ -2,7 +2,8 @@
   "general": {
     "apply": "Aplicar",
     "loading": "A carregar...",
-    "reset": "Reset"
+    "reset": "Reset",
+    "selectsong": "Seleciona uma música ou um padrão"
   },
   "header": {
     "fullscreen": "Ecrã inteiro",
@@ -47,7 +48,8 @@
     "keymode": "Número de teclas"
   },
   "picksong": {
-    "teste": "teste"
+    "play": "Jogar"
+    
   },
   "footer": {
     "message": "— Feito por {author} e {community} — ",

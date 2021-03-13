@@ -198,6 +198,12 @@ export default {
         lightingImages: [
           require('@/assets/skins/blank.png'),
         ],
+        lnBodyImages: [
+          require('@/assets/skins/arrows/hold-body-green.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/arrows/hold-cap-green.png'),
+        ],
         noteImages: [
           require('@/assets/skins/arrows/note-center.png'),
         ],
@@ -212,6 +218,14 @@ export default {
         lightingImages: [
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/arrows/hold-body-red.png'),
+          require('@/assets/skins/arrows/hold-body-red.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/arrows/hold-cap-red.png'),
+          require('@/assets/skins/arrows/hold-cap-red.png'),
         ],
         noteImages: [
           require('@/assets/skins/arrows/note-left-red.png'),
@@ -231,6 +245,16 @@ export default {
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/arrows/hold-body-red.png'),
+          require('@/assets/skins/arrows/hold-body-green.png'),
+          require('@/assets/skins/arrows/hold-body-red.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/arrows/hold-cap-red.png'),
+          require('@/assets/skins/arrows/hold-cap-green.png'),
+          require('@/assets/skins/arrows/hold-cap-red.png'),
         ],
         noteImages: [
           require('@/assets/skins/arrows/note-left-red.png'),
@@ -254,6 +278,18 @@ export default {
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/arrows/hold-body-red.png'),
+          require('@/assets/skins/arrows/hold-body-blue.png'),
+          require('@/assets/skins/arrows/hold-body-blue.png'),
+          require('@/assets/skins/arrows/hold-body-red.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/arrows/hold-cap-red.png'),
+          require('@/assets/skins/arrows/hold-cap-blue.png'),
+          require('@/assets/skins/arrows/hold-cap-blue.png'),
+          require('@/assets/skins/arrows/hold-cap-red.png'),
         ],
         noteImages: [
           require('@/assets/skins/arrows/note-left-red.png'),
@@ -281,6 +317,20 @@ export default {
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/arrows/hold-body-red.png'),
+          require('@/assets/skins/arrows/hold-body-blue.png'),
+          require('@/assets/skins/arrows/hold-body-green.png'),
+          require('@/assets/skins/arrows/hold-body-blue.png'),
+          require('@/assets/skins/arrows/hold-body-red.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/arrows/hold-cap-red.png'),
+          require('@/assets/skins/arrows/hold-cap-blue.png'),
+          require('@/assets/skins/arrows/hold-cap-green.png'),
+          require('@/assets/skins/arrows/hold-cap-blue.png'),
+          require('@/assets/skins/arrows/hold-cap-red.png'),
         ],
         noteImages: [
           require('@/assets/skins/arrows/note-left-red.png'),
@@ -312,6 +362,22 @@ export default {
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/arrows/hold-body-blue.png'),
+          require('@/assets/skins/arrows/hold-body-red.png'),
+          require('@/assets/skins/arrows/hold-body-blue.png'),
+          require('@/assets/skins/arrows/hold-body-blue.png'),
+          require('@/assets/skins/arrows/hold-body-red.png'),
+          require('@/assets/skins/arrows/hold-body-blue.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/arrows/hold-cap-blue.png'),
+          require('@/assets/skins/arrows/hold-cap-red.png'),
+          require('@/assets/skins/arrows/hold-cap-blue.png'),
+          require('@/assets/skins/arrows/hold-cap-blue.png'),
+          require('@/assets/skins/arrows/hold-cap-red.png'),
+          require('@/assets/skins/arrows/hold-cap-blue.png'),
         ],
         noteImages: [
           require('@/assets/skins/arrows/note-left-blue.png'),
@@ -347,6 +413,24 @@ export default {
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/arrows/hold-body-blue.png'),
+          require('@/assets/skins/arrows/hold-body-red.png'),
+          require('@/assets/skins/arrows/hold-body-blue.png'),
+          require('@/assets/skins/arrows/hold-body-green.png'),
+          require('@/assets/skins/arrows/hold-body-blue.png'),
+          require('@/assets/skins/arrows/hold-body-red.png'),
+          require('@/assets/skins/arrows/hold-body-blue.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/arrows/hold-cap-blue.png'),
+          require('@/assets/skins/arrows/hold-cap-red.png'),
+          require('@/assets/skins/arrows/hold-cap-blue.png'),
+          require('@/assets/skins/arrows/hold-cap-green.png'),
+          require('@/assets/skins/arrows/hold-cap-blue.png'),
+          require('@/assets/skins/arrows/hold-cap-red.png'),
+          require('@/assets/skins/arrows/hold-cap-blue.png'),
         ],
         noteImages: [
           require('@/assets/skins/arrows/note-left-blue.png'),
@@ -406,6 +490,12 @@ export default {
         lightingImages: [
           require('@/assets/skins/bars/lighting-yellow.png'),
         ],
+        lnBodyImages: [
+          require('@/assets/skins/bars/hold-body-yellow.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/bars/note-yellow.png'),
+        ],
         noteImages: [
           require('@/assets/skins/bars/note-yellow.png'),
         ],
@@ -420,6 +510,14 @@ export default {
         lightingImages: [
           require('@/assets/skins/bars/lighting-red.png'),
           require('@/assets/skins/bars/lighting-red.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/bars/hold-body-white.png'),
+          require('@/assets/skins/bars/hold-body-white.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/bars/note-white.png'),
+          require('@/assets/skins/bars/note-white.png'),
         ],
         noteImages: [
           require('@/assets/skins/bars/note-white.png'),
@@ -439,6 +537,16 @@ export default {
           require('@/assets/skins/bars/lighting-red.png'),
           require('@/assets/skins/bars/lighting-yellow.png'),
           require('@/assets/skins/bars/lighting-red.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/bars/hold-body-white.png'),
+          require('@/assets/skins/bars/hold-body-yellow.png'),
+          require('@/assets/skins/bars/hold-body-white.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/bars/note-white.png'),
+          require('@/assets/skins/bars/note-yellow.png'),
+          require('@/assets/skins/bars/note-white.png'),
         ],
         noteImages: [
           require('@/assets/skins/bars/note-white.png'),
@@ -462,6 +570,18 @@ export default {
           require('@/assets/skins/bars/lighting-red.png'),
           require('@/assets/skins/bars/lighting-red.png'),
           require('@/assets/skins/bars/lighting-blue.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/bars/hold-body-blue.png'),
+          require('@/assets/skins/bars/hold-body-white.png'),
+          require('@/assets/skins/bars/hold-body-white.png'),
+          require('@/assets/skins/bars/hold-body-blue.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/bars/note-blue.png'),
+          require('@/assets/skins/bars/note-white.png'),
+          require('@/assets/skins/bars/note-white.png'),
+          require('@/assets/skins/bars/note-blue.png'),
         ],
         noteImages: [
           require('@/assets/skins/bars/note-blue.png'),
@@ -489,6 +609,20 @@ export default {
           require('@/assets/skins/bars/lighting-yellow.png'),
           require('@/assets/skins/bars/lighting-red.png'),
           require('@/assets/skins/bars/lighting-blue.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/bars/hold-body-blue.png'),
+          require('@/assets/skins/bars/hold-body-white.png'),
+          require('@/assets/skins/bars/hold-body-yellow.png'),
+          require('@/assets/skins/bars/hold-body-white.png'),
+          require('@/assets/skins/bars/hold-body-blue.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/bars/note-blue.png'),
+          require('@/assets/skins/bars/note-white.png'),
+          require('@/assets/skins/bars/note-yellow.png'),
+          require('@/assets/skins/bars/note-white.png'),
+          require('@/assets/skins/bars/note-blue.png'),
         ],
         noteImages: [
           require('@/assets/skins/bars/note-blue.png'),
@@ -520,6 +654,22 @@ export default {
           require('@/assets/skins/bars/lighting-red.png'),
           require('@/assets/skins/bars/lighting-blue.png'),
           require('@/assets/skins/bars/lighting-red.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/bars/hold-body-white.png'),
+          require('@/assets/skins/bars/hold-body-blue.png'),
+          require('@/assets/skins/bars/hold-body-white.png'),
+          require('@/assets/skins/bars/hold-body-white.png'),
+          require('@/assets/skins/bars/hold-body-blue.png'),
+          require('@/assets/skins/bars/hold-body-white.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/bars/note-white.png'),
+          require('@/assets/skins/bars/note-blue.png'),
+          require('@/assets/skins/bars/note-white.png'),
+          require('@/assets/skins/bars/note-white.png'),
+          require('@/assets/skins/bars/note-blue.png'),
+          require('@/assets/skins/bars/note-white.png'),
         ],
         noteImages: [
           require('@/assets/skins/bars/note-white.png'),
@@ -555,6 +705,24 @@ export default {
           require('@/assets/skins/bars/lighting-red.png'),
           require('@/assets/skins/bars/lighting-blue.png'),
           require('@/assets/skins/bars/lighting-red.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/bars/hold-body-white.png'),
+          require('@/assets/skins/bars/hold-body-blue.png'),
+          require('@/assets/skins/bars/hold-body-white.png'),
+          require('@/assets/skins/bars/hold-body-yellow.png'),
+          require('@/assets/skins/bars/hold-body-white.png'),
+          require('@/assets/skins/bars/hold-body-blue.png'),
+          require('@/assets/skins/bars/hold-body-white.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/bars/note-white.png'),
+          require('@/assets/skins/bars/note-blue.png'),
+          require('@/assets/skins/bars/note-white.png'),
+          require('@/assets/skins/bars/note-yellow.png'),
+          require('@/assets/skins/bars/note-white.png'),
+          require('@/assets/skins/bars/note-blue.png'),
+          require('@/assets/skins/bars/note-white.png'),
         ],
         noteImages: [
           require('@/assets/skins/bars/note-white.png'),
@@ -622,6 +790,12 @@ export default {
         lightingImages: [
           require('@/assets/skins/blank.png'),
         ],
+        lnBodyImages: [
+          require('@/assets/skins/circles/hold-body.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/circles/hold-cap.png'),
+        ],
         noteImages: [
           require('@/assets/skins/circles/note-yellow.png'),
         ],
@@ -636,6 +810,14 @@ export default {
         lightingImages: [
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
         ],
         noteImages: [
           require('@/assets/skins/circles/note-white.png'),
@@ -655,6 +837,16 @@ export default {
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
         ],
         noteImages: [
           require('@/assets/skins/circles/note-white.png'),
@@ -678,6 +870,18 @@ export default {
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
         ],
         noteImages: [
           require('@/assets/skins/circles/note-blue.png'),
@@ -705,6 +909,20 @@ export default {
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
         ],
         noteImages: [
           require('@/assets/skins/circles/note-blue.png'),
@@ -736,6 +954,22 @@ export default {
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
         ],
         noteImages: [
           require('@/assets/skins/circles/note-white.png'),
@@ -771,6 +1005,24 @@ export default {
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+          require('@/assets/skins/circles/hold-body.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
+          require('@/assets/skins/circles/hold-cap.png'),
         ],
         noteImages: [
           require('@/assets/skins/circles/note-white.png'),
@@ -830,6 +1082,12 @@ export default {
         lightingImages: [
           require('@/assets/skins/blank.png'),
         ],
+        lnBodyImages: [
+          require('@/assets/skins/diamonds/hold-body.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/diamonds/hold-cap.png'),
+        ],
         noteImages: [
           require('@/assets/skins/diamonds/note-yellow.png'),
         ],
@@ -844,6 +1102,14 @@ export default {
         lightingImages: [
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
         ],
         noteImages: [
           require('@/assets/skins/diamonds/note-white.png'),
@@ -863,6 +1129,16 @@ export default {
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
         ],
         noteImages: [
           require('@/assets/skins/diamonds/note-white.png'),
@@ -886,6 +1162,18 @@ export default {
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
         ],
         noteImages: [
           require('@/assets/skins/diamonds/note-blue.png'),
@@ -913,6 +1201,20 @@ export default {
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
         ],
         noteImages: [
           require('@/assets/skins/diamonds/note-blue.png'),
@@ -944,6 +1246,22 @@ export default {
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
         ],
         noteImages: [
           require('@/assets/skins/diamonds/note-white.png'),
@@ -979,6 +1297,24 @@ export default {
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
           require('@/assets/skins/blank.png'),
+        ],
+        lnBodyImages: [
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+          require('@/assets/skins/diamonds/hold-body.png'),
+        ],
+        lnCapImages: [
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
+          require('@/assets/skins/diamonds/hold-cap.png'),
         ],
         noteImages: [
           require('@/assets/skins/diamonds/note-white.png'),

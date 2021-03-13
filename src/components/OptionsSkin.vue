@@ -9,43 +9,36 @@
       :label="$t('options.skin.hitposition')"
       :rules="percentageRules"
       v-model="computedHitPosition"
-      hide-details="auto"
     ></v-text-field>
     <v-text-field
       :label="$t('options.skin.columnsize')"
       :rules="percentageRules"
       v-model="computedColumnSize"
-      hide-details="auto"
     ></v-text-field>
     <v-text-field
       :label="$t('options.skin.judgementposition')"
       :rules="percentageRules"
       v-model="computedJudgementPosition"
-      hide-details="auto"
     ></v-text-field>
     <v-text-field
       :label="$t('options.skin.judgementsize')"
       :rules="percentageRules"
       v-model="computedJudgementSize"
-      hide-details="auto"
     ></v-text-field>
     <v-text-field
       :label="$t('options.skin.comboposition')"
       :rules="percentageRules"
       v-model="computedComboPosition"
-      hide-details="auto"
     ></v-text-field>
     <v-text-field
       :label="$t('options.skin.combosize')"
       :rules="percentageRules"
       v-model="computedComboSize"
-      hide-details="auto"
     ></v-text-field>
     <v-text-field
       :label="$t('options.skin.effectSize')"
       :rules="percentageRules"
       v-model="computedEffectSize"
-      hide-details="auto"
     ></v-text-field>
   </div>
 </template>

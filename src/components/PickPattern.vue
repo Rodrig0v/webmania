@@ -18,8 +18,7 @@
           :label="$t('pickpattern.bpm')"
           :rules="bpmRules"
           v-model="computedBpm"
-          hide-details="auto"
-        ></v-text-field>
+            ></v-text-field>
       </v-card-text>
 
       <!--v-divider/-->

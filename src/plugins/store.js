@@ -83,6 +83,9 @@ const mutations = {
   toggleSoundOn (state, data) {
     state.player.config.soundOn = data.value
   },
+  toggleShowJudgements (state, data) {
+    state.player.config.showJudgements = data.value
+  },
   toggleShowFps (state, data) {
     state.player.config.showFps = data.value
   },
@@ -108,6 +111,7 @@ const mutations = {
         od: 0,
         scrollSpeed: 444,
         showFps: true,
+        showJudgements: true,
         soundOn: true,
         volume: 0.2,
       },
@@ -547,6 +551,7 @@ const getters = {
   score: state => state.player.gameplay.score,
   scrollSpeed: state => state.player.config.scrollSpeed,
   showFps: state => state.player.config.showFps,
+  showJudgements: state => state.player.config.showJudgements,
   skin: state => state.player.skin.skin,
   soundOn: state => state.player.config.soundOn,
   volume: state => state.player.config.volume,

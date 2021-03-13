@@ -10,7 +10,6 @@
 import { mapActions, mapGetters } from 'vuex';
 import info from '../models/info';
 import Queue from 'denque';
-import { Howl } from 'howler';
 
 export default {
   name: 'GameField',
@@ -22,12 +21,12 @@ export default {
 
     this.loadSkin()
 
-    this.sound = new Howl({
+    /*this.sound = new Howl({
       src: [require('@/assets/sound/cyber-loop.ogg')],
       loop: true,
       volume: this.volume,
       rate: this.bpm / 191,
-    });
+    });*/
 
     this.start()
   },
@@ -50,10 +49,15 @@ export default {
       lastJudgement: null,
       lastNoteAddedTime: 0,
       lightingImage: null,
+      lnBodyImages: null,
+      lnCapImages: null,
       notes: null,
       onGoingEffects: new Queue(),
       pattern: [2,1],
-      patternIndex: 0
+      patternIndex: 0,
+      playing: false,
+      playStartTime: 0,
+      sound: null
     }
   },
   computed: mapGetters([
@@ -72,6 +76,7 @@ export default {
     'od',
     'scrollSpeed',
     'showFps',
+    'showJudgements',
     'skin',
     'soundOn',
     'volume'
@@ -134,15 +139,19 @@ export default {
         let id = this.hasKey(event.code)
         if(id != null) {
           this.keysDown[id] = true
-          let difference = this.notes[id].length > 0 ? Math.abs(this.notes[id].peekFront().time - now) : Number.POSITIVE_INFINITY
+          let difference = this.notes[id].length > 0 ? Math.abs(this.playStartTime + this.notes[id].peekFront().startTime - now) : Number.POSITIVE_INFINITY
           if(difference < info.judgementWindows[this.od][info.judgementWindows[this.od].length - 1]) {
-            this.notes[id].shift()
+            if(this.notes[id].peekFront().endTime != null) {
+              this.notes[id].peekFront().pressed = true
+            } else {
+              this.notes[id].shift()
+            }
             this.lastHitTime = now
             this.lastJudgement = this.getJudgement(difference)
             if(this.lastJudgement == 5) {
               this.breakCombo()
             } else {
-              this.onGoingEffects.push({ id: id, time: Date.now() })
+              this.onGoingEffects.push({ id: id, startTime: Date.now() })
               this.processKeyTap({ value: 1 })
             }
           }
@@ -154,8 +163,41 @@ export default {
         this.toggleShift({ value: false })
       }
       let id = this.hasKey(event.code)
-        if (id != null) {
+      let now = Date.now()
+      if (id != null) {
         this.keysDown[id] = false
+        if(this.notes[id].peekFront() != null) {
+          let difference = this.playStartTime + this.notes[id].peekFront().endTime - now
+          if(!this.notes[id].peekFront().missed && this.notes[id].peekFront().pressed && difference < -info.judgementWindows[this.od][info.judgementWindows[this.od].length - 1]) {  // Released longnote too soon
+            this.notes[id].peekFront().missed = true;
+            this.lastHitTime = now
+            this.lastJudgement = 5
+            this.breakCombo()
+          }
+          else if(this.notes[id].peekFront().pressed && Math.abs(difference) < info.judgementWindows[this.od][info.judgementWindows[this.od].length - 1]) { // Released in time
+            this.notes[id].shift()
+            this.lastHitTime = now
+            this.lastJudgement = this.getJudgement(difference)
+            if(this.lastJudgement == 5) {
+              this.breakCombo()
+            } else {
+              this.onGoingEffects.push({ id: id, startTime: Date.now() })
+              this.processKeyTap({ value: 1 })
+            }
+          }
+        }
+        let difference = this.notes[id].length > 0 && !this.notes[id].peekFront().missed ? Math.abs(this.playStartTime + this.notes[id].peekFront().endTime - now) : Number.POSITIVE_INFINITY
+        if(difference < info.judgementWindows[this.od][info.judgementWindows[this.od].length - 1]) {
+          this.notes[id].shift()
+          this.lastHitTime = now
+          this.lastJudgement = this.getJudgement(difference)
+          if(this.lastJudgement == 5) {
+            this.breakCombo()
+          } else {
+            this.onGoingEffects.push({ id: id, startTime: Date.now() })
+            this.processKeyTap({ value: 1 })
+          }
+        }
       }
       
     },
@@ -163,8 +205,7 @@ export default {
       this.canvas = document.getElementById("gameCanvas")
       this.processResize()
       this.context = this.canvas.getContext("2d")
-      //this.context.globalCompositeOperation = "screen"
-      this.addNotes()
+      //this.addNotes()
       this.addNotesInterval = setInterval(() => this.addNotes(), 1000.0)
       this.interval = setInterval(this.updateCanvas, 1000.0 / this.fps)
       window.addEventListener("resize", this.processResize)
@@ -176,25 +217,39 @@ export default {
       this.canvas.addEventListener("volumeChanged", this.processVolumeChange)
       this.canvas.addEventListener("soundChanged", this.processSoundChange)
       this.canvas.addEventListener("resetGame", this.processReset)
-      if(this.soundOn) {
-        this.sound.play()
-      }
+      this.canvas.addEventListener("loadSong", this.processLoadSong)
     },
     updateCanvas() {
-      this.checkMisses()
+      if(this.playing)
+        this.checkMisses()
       this.clear()
       this.drawHint()
       this.drawLighting()
-      this.drawNotes()
+      if(this.playing)
+        this.drawNotes()
       this.drawCombo()
       this.drawJudgement()
       this.drawReceptors()
       this.drawEffects()
+      this.drawAccuracy()
+      if(this.showJudgements)
+      this.drawJudgements()
+      if(!this.playing)
+        this.drawSelectSong()
       if(this.showFps)
         this.drawFps()
     },
     clear() {
       this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    },
+    drawSelectSong() {
+      this.context.font = "30px Arial";
+      this.context.fillStyle = "white";
+      this.context.textAlign = "center";
+      this.context.fillText(this.$t('general.selectsong'), this.canvas.width / 2, this.canvas.height / 2)
+      if(this.lastFps.length > 100) {
+        this.lastFps.shift()
+      }
     },
     drawHint() {
       this.context.drawImage(
@@ -241,9 +296,9 @@ export default {
     drawEffects() {
       let now = Date.now();
       this.context.globalCompositeOperation = 'screen';
-      this.removeOldItems(this.onGoingEffects, this.effectTime, () => {} )
+      this.removeOldEffects()
       for(let i = 0; i < this.onGoingEffects.length; i++) {
-        let difference = now - this.onGoingEffects.peekAt(i).time
+        let difference = now - this.onGoingEffects.peekAt(i).startTime
         let index = Math.floor((difference / this.effectTime) * this.effectImages.length )
         this.context.drawImage(
           this.effectImages[index],
@@ -284,13 +339,47 @@ export default {
       let noteWidth = this.columnSize * this.canvas.width
       for(let column = 0; column < this.notes.length; column++) {
         for(let i = 0; i < this.notes[column].length; i++) {
-          let difference = this.notes[column].peekAt(i).time - now
+          let note = this.notes[column].peekAt(i);
+          let difference = this.playStartTime + note.startTime - now
           if(difference < offset) {
+            if(note.endTime != null) {
+              let capDifference = this.playStartTime + note.endTime - now
+              let capHeight = noteWidth * this.lnCapImages[column].height / this.lnCapImages[column].width
+              let bodyHeight = (capDifference - difference) * playableHeight / offset
+              if(bodyHeight > capHeight) {
+                this.context.drawImage( // longnote body
+                  this.lnBodyImages[column],
+                  ((this.canvas.width - (noteWidth * this.keyMode)) / 2) + (noteWidth * column),
+                  playableHeight - (capDifference * playableHeight / offset) + capHeight,
+                  noteWidth,
+                  bodyHeight - capHeight,
+                )
+                this.context.drawImage( // longnote cap
+                  this.lnCapImages[column],
+                  ((this.canvas.width - (noteWidth * this.keyMode)) / 2) + (noteWidth * column),
+                  playableHeight - (capDifference * playableHeight / offset),
+                  noteWidth,
+                  capHeight,
+                )
+              } else {
+                this.context.drawImage( // longnote cap
+                  this.lnCapImages[column],
+                  0,
+                  0,
+                  this.lnCapImages[column].width,
+                  bodyHeight,
+                  ((this.canvas.width - (noteWidth * this.keyMode)) / 2) + (noteWidth * column),
+                  playableHeight - (capDifference * playableHeight / offset),
+                  noteWidth,
+                  bodyHeight,
+                )
+              }
+            }
             let noteHeight = noteWidth * this.noteImages[column].height / this.noteImages[column].width
-            this.context.drawImage(
+            this.context.drawImage( //regular note
               this.noteImages[column],
               ((this.canvas.width - (noteWidth * this.keyMode)) / 2) + (noteWidth * column),
-              playableHeight - (difference * playableHeight / offset) - (noteHeight / 2), //height
+              playableHeight - (difference * playableHeight / offset) - (noteHeight / 2),
               noteWidth,
               noteHeight,
             )
@@ -313,10 +402,18 @@ export default {
         this.lastFps.shift()
       }
     },
-    removeOldItems(queue, interval, onRemove) {
+    drawAccuracy() {
+
+    },
+    drawJudgements() {
+
+    },
+    removeOldEffects() {
+      let queue = this.onGoingEffects
+      let interval = this.effectTime
       let now = Date.now()
-      while(queue.peekFront() != null && now - queue.peekFront().time >= interval) {
-        onRemove(queue.shift())
+      while(queue.peekFront() != null && now - queue.peekFront().startTime >= interval) {
+        queue.shift()
       }
     },
     addNotes() {
@@ -331,7 +428,7 @@ export default {
         if(this.keyMode == 1 < 3 || this.lastColumns == null) {
           this.lastColumns = []
           let column = Math.floor((Math.random() * this.keyMode))
-          this.notes[column].push({ time: i })
+          this.notes[column].push({ startTime: i })
           this.lastNoteAddedTime = i
           this.lastColumns.push(column)
         } else if(this.keyMode == 4) {
@@ -340,7 +437,7 @@ export default {
             this.lastColumns = []
           for(let j = 0; j < this.pattern[this.patternIndex]; j++) {
             let column = Math.floor(Math.random() * availableNumbers.length)
-            this.notes[availableNumbers[column]].push({ time: i })
+            this.notes[availableNumbers[column]].push({ startTime: i, endTime: i + 60000 / (this.bpm * 4) })
             this.lastNoteAddedTime = i
             this.lastColumns.push(availableNumbers[column])
             availableNumbers.splice(column, 1)
@@ -350,19 +447,46 @@ export default {
           let availableNumbers = Array.from(Array(this.keyMode).keys()).filter((i) => !this.lastColumns.includes(i))
           this.lastColumns = []
           let column = Math.floor(Math.random() * availableNumbers.length)
-          this.notes[availableNumbers[column]].push({ time: i })
+          this.notes[availableNumbers[column]].push({ startTime: i })
           this.lastNoteAddedTime = i
           this.lastColumns.push(availableNumbers[column])
         }
       }
     },
     checkMisses() {
-      for(let column of this.notes) {
-        this.removeOldItems(column, info.judgementWindows[this.od][info.judgementWindows[this.od].length - 1], () => {
-          this.lastHitTime = Date.now()
-          this.lastJudgement = 5
-          this.breakCombo()
-        })
+      let now = Date.now()
+      let interval = info.judgementWindows[this.od][info.judgementWindows[this.od].length - 1]
+      for(let queue of this.notes) {
+        let processed = false
+        while(processed != true) {
+          queue.peekFront() != null && ((queue.peekFront().endTime != null && now - this.playStartTime - queue.peekFront().endTime >= interval) || now - this.playStartTime - queue.peekFront().startTime >= interval) && queue.peekFront().missed != true
+          if(queue.peekFront() == null) { // Empty
+            processed = true
+          } else if(queue.peekFront().endTime != null) { // Missed Longnote
+            if(now - this.playStartTime - queue.peekFront().startTime >= interval && !queue.peekFront().pressed && !queue.peekFront().missed) { // Missed start
+              queue.peekFront().missed = true
+              this.lastHitTime = Date.now()
+              this.lastJudgement = 5
+              this.breakCombo()
+            } else if(queue.peekFront().pressed && now - this.playStartTime - queue.peekFront().endTime >= interval) { // Missed end
+              queue.shift()
+              this.lastHitTime = Date.now()
+              this.lastJudgement = 5
+              this.breakCombo()
+            } else {
+              processed = true
+            }
+          } else { // Missed Normal note
+            if(now - this.playStartTime - queue.peekFront().startTime >= interval) { // Missed start
+              queue.shift()
+              this.lastHitTime = Date.now()
+              this.lastJudgement = 5
+              this.breakCombo()
+            } else {
+              processed = true
+            }
+          }
+        }
       }
     },
     getJudgement(difference) {
@@ -407,13 +531,17 @@ export default {
     },
     processSoundChange() {
       if(this.soundOn) {
-        this.sound.play()
+        this.sound.volume(this.volume)
       } else {
-        this.sound.stop()
+        this.sound.volume(0)
       }
     },
     processVolumeChange() {
-      this.sound.volume(this.volume)
+      if(this.soundOn) {
+        this.sound.volume(this.volume)
+      } else {
+        this.sound.volume(0)
+      }
     },
     processReset() {
       this.processSkinChange()
@@ -445,6 +573,14 @@ export default {
         this.canvas.style.width = Math.round(height * screenScale) + 'px'
         this.canvas.style.height = Math.round(height) + 'px'
       }
+    },
+    processLoadSong(event) {
+      console.log(event)
+      this.notes = event.detail.beatmap.notes
+      this.sound = event.detail.song
+      this.playing = true
+      this.playStartTime = Date.now()
+      this.sound.play()
     },
     loadSkin() {
       this.lightingImages = Array.from({length: info.skins[this.skin][this.keyMode].lightingImages.length}, () => new Image())
@@ -484,6 +620,16 @@ export default {
       for(let i = 0; i < this.noteImages.length; i++) {
         this.noteImages[i].src = info.skins[this.skin][this.keyMode].noteImages[i]
       }
+
+      this.lnBodyImages = Array.from({length: info.skins[this.skin][this.keyMode].lnBodyImages.length}, () => new Image());
+      for(let i = 0; i < this.lnBodyImages.length; i++) {
+        this.lnBodyImages[i].src = info.skins[this.skin][this.keyMode].lnBodyImages[i]
+      }
+
+      this.lnCapImages = Array.from({length: info.skins[this.skin][this.keyMode].lnCapImages.length}, () => new Image());
+      for(let i = 0; i < this.lnCapImages.length; i++) {
+        this.lnCapImages[i].src = info.skins[this.skin][this.keyMode].lnCapImages[i]
+      }
     },
     loadKeyMode() {
       this.keysDown = []
@@ -506,6 +652,7 @@ export default {
     this.canvas.removeEventListener("volumeChanged", this.processVolumeChange)
     this.canvas.removeEventListener("soundChanged", this.processSoundChange)
     this.canvas.removeEventListener("resetGame", this.processReset)
+    this.canvas.removeEventListener("loadSong", this.processLoadSong)
 
     clearInterval(this.interval)
   }

@@ -2,7 +2,8 @@
   "general": {
     "apply": "Apply",
     "loading": "Loading...",
-    "reset": "Reset"
+    "reset": "Reset",
+    "selectsong": "Select a song or pattern"
   },
   "header": {
     "fullscreen": "Fullscreen",
@@ -47,7 +48,7 @@
     "keymode": "Key mode"
   },
   "picksong": {
-    "teste": "teste"
+    "play": "Play"
   },
   "footer": {
     "message": "— Made by {author} and {community} — ",
