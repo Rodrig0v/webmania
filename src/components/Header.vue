@@ -7,10 +7,10 @@
           contain
           :src="getLogo"
           transition="scale-transition"
-          width="40"
+          width="48"
         />
 
-        <v-toolbar-title>Osu!Mania Idle</v-toolbar-title>
+        <v-toolbar-title>Web!Mania</v-toolbar-title>
       </div>
 
       <div style="width: 15px"></div>
@@ -22,7 +22,7 @@
       >
         <template v-slot:activator="{ on, attrs }">
           <v-btn v-bind="attrs" v-on="on">
-            <v-icon>mdi-cog</v-icon>
+            <v-icon left>mdi-cog</v-icon>
             <span class="mr-2">{{ $t('header.options') }}</span>
           </v-btn>
         </template>
@@ -39,7 +39,7 @@
       >
         <template v-slot:activator="{ on, attrs }">
           <v-btn v-bind="attrs" v-on="on">
-            <v-icon>mdi-gamepad</v-icon>
+            <v-icon left>mdi-gamepad</v-icon>
             <span class="mr-2">{{ $t('header.pickpattern') }}</span>
           </v-btn>
         </template>
@@ -56,18 +56,18 @@
       >
         <template v-slot:activator="{ on, attrs }">
           <v-btn v-bind="attrs" v-on="on">
-            <v-icon>mdi-music</v-icon>
+            <v-icon left>mdi-music</v-icon>
             <span class="mr-2">{{ $t('header.picksong') }}</span>
           </v-btn>
         </template>
 
-        <PickSong v-on:close="pickSongDialog = false; blur()"/>
+        <PickSong v-on:open="pickSongDialog = true" v-on:close="pickSongDialog = false; blur()"/>
       </v-dialog>
 
       <div style="width: 15px"></div>
 
       <v-btn @click="makeFullscreen">
-        <v-icon>mdi-fullscreen</v-icon>
+        <v-icon left>mdi-fullscreen</v-icon>
         <span class="mr-2">{{ $t('header.fullscreen') }}</span>
       </v-btn>
   </v-app-bar>
@@ -100,15 +100,18 @@ export default {
   },
   methods: {
     ...mapActions([
-      'saveGame'
+      'saveGame',
     ]),
     makeFullscreen() {
-      let makeFullscreenEvent = new CustomEvent('makeFullscreen')
-      document.getElementById('gameCanvas').dispatchEvent(makeFullscreenEvent)
+      let canvas = document.getElementById('gameCanvas')
+      if(canvas) { 
+        let makeFullscreenEvent = new CustomEvent('makeFullscreen')
+        canvas.dispatchEvent(makeFullscreenEvent)
+      }
     },
     blur() {
       setTimeout(() => { document.activeElement.blur() }, 0)
-    }
+    },
   }
 }
 </script>

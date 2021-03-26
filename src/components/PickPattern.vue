@@ -40,13 +40,15 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions } from 'vuex'
 
 export default {
   name: 'PickPattern',
   data() {
     return {
       keyModes: [1,2,3,4,5,6,7],
+      currentKeyMode: 4,
+      currentBpm: 191,
       bpmRules: [
         v  => !isNaN(Number(v)) ? true : this.$t('rules.number'),
         v  => v >= 0 && v <= 9999 ? true : this.$t('rules.value', {min: 0, max: 9999}),
@@ -54,27 +56,23 @@ export default {
     }
   },
   computed: {
-    ...mapGetters([
-      'keyMode',
-      'bpm',
-    ]),
     computedBpm: {
       get () {
-        return this.bpm
+        return this.currentBpm
       },
       set (value) {
         for(var rule of this.bpmRules) {
           if (rule(value) != true) return
         }
-        this.changeBpm({ value: Number(value) })
+        this.currentBpm = Number(value)
       }
     },
     computedKeyMode: {
       get () {
-        return this.keyMode
+        return this.currentKeyMode
       },
       set (value) {
-        this.changeKeyMode({ value: value })
+        this.currentKeyMode = value
       }
     },
   },

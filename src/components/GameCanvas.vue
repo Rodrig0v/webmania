@@ -1,27 +1,50 @@
 <template>
   <v-main>
-    <div id="canvasWrapper">
-      <canvas id="gameCanvas"></canvas>
+    <div id='canvasWrapper'>
+      <canvas
+      id='gameCanvas'
+      v-on:fpsChanged="this.processFpsChange"
+      v-on:keyModeChanged="this.processKeyModeChange"
+      v-on:skinChanged="this.processSkinChange"
+      v-on:makeFullscreen="this.processFullScreen"
+      v-on:volumeChanged="this.processVolumeChange"
+      v-on:resetGame="this.processReset"
+      v-on:loadSong="this.processLoadSong"
+      ></canvas>
     </div>
   </v-main>
 </template>
 
 <script>
+
+// TODOS
+// do pattern generator
+// pick column position start or center
+// Fix pausing on restart or restarting on pause
+// Do skin menu pretty
+// finish bms loader
+// fix load song from anywhere
+// show correct errors when parsing file fails
+// offset pause????
+
 import { mapActions, mapGetters } from 'vuex';
 import info from '../models/info';
 import Queue from 'denque';
+import { Howl, Howler } from 'howler';
 
 export default {
   name: 'GameField',
   mounted() {
-    addEventListener("keydown", this.processKeyDown)
-    addEventListener("keyup", this.processKeyUp)
+    addEventListener('keydown', this.processKeyDown)
+    addEventListener('keyup', this.processKeyUp)
 
     this.loadKeyMode()
 
     this.loadSkin()
 
-    /*this.sound = new Howl({
+    Howler.volume(this.volume)
+
+    /*this.song = new Howl({
       src: [require('@/assets/sound/cyber-loop.ogg')],
       loop: true,
       volume: this.volume,
@@ -32,261 +55,531 @@ export default {
   },
   data() {
     return {
-      addNotesInterval: null,
+      /* Current map */
+      accuracy: 0,
+      combo: 0,
+      difficulty: null,
+      judgements: [0,0,0,0,0,0],
+      keyMode: 4,
+      length: 0,
+      notes: [],
+      timingWindows: 0,
+      totalAccuracy: 0,
+      songRate: 1,
+      hitSounds: {},
+      timeSounds: [],
+      loadedSounds: null,
+      totalSounds: null,
+      backgroundImage: null,
+      /* General */
+      helperCanvas: null,
+      helperContext: null,
       canvas: null,
       context: null,
-      effectImages: null,
-      effectTime: 300,
-      hintImage: null,
-      interval: null,
-      judgementImages: null,
+      loading: false,
+      lastPauseTime: null,
+      pauseStartTime: null,
+      paused: false,
+      countdownStartTime: 0,
+      playStartTime: 0,
+      playing: false,
+      skinData: null,
+      webmaniaBackgroundImage: null,
+      lastOffsetChangeTime: 0,
+      /* Settings */
+      offsetChangeTime: 3000,
+      countdownTime: 2000,
+      effectTime: 250,
+      offsetTime: 3000,
+      judgementEffectSize: 1.5,
+      judgementEffectTime: 200,
       judgementTime: 400,
+      lineWidth: 0.003,
+      textSize: 0.05,
+      margin: 0.02,
+      /* Timers */
+      addNotesInterval: null,
+      gameLoopInterval: null,
+      /* Draw Helpers */
+      floatingLns: new Queue(),
       keysDown: null,
-      lastColumns: [],
+      lastOffsets: new Queue(),
       lastFps: new Queue(),
-      lastHitId: 0,
       lastHitTime: 0,
       lastJudgement: null,
-      lastNoteAddedTime: 0,
-      lightingImage: null,
-      lnBodyImages: null,
-      lnCapImages: null,
-      notes: null,
       onGoingEffects: new Queue(),
-      pattern: [2,1],
+      /* Pattern variables*/
       patternIndex: 0,
-      playing: false,
-      playStartTime: 0,
-      sound: null
+      pattern: [2,1],
+      lastNoteAddedTime: 0,
+      lastColumns: [],
+      /* Custom background */
+      lastFrameTime: null,
+      particles: [],
+      maxParticleWidth: 0.05,
+      minParticleWidth: 0.005,
+      numParticles: 100,
+      particleSpeedMultiplier: 0.01,
     }
   },
   computed: mapGetters([
-    'bpm',
+    'accuracySize',
+    'audioOffset',
+    'backgroundOpacity',
     'columnSize',
-    'combo',
     'comboPosition',
     'comboSize',
-    'currentKeys',
     'effectSize',
     'fps',
     'hitPosition',
+    'hitPosition',
+    'infoSize',
     'judgementPosition',
     'judgementSize',
-    'keyMode',
-    'od',
+    'judgementsSize',
+    'keyBindings',
+    'offsetSizeX',
+    'offsetSizeY',
     'scrollSpeed',
+    'showAccuracy',
+    'showBackground',
+    'showCombo',
+    'showEffects',
     'showFps',
+    'showHint',
+    'showInfo',
+    'showJudgement',
     'showJudgements',
+    'showLighting',
+    'showOffset',
+    'showReceptors',
+    'showSongMeter',
     'skin',
-    'soundOn',
-    'volume'
+    'songMeterSize',
+    'upScroll',
+    'visualOffset',
+    'volume',
   ]),
   methods: {
     ...mapActions([
-      'breakCombo',
-      'processKeyTap',
-      'toggleShift'
+      'changeGeneralParameter'
     ]),
-    tintImage(imgElement,tintColor) {
-        // create hidden canvas (using image dimensions)
-        var canvas = document.createElement("canvas");
-        canvas.width = imgElement.offsetWidth;
-        canvas.height = imgElement.offsetHeight;
-
-        var ctx = canvas.getContext("2d");
-        ctx.drawImage(imgElement,0,0);
-
-        var map = ctx.getImageData(0,0,320,240);
-        var imdata = map.data;
-
-        // convert image to grayscale
-        var r,g,b,avg;
-        for(var p = 0, len = imdata.length; p < len; p+=4) {
-            r = imdata[p]
-            g = imdata[p+1];
-            b = imdata[p+2];
-            
-            avg = Math.floor((r+g+b)/3);
-
-            imdata[p] = imdata[p+1] = imdata[p+2] = avg;
-        }
-
-        ctx.putImageData(map,0,0);
-
-        // overlay filled rectangle using lighter composition
-        ctx.globalCompositeOperation = "lighter";
-        ctx.globalAlpha = 0.5;
-        ctx.fillStyle=tintColor;
-        ctx.fillRect(0,0,canvas.width,canvas.height);
-
-        // replace image source with canvas data
-        imgElement.src = canvas.toDataURL()
-    },
     hasKey(keyCode) {
-      for(let i = 0; i < this.currentKeys.length; i++) {
-        if(keyCode == this.currentKeys[i].code) {
-          return i;
+      for(let i = 0; i < this.keyBindings[this.keyMode].length; i++) {
+        if(keyCode == this.keyBindings[this.keyMode][i].code) {
+          return i
         }
       }
-      return null;
+      return null
     },
     processKeyDown(event) {
       if(!event.repeat) {
-        if (event.char == 'Shift') {
-          this.toggleShift({ value: true })
+        if (event.code == this.keyBindings['pause'].code) {
+          this.playPause()
         }
-        let now = Date.now();
+        if (event.code == this.keyBindings['restart'].code) {
+          this.restart()
+        }
+        if (event.code == this.keyBindings['fullScreen'].code) {
+          this.processFullScreen()
+        }
+        if (event.code == this.keyBindings['incrementAudioOffset'].code) {
+          if(this.audioOffset + (event.shiftKey ? 1 : 5) <= 1500) {
+            this.changeGeneralParameter({ id: 'audioOffset', value: this.audioOffset + (event.shiftKey ? 1 : 5) })
+            if(this.playing) {
+              for(let timeSound of this.timeSounds) {
+                if(timeSound.start && !timeSound.end) {
+                  timeSound.howl.seek((Date.now() - this.playStartTime - timeSound.startTime - this.audioOffset) / 1000 / this.songRate, timeSound.id)
+                }
+              }
+            }
+          }
+            
+          this.lastOffsetChangeTime = Date.now()
+        }
+        if (event.code == this.keyBindings['decrementAudioOffset'].code) {
+          if(this.audioOffset - (event.shiftKey ? 1 : 5) >= -1500) {
+            this.changeGeneralParameter({ id: 'audioOffset', value: this.audioOffset - (event.shiftKey ? 1 : 5) })
+            if(this.playing) {
+              for(let timeSound of this.timeSounds) {
+                if(timeSound.start && !timeSound.end) {
+                  timeSound.howl.seek((Date.now() - this.playStartTime - timeSound.startTime - this.audioOffset) / 1000 / this.songRate, timeSound.id)
+                }
+              }
+            }
+          }
+          this.lastOffsetChangeTime = Date.now()
+        }
+        /*
+        if (event.code == 'KeyG') {
+          let now = Date.now()
+          console.log(this.song.seek() * 1000)
+          console.log(now - this.playStartTime)
+          this.song.seek((now - this.playStartTime) / 1000)
+        }*/
+        let now = Date.now()
         let id = this.hasKey(event.code)
+        let maxTimingWindow = this.getTimingWindow(5)
         if(id != null) {
           this.keysDown[id] = true
-          let difference = this.notes[id].length > 0 ? Math.abs(this.playStartTime + this.notes[id].peekFront().startTime - now) : Number.POSITIVE_INFINITY
-          if(difference < info.judgementWindows[this.od][info.judgementWindows[this.od].length - 1]) {
-            if(this.notes[id].peekFront().endTime != null) {
-              this.notes[id].peekFront().pressed = true
-            } else {
-              this.notes[id].shift()
-            }
-            this.lastHitTime = now
-            this.lastJudgement = this.getJudgement(difference)
-            if(this.lastJudgement == 5) {
-              this.breakCombo()
-            } else {
-              this.onGoingEffects.push({ id: id, startTime: Date.now() })
-              this.processKeyTap({ value: 1 })
-            }
+          if(this.playing && !this.paused) {
+            let note = this.getFirstActiveNote(this.notes[id])
+            if(note == null || note.pressed) return
+            let offset = now - this.playStartTime - note.startTime
+            if(Math.abs(offset) <= maxTimingWindow) {
+              if(note.objectName == 'note')
+                this.notes[id].shift()
+              this.lastHitTime = now
+              this.lastJudgement = this.getJudgement(offset)
+              if(this.lastJudgement == 5) {
+                if(note.objectName == 'longnote')
+                  note.missed = true
+                this.breakCombo()
+                this.lastOffsets.push({ offset: -this.getTimingWindow(4), startTime: now })
+              } else {
+                if(note.objectName == 'longnote')
+                  note.pressed = true
+                if(note.hitSound != null && this.hitSounds[note.hitSound] != null) {
+                  this.hitSounds[note.hitSound].play()
+                }
+                this.processKeyTap(id, offset, this.lastJudgement)
+              }
+            } 
           }
         }
       }
     },
     processKeyUp(event) {
-      if (event.code == 'Shift') {
-        this.toggleShift({ value: false })
-      }
       let id = this.hasKey(event.code)
       let now = Date.now()
+      let earlyTimingWindow = this.getTimingWindow(5)
       if (id != null) {
         this.keysDown[id] = false
-        if(this.notes[id].peekFront() != null) {
-          let difference = this.playStartTime + this.notes[id].peekFront().endTime - now
-          if(!this.notes[id].peekFront().missed && this.notes[id].peekFront().pressed && difference < -info.judgementWindows[this.od][info.judgementWindows[this.od].length - 1]) {  // Released longnote too soon
-            this.notes[id].peekFront().missed = true;
-            this.lastHitTime = now
-            this.lastJudgement = 5
-            this.breakCombo()
-          }
-          else if(this.notes[id].peekFront().pressed && Math.abs(difference) < info.judgementWindows[this.od][info.judgementWindows[this.od].length - 1]) { // Released in time
-            this.notes[id].shift()
-            this.lastHitTime = now
-            this.lastJudgement = this.getJudgement(difference)
-            if(this.lastJudgement == 5) {
+        if(this.playing && !this.paused) {
+          let note = this.getFirstActiveNote(this.notes[id])
+          if(note != null && note.objectName == 'longnote') {
+            let offset = now - this.playStartTime - note.endTime
+            if(note.pressed && offset < -earlyTimingWindow) {  // Released longnote too soon
+              note.missed = true
+              note.pressed = false
+              this.lastHitTime = now
+              this.lastJudgement = 5
               this.breakCombo()
-            } else {
-              this.onGoingEffects.push({ id: id, startTime: Date.now() })
-              this.processKeyTap({ value: 1 })
+              this.lastOffsets.push({ offset: -this.getTimingWindow(4), startTime: now })
+            }
+            else if(note.pressed && Math.abs(offset) < earlyTimingWindow) { // Released in time
+              this.notes[id].shift()
+              this.lastHitTime = now
+              this.lastJudgement = this.getJudgement(offset)
+              if(this.lastJudgement == 5) {
+                this.breakCombo()
+                this.lastOffsets.push({ offset: -this.getTimingWindow(4), startTime: now })
+              } else {
+                this.processKeyTap(id, offset, this.lastJudgement)
+              }
             }
           }
         }
-        let difference = this.notes[id].length > 0 && !this.notes[id].peekFront().missed ? Math.abs(this.playStartTime + this.notes[id].peekFront().endTime - now) : Number.POSITIVE_INFINITY
-        if(difference < info.judgementWindows[this.od][info.judgementWindows[this.od].length - 1]) {
-          this.notes[id].shift()
-          this.lastHitTime = now
-          this.lastJudgement = this.getJudgement(difference)
-          if(this.lastJudgement == 5) {
-            this.breakCombo()
-          } else {
-            this.onGoingEffects.push({ id: id, startTime: Date.now() })
-            this.processKeyTap({ value: 1 })
+      }
+    },
+    processKeyTap(column, offset, judgement) {
+      let now = Date.now()
+      let maxOffset = this.getTimingWindow(4)
+      this.combo += 1
+      this.lastOffsets.push({ offset: offset < 0 ? Math.max(offset, -maxOffset) : Math.min(offset, maxOffset), startTime: now})
+      this.onGoingEffects.push({ id: column, startTime: now })
+      this.judgements[judgement] += 1
+      this.accuracy += this.getAccuracy(judgement)
+      this.totalAccuracy += this.getAccuracy(0)
+    },
+    playPause() {
+      if(!this.playing) return
+      if(this.paused) { // play
+        this.playStartTime += Date.now() - this.pauseStartTime + this.countdownTime
+        this.countdownStartTime = Date.now()
+        this.paused = false
+        for(let timeSound of this.timeSounds) {
+          if(timeSound.start && !timeSound.end) {
+            timeSound.howl.once('play', () => {
+              timeSound.howl.seek((Date.now() - this.playStartTime - timeSound.startTime - this.audioOffset) /  1000 / this.songRate, timeSound.id)
+            })
+            timeSound.howl.play(timeSound.id)
+          }
+        }
+      } else { // pause
+        this.pauseStartTime = Date.now()
+        this.paused = true
+        for(let timeSound of this.timeSounds) {
+          if(timeSound.start && !timeSound.end) {
+            timeSound.howl.pause(timeSound.id)
           }
         }
       }
-      
+    },
+    restart() {
+      this.processLoadSong({ detail: this.difficulty, restart: true })
     },
     start() {
-      this.canvas = document.getElementById("gameCanvas")
+      /*for(let i = 0; i < this.numParticles; i++) {
+        let sizePercentage = Math.random() * (this.maxParticleWidth - this.minParticleWidth) + this.minParticleWidth
+        this.particles.push({
+          widthPercentage: Math.random(),
+          heightPercentage: Math.random(),
+          sizePercentage: sizePercentage,
+          speed: sizePercentage * this.particleSpeedMultiplier,
+          column: Math.floor(Math.random() * this.skinData.noteImages.length)
+        })
+      }*/
+      this.webmaniaBackgroundImage = new Image()
+      this.webmaniaBackgroundImage.src = require('@/assets/app/background.jpg')
+      this.canvas = document.getElementById('gameCanvas')
+      this.helperCanvas = document.createElement("canvas")
       this.processResize()
-      this.context = this.canvas.getContext("2d")
+      this.context = this.canvas.getContext('2d')
+      this.helperContext = this.helperCanvas.getContext('2d')
       //this.addNotes()
-      this.addNotesInterval = setInterval(() => this.addNotes(), 1000.0)
-      this.interval = setInterval(this.updateCanvas, 1000.0 / this.fps)
-      window.addEventListener("resize", this.processResize)
-      this.canvas.addEventListener("bpmChanged", this.processBpmChange)
-      this.canvas.addEventListener("fpsChanged", this.processFpsChange)
-      this.canvas.addEventListener("keyModeChanged", this.processKeyModeChange)
-      this.canvas.addEventListener("skinChanged", this.processSkinChange)
-      this.canvas.addEventListener("makeFullscreen", this.processFullScreen)
-      this.canvas.addEventListener("volumeChanged", this.processVolumeChange)
-      this.canvas.addEventListener("soundChanged", this.processSoundChange)
-      this.canvas.addEventListener("resetGame", this.processReset)
-      this.canvas.addEventListener("loadSong", this.processLoadSong)
+      //this.addNotesInterval = setInterval(() => this.addNotes(), 1000.0)
+      this.gameLoopInterval = setInterval(this.updateCanvas, 1000.0 / this.fps)
+      window.addEventListener('resize', this.processResize)
     },
     updateCanvas() {
-      if(this.playing)
+      if(this.playing && !this.paused)
         this.checkMisses()
+      if(this.playing && !this.paused)
+        this.checkTimeSounds()
       this.clear()
-      this.drawHint()
-      this.drawLighting()
+      if(this.showBackground)
+        this.drawBackground()
+      if(this.upScroll) {
+        this.context.save()
+        this.context.translate(this.canvas.width / 2, this.canvas.height / 2);
+        this.context.scale(1, -1)
+        this.context.translate(-this.canvas.width / 2, -this.canvas.height / 2);
+      }
+      if(this.showHint)
+        this.drawHint()
+      if(this.showLighting)
+        this.drawLighting()
       if(this.playing)
         this.drawNotes()
-      this.drawCombo()
-      this.drawJudgement()
-      this.drawReceptors()
-      this.drawEffects()
-      this.drawAccuracy()
+      if(this.showReceptors)
+        this.drawReceptors()
+      if(this.showEffects)
+        this.drawEffects()
+      if(this.upScroll)
+        this.context.restore()
+      if(this.showCombo)
+        this.drawCombo()
+      if(this.showJudgement)
+        this.drawJudgement()
+      if(this.showSongMeter)
+        this.drawSongMeter()
+      if(this.showAccuracy)
+        this.drawAccuracy()
+      if(this.showInfo && this.difficulty != null)
+        this.drawInfo()
       if(this.showJudgements)
-      this.drawJudgements()
-      if(!this.playing)
-        this.drawSelectSong()
+        this.drawJudgements()
+      if(this.showOffset)
+        this.drawOffset()
+      if(Date.now() - this.countdownTime - 200 < this.countdownStartTime)
+        this.drawCountdown()
+      if(this.paused)
+        this.drawPaused()
+      if(!this.playing) {
+        if(this.loading) {
+          this.drawLoading()
+        } else {
+          this.drawSelectSong()
+        }
+      }
       if(this.showFps)
         this.drawFps()
+      if(Date.now() - this.lastOffsetChangeTime < this.offsetChangeTime)
+        this.drawOffsetChange()
+    },
+    checkTimeSounds() {
+      for(let timeSound of this.timeSounds) {
+        if(!timeSound.start && Date.now() - this.playStartTime >= (timeSound.startTime + this.audioOffset) / this.songRate) {
+          timeSound.start = true
+          timeSound.id = timeSound.howl.play()
+        } 
+      }
     },
     clear() {
       this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
     },
+    drawPaused() {
+      this.context.font = (this.canvas.height * this.textSize).toFixed(0) + 'px Arial'
+      this.context.fillStyle = 'white'
+      this.context.textBaseline = 'middle'
+      this.context.textAlign = 'center'
+      this.context.fillText(this.$t('general.paused'), this.canvas.width / 2, this.canvas.height / 2)
+    },
+    drawOffsetChange() {
+      this.context.font = (this.canvas.height * this.textSize).toFixed(0) + 'px Arial'
+      this.context.fillStyle = 'white'
+      this.context.textBaseline = 'top'
+      this.context.textAlign = 'left'
+      this.context.fillText(this.$t('general.newaudiooffset') + this.audioOffset.toFixed(0) + ' ms', this.margin * this.canvas.height, this.margin * this.canvas.height)
+    },
+    drawBackground() {
+      this.context.globalAlpha = this.backgroundOpacity;
+      this.context.drawImage(this.backgroundImage ? this.backgroundImage : this.webmaniaBackgroundImage,
+        0,
+        0,
+        this.canvas.width,
+        this.canvas.height)
+      this.context.globalAlpha = 1.0;
+      this.context.clearRect(this.canvas.width / 2 - this.columnSize * this.keyMode * this.canvas.width / 2, 0, this.columnSize * this.keyMode * this.canvas.width, this.canvas.height)
+      /*} else {
+        /*let now = Date.now()
+        if(!this.lastFrameTime)
+          this.lastFrameTime = now
+        for(let particle of this.particles) {
+          if(particle.heightPercentage >= 1) {
+            particle.widthPercentage = Math.random()
+            particle.sizePercentage = Math.random() * (this.maxParticleWidth - this.minParticleWidth) + this.minParticleWidth
+            particle.heightPercentage = - (particle.sizePercentage * this.skinData.noteImages[particle.column].height / this.skinData.noteImages[particle.column].width)
+            particle.speed = particle.sizePercentage * this.particleSpeedMultiplier
+            particle.column = Math.floor(Math.random() * this.skinData.noteImages.length)
+          } else {
+            particle.heightPercentage += particle.speed * (now - this.lastFrameTime)
+            this.particles.sort((a,b) => a.sizePercentage > b.sizePercentage ? 1 : -1)
+            let maxParticleHeight = this.maxParticleWidth * this.skinData.noteImages[particle.column].height / this.skinData.noteImages[particle.column].width
+            this.context.drawImage(
+              this.skinData.noteImages[particle.column],
+              particle.widthPercentage * (this.canvas.width + this.canvas.width * 2 * this.maxParticleWidth) - this.canvas.width * this.maxParticleWidth,
+              particle.heightPercentage * (this.canvas.height + this.canvas.height * 2 * maxParticleHeight) - this.canvas.height * maxParticleHeight,
+              particle.sizePercentage * this.canvas.width,
+              particle.sizePercentage * this.canvas.height * this.skinData.noteImages[particle.column].height / this.skinData.noteImages[particle.column].width
+            )
+          }
+        }
+        this.lastFrameTime = now
+      }*/
+    },
+    drawInfo() {
+      let margin = this.canvas.height * this.margin
+      this.context.font = (this.canvas.height * this.infoSize).toFixed(0) + 'px Arial'
+      this.context.fillStyle = 'white'
+      this.context.textBaseline = 'bottom'
+      this.context.textAlign = 'left'
+      this.context.fillText('OD' + this.timingWindows.toFixed(0) + ', ' + (this.songRate * this.difficulty.beatmap.bpm).toFixed(0) + 'bpm, ' + this.songRate.toFixed(2) + 'x', margin, this.canvas.height - margin)
+
+    },
+    drawSongMeter() {
+      let margin = this.canvas.height * this.margin
+      let now = Date.now()
+      let lineWidth = this.canvas.height * this.lineWidth
+      let radius = this.canvas.height * this.songMeterSize / 2
+      let timeElapsed = this.paused ? this.pauseStartTime - this.playStartTime : now - this.playStartTime
+      let timeRatio = timeElapsed < 0 ? 0 : timeElapsed / this.length
+      let radians = this.playStartTime == 0 || this.length == 0 ? 0 : 2 * Math.PI * timeRatio
+      let accuracyHeight = this.showAccuracy ? this.accuracySize * this.canvas.height : 0
+
+      this.context.fillStyle = '#1976d2'
+      this.context.beginPath()
+      this.context.moveTo(this.canvas.width - radius - lineWidth - margin, radius + lineWidth + margin + accuracyHeight)
+      this.context.arc(this.canvas.width - radius - lineWidth - margin,radius + lineWidth + margin + accuracyHeight, radius, - Math.PI / 2, radians - Math.PI / 2)
+      this.context.lineTo(this.canvas.width - radius - lineWidth - margin, radius + lineWidth + margin + accuracyHeight)
+      this.context.closePath()
+      this.context.fill()
+
+      this.context.lineWidth = lineWidth;
+      this.context.strokeStyle = 'white'
+      this.context.stroke
+      this.context.beginPath()
+      this.context.arc(this.canvas.width - radius - lineWidth - margin, radius + lineWidth + margin + accuracyHeight, radius, 0, 2 * Math.PI)
+      this.context.closePath()
+      this.context.stroke()
+
+    },
+    drawCountdown() {
+      let now = Date.now()
+      this.context.font = (this.canvas.height * this.textSize).toFixed(0) + 'px Arial'
+      this.context.fillStyle = 'white'
+      this.context.textBaseline = 'middle'
+      this.context.textAlign = 'center'
+      let playableHeight = this.canvas.height - (this.hitPosition * this.canvas.height)
+      let screenTime = this.scrollSpeed
+      this.context.fillText('3', this.canvas.width / 2, playableHeight - (this.countdownStartTime - now + (this.countdownTime * 1 / 4)) * playableHeight / screenTime)
+      this.context.fillText('2', this.canvas.width / 2, playableHeight - (this.countdownStartTime - now + (this.countdownTime * 2 / 4)) * playableHeight / screenTime)
+      this.context.fillText('1', this.canvas.width / 2, playableHeight - (this.countdownStartTime - now + (this.countdownTime * 3 / 4)) * playableHeight / screenTime)
+    },
+    drawLoading() {
+      this.context.font = (this.canvas.height * this.textSize).toFixed(0) + 'px Arial'
+      this.context.fillStyle = 'white'
+      this.context.textBaseline = 'middle'
+      this.context.textAlign = 'center'
+      this.context.fillText(this.$t('general.loading'), this.canvas.width / 2, this.canvas.height / 2)
+    },
+    drawReady() {
+      this.context.font = (this.canvas.height * this.textSize).toFixed(0) + 'px Arial'
+      this.context.fillStyle = 'white'
+      this.context.textBaseline = 'middle'
+      this.context.textAlign = 'center'
+      this.context.fillText(this.$t('general.pressanykey'), this.canvas.width / 2, this.canvas.height / 2)
+    },
     drawSelectSong() {
-      this.context.font = "30px Arial";
-      this.context.fillStyle = "white";
-      this.context.textAlign = "center";
-      this.context.fillText(this.$t('general.selectsong'), this.canvas.width / 2, this.canvas.height / 2)
-      if(this.lastFps.length > 100) {
-        this.lastFps.shift()
-      }
+      this.context.font = (this.canvas.height * this.textSize).toFixed(0) + 'px Arial'
+      this.context.fillStyle = 'white'
+      this.context.textBaseline = 'middle'
+      this.context.textAlign = 'center'
+      this.context.fillText(this.$t('general.pick'), this.canvas.width / 2, this.canvas.height / 2)
     },
     drawHint() {
+      let hintImage = this.skinData.hintImage
       this.context.drawImage(
-          this.hintImage,
+          hintImage,
           (this.canvas.width - (this.canvas.width * this.columnSize * this.keyMode)) / 2 ,
-          this.canvas.height - (this.hitPosition * this.canvas.height) - (this.hintImage.height / 2),
+          this.canvas.height - (this.hitPosition * this.canvas.height) - (hintImage.height / 2),
           this.canvas.width * this.columnSize * this.keyMode,
-          this.hintImage.height)
+          hintImage.height)
     },
     drawLighting() {
-      for(let i = 0; i < this.currentKeys.length ; i++) {
+      for(let i = 0; i < this.keyBindings[this.keyMode].length ; i++) {
         if (this.keysDown[i]) {
-          this.context.drawImage(this.lightingImages[i], ((this.canvas.width - (this.columnSize * this.canvas.width * this.keyMode)) / 2) + (this.columnSize * this.canvas.width * i), this.canvas.height - 640 - (this.hitPosition * this.canvas.height), this.columnSize * this.canvas.width, 640)
+          let lightingImage = this.skinData.noteColored ? this.skinData.lightingImage : this.skinData.lightingImages[i]
+          let lightingWidth = this.columnSize * this.canvas.width
+          let lightingHeight = lightingWidth * lightingImage.height / lightingImage.width
+          this.context.drawImage(lightingImage,
+          ((this.canvas.width - (lightingWidth * this.keyMode)) / 2) + (lightingWidth * i),
+          this.canvas.height - lightingHeight - (this.hitPosition * this.canvas.height),
+          lightingWidth,
+          lightingHeight)
         }
       }
     },
     drawCombo() {
       if(this.combo == 0) return
-      var comboString = this.combo.toString()
-      var comboHeight = this.comboSize * this.canvas.height
+      /*let comboString = this.combo.toString()
+      let comboHeight = this.comboSize * this.canvas.height
       for(let i = 0; i < comboString.length; i++) {
-        var comboWidth = comboHeight * this.comboImages[comboString[i]].width / this.comboImages[comboString[i]].height
+        let comboImage = this.skinData.comboImages[comboString[i]]
+        let comboWidth = comboHeight * comboImage.width / comboImage.height
         this.context.drawImage(
-          this.comboImages[comboString[i]],
+          comboImage,
           (this.canvas.width / 2) - (comboWidth * comboString.length / 2) + (comboWidth * i),
           this.canvas.height - (this.comboPosition * this.canvas.height) - (comboHeight / 2),
           comboWidth,
-          comboHeight) //TODO
-      }
+          comboHeight)
+      }*/
+
+      this.context.font = (this.canvas.height * this.comboSize).toFixed(0) + 'px Arial'
+      this.context.fillStyle = 'white'
+      this.context.textBaseline = 'middle'
+      this.context.textAlign = 'center'
+      this.context.fillText(this.combo.toFixed(0), this.canvas.width / 2, this.canvas.height - this.canvas.height * this.comboPosition)
     },
     drawJudgement() {
       let difference = Date.now() - this.lastHitTime
       if(difference < this.judgementTime) {
-        let judgementHeight = Math.max(this.canvas.height * this.judgementSize * 1.5 - difference / (this.judgementTime / 2) * (this.canvas.height * this.judgementSize * 1.5 - this.canvas.height * this.judgementSize), this.canvas.height * this.judgementSize)
-        let judgementWidth = judgementHeight * this.judgementImages[this.lastJudgement].width / this.judgementImages[this.lastJudgement].height
+        let judgementImage = this.skinData.judgementImages[this.lastJudgement]
+        let judgementHeight = Math.max(this.canvas.height * this.judgementSize * this.judgementEffectSize - difference / this.judgementEffectTime * (this.canvas.height * this.judgementSize * this.judgementEffectSize - this.canvas.height * this.judgementSize), this.canvas.height * this.judgementSize)
+        let judgementWidth = judgementHeight * judgementImage.width / judgementImage.height
         this.context.drawImage(
-          this.judgementImages[this.lastJudgement],
+          judgementImage,
           (this.canvas.width / 2) - (judgementWidth / 2),
           this.canvas.height - (this.judgementPosition * this.canvas.height) - (judgementHeight / 2),
           judgementWidth,
@@ -294,95 +587,145 @@ export default {
       }
     },
     drawEffects() {
-      let now = Date.now();
-      this.context.globalCompositeOperation = 'screen';
+      let now = Date.now()
+      this.context.globalCompositeOperation = 'screen'
       this.removeOldEffects()
       for(let i = 0; i < this.onGoingEffects.length; i++) {
         let difference = now - this.onGoingEffects.peekAt(i).startTime
-        let index = Math.floor((difference / this.effectTime) * this.effectImages.length )
+        let index = Math.floor((difference / this.effectTime) * this.skinData.effectImages.length )
         this.context.drawImage(
-          this.effectImages[index],
+          this.skinData.effectImages[index],
           this.onGoingEffects.peekAt(i).id * (this.canvas.width * this.columnSize) + (this.canvas.width * this.columnSize / 2) - this.canvas.width * this.effectSize + ((this.canvas.width - (this.canvas.width * this.columnSize * this.keyMode)) / 2),
           this.canvas.height - (this.hitPosition * this.canvas.height) - this.canvas.width * this.effectSize,
           this.canvas.width * this.effectSize * 2,
           this.canvas.width * this.effectSize * 2)
       }
-      this.context.globalCompositeOperation = 'source-over';
+      this.context.globalCompositeOperation = 'source-over'
     },
     drawReceptors() {
-      for(let i = 0; i < this.currentKeys.length ; i++) {
+      for(let i = 0; i < this.keyBindings[this.keyMode].length ; i++) {
+        let receptorImage = this.skinData.noteColored ? this.skinData.receptorImage : this.skinData.receptorImages[i]
+        let receptorDownImage = this.skinData.noteColored ? this.skinData.receptorDownImage : this.skinData.receptorDownImages[i]
         let receptorWidth = this.columnSize * this.canvas.width
-        let receptorHeight =  receptorWidth * this.pressedReceptorImages[i].height / this.pressedReceptorImages[i].width
+        let receptorHeight =  receptorWidth * receptorImage.height / receptorImage.width
+        let receptorStartX = ((this.canvas.width - (receptorWidth * this.keyMode)) / 2) + (receptorWidth * i)
+        let receptorStartY = this.canvas.height - (this.hitPosition * this.canvas.height) - (receptorHeight / 2)
+
+        this.context.save()
+        this.context.translate(receptorStartX + receptorWidth / 2, receptorStartY + receptorHeight / 2);
+        if(this.upScroll)
+          this.context.scale(1, -1)
+        if(this.skinData.rotate)
+          this.context.rotate(this.skinData.rotate[this.keyMode][i])
+        this.context.translate(-receptorStartX - receptorWidth / 2, -receptorStartY - receptorHeight / 2);
+
         if (this.keysDown[i]) {
           this.context.drawImage(
-            this.pressedReceptorImages[i],
-            ((this.canvas.width - (receptorWidth * this.keyMode)) / 2) + (receptorWidth * i),
-            this.canvas.height - (this.hitPosition * this.canvas.height) - (receptorHeight / 2),
+            receptorDownImage,
+            receptorStartX,
+            receptorStartY,
             receptorWidth,
             receptorHeight
           )
         } else {
           this.context.drawImage(
-            this.receptorImages[i],
-            ((this.canvas.width - (receptorWidth * this.keyMode)) / 2) + (receptorWidth * i),
-            this.canvas.height - (this.hitPosition * this.canvas.height) - (receptorHeight / 2),
+            receptorImage,
+            receptorStartX,
+            receptorStartY,
             receptorWidth,
             receptorHeight
           )
         }
+
+        this.context.restore()
       }
     },
     drawNotes() {
-      let now = Date.now();
+      let now = Date.now()
       let playableHeight = this.canvas.height - (this.hitPosition * this.canvas.height)
-      let offset = this.scrollSpeed //miliseconds that will appear on screen
+      let screenTime = this.scrollSpeed //miliseconds that will appear on screen
       let noteWidth = this.columnSize * this.canvas.width
       for(let column = 0; column < this.notes.length; column++) {
         for(let i = 0; i < this.notes[column].length; i++) {
-          let note = this.notes[column].peekAt(i);
-          let difference = this.playStartTime + note.startTime - now
-          if(difference < offset) {
-            if(note.endTime != null) {
-              let capDifference = this.playStartTime + note.endTime - now
-              let capHeight = noteWidth * this.lnCapImages[column].height / this.lnCapImages[column].width
-              let bodyHeight = (capDifference - difference) * playableHeight / offset
-              if(bodyHeight > capHeight) {
-                this.context.drawImage( // longnote body
-                  this.lnBodyImages[column],
-                  ((this.canvas.width - (noteWidth * this.keyMode)) / 2) + (noteWidth * column),
-                  playableHeight - (capDifference * playableHeight / offset) + capHeight,
-                  noteWidth,
-                  bodyHeight - capHeight,
-                )
-                this.context.drawImage( // longnote cap
-                  this.lnCapImages[column],
-                  ((this.canvas.width - (noteWidth * this.keyMode)) / 2) + (noteWidth * column),
-                  playableHeight - (capDifference * playableHeight / offset),
-                  noteWidth,
-                  capHeight,
-                )
-              } else {
-                this.context.drawImage( // longnote cap
-                  this.lnCapImages[column],
-                  0,
-                  0,
-                  this.lnCapImages[column].width,
-                  bodyHeight,
-                  ((this.canvas.width - (noteWidth * this.keyMode)) / 2) + (noteWidth * column),
-                  playableHeight - (capDifference * playableHeight / offset),
-                  noteWidth,
-                  bodyHeight,
-                )
+          let note = this.notes[column].peekAt(i)
+          let difference = this.paused ? this.playStartTime + this.visualOffset + note.startTime - this.pauseStartTime : this.playStartTime + this.visualOffset + note.startTime - now
+          if(difference < screenTime) {
+            let noteImage = this.skinData.noteColored ? (this.skinData.noteImages[note.timing] != null ? this.skinData.noteImages[note.timing] : this.skinData.noteImages[16]) : this.skinData.noteImages[column]
+            let noteHeight = noteWidth * noteImage.height / noteImage.width
+
+            if(note.objectName == 'longnote') {
+              let lnBodyImage = this.skinData.noteColored ? this.skinData.lnBodyImage : this.skinData.lnBodyImages[column]
+              let lnCapImage = this.skinData.noteColored ? this.skinData.lnCapImage : this.skinData.lnCapImages[column]
+              let capDifference = this.paused ? this.playStartTime + this.visualOffset + note.endTime - this.pauseStartTime : this.playStartTime + this.visualOffset + note.endTime - now
+              let capHeight = noteWidth * lnCapImage.height / lnCapImage.width
+              let pressedBodyHeight = capDifference * playableHeight / screenTime
+              let bodyHeight = (capDifference - difference) * playableHeight / screenTime
+
+              this.helperContext.clearRect(0, 0, this.helperCanvas.width, this.helperCanvas.height)
+              
+              this.helperContext.drawImage( // longnote body
+                lnBodyImage,
+                ((this.canvas.width - (noteWidth * this.keyMode)) / 2) + (noteWidth * column),
+                playableHeight - (difference * playableHeight / screenTime) - bodyHeight,
+                noteWidth,
+                note.pressed && difference < 0 ? pressedBodyHeight : bodyHeight,
+              )
+              this.helperContext.drawImage( // longnote cap
+                lnCapImage,
+                ((this.canvas.width - (noteWidth * this.keyMode)) / 2) + (noteWidth * column),
+                playableHeight - (capDifference * playableHeight / screenTime) - capHeight / 2,
+                noteWidth,
+                capHeight,
+              )
+
+              let noteStartX = ((this.canvas.width - (noteWidth * this.keyMode)) / 2) + (noteWidth * column)
+              let noteStartY = note.pressed && difference < 0 ? playableHeight - (noteHeight / 2) : playableHeight - (difference * playableHeight / screenTime) - (noteHeight / 2)
+
+              this.helperContext.save()
+              this.helperContext.translate(noteStartX + noteWidth / 2, noteStartY + noteHeight / 2);
+              if(this.upScroll)
+                this.helperContext.scale(1, -1)
+              if(this.skinData.rotate)
+                this.helperContext.rotate(this.skinData.rotate[this.keyMode][column])
+              this.helperContext.translate(-noteStartX - noteWidth / 2, -noteStartY - noteHeight / 2);
+              
+              this.helperContext.drawImage( // longnote bottom
+                noteImage,
+                noteStartX,
+                noteStartY,
+                noteWidth,
+                noteHeight,
+              )
+
+              this.helperContext.restore()
+              
+              if(note.missed) {
+                this.context.globalAlpha = 0.5
               }
+              this.context.drawImage(this.helperCanvas, 0, 0, this.canvas.width, this.canvas.height)
+              this.context.globalAlpha = 1.0
+            } else {
+              let noteStartX = ((this.canvas.width - (noteWidth * this.keyMode)) / 2) + (noteWidth * column)
+              let noteStartY = playableHeight - (difference * playableHeight / screenTime) - (noteHeight / 2)
+
+              this.context.save()
+              this.context.translate(noteStartX + noteWidth / 2, noteStartY + noteHeight / 2);
+              if(this.upScroll)
+                this.context.scale(1, -1)
+              if(this.skinData.rotate)
+                this.context.rotate(this.skinData.rotate[this.keyMode][column])
+              this.context.translate(-noteStartX - noteWidth / 2, -noteStartY - noteHeight / 2);
+
+              this.context.drawImage( //regular note
+                noteImage,
+                noteStartX,
+                noteStartY,
+                noteWidth,
+                noteHeight,
+              )
+
+              this.context.restore()
             }
-            let noteHeight = noteWidth * this.noteImages[column].height / this.noteImages[column].width
-            this.context.drawImage( //regular note
-              this.noteImages[column],
-              ((this.canvas.width - (noteWidth * this.keyMode)) / 2) + (noteWidth * column),
-              playableHeight - (difference * playableHeight / offset) - (noteHeight / 2),
-              noteWidth,
-              noteHeight,
-            )
           } else {
             break
           }
@@ -390,29 +733,128 @@ export default {
       }
     },
     drawFps() {
+      let margin = this.canvas.height * this.margin
       this.lastFps.push(Date.now())
       if(this.lastFps.length == 1) {
         return
       }
-      this.context.font = "30px Arial";
-      this.context.fillStyle = "red";
-      this.context.textAlign = "bottom";
-      this.context.fillText((1000.0 * this.lastFps.length / (this.lastFps.peekBack() - this.lastFps.peekFront())).toFixed(0), this.canvas.width - 60, this.canvas.height)
+      this.context.font = (this.canvas.height * this.fpsSize).toFixed(0) + 'px Arial'
+      this.context.fillStyle = 'red'
+      this.context.textBaseline = 'bottom'
+      this.context.textAlign = 'right'
+      this.context.fillText((1000.0 * this.lastFps.length / (this.lastFps.peekBack() - this.lastFps.peekFront())).toFixed(0), this.canvas.width - margin, this.canvas.height - margin)
       if(this.lastFps.length > 100) {
         this.lastFps.shift()
       }
     },
-    drawAccuracy() {
+    drawOffset() {
+      let now = Date.now()
+      while(this.lastOffsets.peekFront() != null && now - this.lastOffsets.peekFront().startTime >= this.offsetTime) {
+        this.lastOffsets.shift()
+      }
 
+      let offsetSizeX = this.canvas.width * this.offsetSizeX
+      let offsetSizeY = this.canvas.height * this.offsetSizeY
+
+      let maxOffset = this.getTimingWindow(4)
+      let blueWidth = offsetSizeX * this.getTimingWindow(1) / maxOffset / 2
+      let greenWidth = offsetSizeX * this.getTimingWindow(3) / maxOffset / 2 - blueWidth
+      let yellowWidth = offsetSizeX / 2 - greenWidth - blueWidth
+
+      this.context.fillStyle = 'rgba(0,0,0,0.5)' //black
+      this.context.beginPath();
+      this.context.rect(this.canvas.width / 2 - offsetSizeX / 2, this.canvas.height - offsetSizeY, offsetSizeX, offsetSizeY);
+      this.context.closePath();
+      this.context.fill();
+
+      this.context.fillStyle = '#2ebbe6' //blue
+      this.context.beginPath();
+      this.context.rect(this.canvas.width / 2 - blueWidth , this.canvas.height - offsetSizeY * 0.625, 2 * blueWidth, offsetSizeY * 0.25);
+      this.context.closePath();
+      this.context.fill();
+
+      this.context.fillStyle = '#53e80a' //green
+      this.context.beginPath();
+      this.context.rect(this.canvas.width / 2 - blueWidth - greenWidth, this.canvas.height - offsetSizeY * 0.625, greenWidth, offsetSizeY * 0.25);
+      this.context.closePath();
+      this.context.fill();
+      this.context.beginPath();
+      this.context.rect(this.canvas.width / 2 + blueWidth, this.canvas.height - offsetSizeY * 0.625, greenWidth, offsetSizeY * 0.25);
+      this.context.closePath();
+      this.context.fill();
+
+      this.context.fillStyle = '#dead50' //yellow
+      this.context.beginPath();
+      this.context.rect(this.canvas.width / 2 - offsetSizeX / 2, this.canvas.height - offsetSizeY * 0.625, yellowWidth, offsetSizeY * 0.25);
+      this.context.closePath();
+      this.context.fill();
+      this.context.beginPath();
+      this.context.rect(this.canvas.width / 2 + blueWidth + greenWidth, this.canvas.height - offsetSizeY * 0.625, yellowWidth, offsetSizeY * 0.25);
+      this.context.closePath();
+      this.context.fill();
+
+      this.context.fillStyle = 'white' //white 5%
+      this.context.beginPath();
+      this.context.rect(this.canvas.width / 2 - 1.5, this.canvas.height - offsetSizeY, 3, offsetSizeY);
+      this.context.closePath();
+      this.context.fill();
+
+      this.context.globalCompositeOperation = 'screen'
+
+      for(let i = 0; i < this.lastOffsets.length; i++) {
+        let offset = this.lastOffsets.peekAt(i).offset
+        let offsetWidth = (offset + maxOffset) / (maxOffset * 2) * offsetSizeX
+
+        this.context.fillStyle = this.getOffsetColor(offset)
+
+        this.context.beginPath();
+        this.context.rect(this.canvas.width / 2 - offsetSizeX / 2 - 1.5 + offsetWidth, this.canvas.height - offsetSizeY, 3, offsetSizeY);
+        this.context.closePath();
+        this.context.fill();
+      }
+
+      this.context.globalCompositeOperation ='source-over'
+    },
+    getOffsetColor(offset) {
+      let x = this.getJudgement(offset)
+      if(x < 2) return 'rgba(46, 187, 230, 1)'
+      if(x < 4) return 'rgba(83, 232, 10, 1)'
+      return 'rgba(222, 173, 80, 1)'
+    },
+    drawAccuracy() {
+      let margin = this.canvas.height * this.margin
+      this.context.font = (this.canvas.height * this.accuracySize).toFixed(0) + 'px Arial'
+      this.context.fillStyle = 'white'
+      this.context.textBaseline = 'top'
+      this.context.textAlign = 'right'
+      this.context.fillText(this.totalAccuracy == 0 ? '100.00%' : (this.accuracy / this.totalAccuracy * 100).toFixed(2) + '%', this.canvas.width - margin, margin)
     },
     drawJudgements() {
-
+      let margin = this.canvas.width * this.margin
+      this.context.font = (this.canvas.height * this.judgementsSize).toFixed(0) + 'px Arial'
+      this.context.fillStyle = 'white'
+      this.context.textBaseline = 'top'
+      this.context.textAlign = 'left'
+      let judgementHeight = this.judgementsSize * this.canvas.height
+      let startHeight = (this.canvas.height / 2) - (3 * judgementHeight)
+      for(let i = 0; i < 6; i++) {
+        let judgementImage = this.skinData.judgementImages[i]
+        let judgementWidth = judgementHeight * judgementImage.width / judgementImage.height
+        this.context.drawImage( //regular note
+              judgementImage,
+              margin,
+              startHeight + judgementHeight * i,
+              judgementWidth,
+              judgementHeight,
+        )
+        this.context.fillText(this.judgements[i], judgementWidth + 2 * margin, startHeight + judgementHeight * i)
+      }
     },
     removeOldEffects() {
       let queue = this.onGoingEffects
-      let interval = this.effectTime
+      let screenTime = this.effectTime
       let now = Date.now()
-      while(queue.peekFront() != null && now - queue.peekFront().startTime >= interval) {
+      while(queue.peekFront() != null && now - queue.peekFront().startTime >= screenTime) {
         queue.shift()
       }
     },
@@ -421,7 +863,7 @@ export default {
       let init = this.lastNoteAddedTime
       let offset = now - this.lastNoteAddedTime + 30000
       if(offset > 30000) {
-        init = Date.now()
+        init = now
         offset = 30000
       }
       for(let i = init + (60000 / (this.bpm * 4)); i < init + offset; i += (60000 / (this.bpm * 4)) ) {
@@ -453,33 +895,48 @@ export default {
         }
       }
     },
+    getFirstActiveNote(queue) {
+      let maxTimingWindow = this.getTimingWindow(5)
+      let now = Date.now()
+      for(let i = 0; i < queue.length; i++) {
+        let note = queue.peekAt(i)
+        if(!note.missed) {
+          return note
+        } else if(now - this.playStartTime - this.visualOffset - note.endTime >= maxTimingWindow) {
+          queue.shift()
+          i--
+        }
+      }
+      return null
+    },
     checkMisses() {
       let now = Date.now()
-      let interval = info.judgementWindows[this.od][info.judgementWindows[this.od].length - 1]
+      let lateTimingWindow = this.getTimingWindow(4)
       for(let queue of this.notes) {
         let processed = false
         while(processed != true) {
-          queue.peekFront() != null && ((queue.peekFront().endTime != null && now - this.playStartTime - queue.peekFront().endTime >= interval) || now - this.playStartTime - queue.peekFront().startTime >= interval) && queue.peekFront().missed != true
-          if(queue.peekFront() == null) { // Empty
+          let note = this.getFirstActiveNote(queue)
+          note != null && ((note.objectName == 'longnote' && now - this.playStartTime - this.visualOffset - note.endTime >= lateTimingWindow) || now - this.playStartTime - this.visualOffset - note.startTime >= lateTimingWindow) && note.missed != true
+          if(note == null) { // Empty
             processed = true
-          } else if(queue.peekFront().endTime != null) { // Missed Longnote
-            if(now - this.playStartTime - queue.peekFront().startTime >= interval && !queue.peekFront().pressed && !queue.peekFront().missed) { // Missed start
-              queue.peekFront().missed = true
-              this.lastHitTime = Date.now()
+          } else if(note.objectName == 'longnote') { // Missed Longnote
+            if(now - this.playStartTime - this.visualOffset - note.startTime >= lateTimingWindow && !note.pressed) { // Missed start
+              note.missed = true
+              this.lastHitTime = now
               this.lastJudgement = 5
               this.breakCombo()
-            } else if(queue.peekFront().pressed && now - this.playStartTime - queue.peekFront().endTime >= interval) { // Missed end
+            } else if(note.pressed && now - this.playStartTime - this.visualOffset - note.endTime >= lateTimingWindow) { // Missed end
               queue.shift()
-              this.lastHitTime = Date.now()
+              this.lastHitTime = now
               this.lastJudgement = 5
               this.breakCombo()
             } else {
               processed = true
             }
           } else { // Missed Normal note
-            if(now - this.playStartTime - queue.peekFront().startTime >= interval) { // Missed start
+            if(now - this.playStartTime - this.visualOffset - note.startTime >= lateTimingWindow) {
               queue.shift()
-              this.lastHitTime = Date.now()
+              this.lastHitTime = now
               this.lastJudgement = 5
               this.breakCombo()
             } else {
@@ -489,29 +946,63 @@ export default {
         }
       }
     },
-    getJudgement(difference) {
-      for(let i = 0; i < info.judgementWindows[this.od].length; i++) {
-        if(difference < info.judgementWindows[this.od][i]) {
-          return i;
+    breakCombo() {
+      this.combo = 0
+      this.judgements[5] += 1
+      this.totalAccuracy += this.getAccuracy(0)
+    },
+    getAccuracy(judgement) {
+      switch(judgement) {
+        case 0:
+          return 300
+        case 1:
+          return 300
+        case 2:
+          return 200
+        case 3:
+          return 100
+        case 4:
+          return 50
+        case 5:
+          return 0
+      }
+      return 0
+    },
+    getTimingWindow(judgement) {
+      switch(judgement) {
+        case 0:
+          return 17
+        case 1:
+          return 65 - this.timingWindows * 3
+        case 2:
+          return 98 - this.timingWindows * 3
+        case 3:
+          return 128 - this.timingWindows * 3
+        case 4:
+          return 152 - this.timingWindows * 3
+        case 5:
+          return 189 - this.timingWindows * 3
+      }
+      return 0
+    },
+    getJudgement(timing) {
+      if(timing <= -this.getTimingWindow(4))
+        return 5
+      let absTiming = Math.abs(timing)
+      for(let i = 0; i < 6; i++) {
+        if(absTiming <= this.getTimingWindow(i)) {
+          return i
         }
       }
-      return 5;
     },
     clearNotes() {
       for(var queue of this.notes) {
         queue.clear()
       }
     },
-    processBpmChange() {
-      this.clearNotes()
-      this.lastNoteAddedTime = 0
-      this.lastColumns = null
-      this.sound.rate(this.bpm / 191)
-      this.addNotes()
-    },
     processFpsChange() {
-      clearInterval(this.interval)
-      this.interval = setInterval(this.updateCanvas, 1000.0 / this.fps)
+      clearInterval(this.gameLoopInterval)
+      this.gameLoopInterval = setInterval(this.updateCanvas, 1000.0 / this.fps)
       this.lastFps.clear()
     },
     processSkinChange() {
@@ -520,7 +1011,6 @@ export default {
     processKeyModeChange() {
       this.loadKeyMode()
       this.processSkinChange()
-      this.processBpmChange()
     },
     processFullScreen() {
       if(this.canvas.webkitRequestFullScreen) {
@@ -529,26 +1019,14 @@ export default {
         this.canvas.requestFullscreen()
       }
     },
-    processSoundChange() {
-      if(this.soundOn) {
-        this.sound.volume(this.volume)
-      } else {
-        this.sound.volume(0)
-      }
-    },
     processVolumeChange() {
-      if(this.soundOn) {
-        this.sound.volume(this.volume)
-      } else {
-        this.sound.volume(0)
-      }
+      Howler.volume(this.volume)
     },
     processReset() {
       this.processSkinChange()
       this.processKeyModeChange()
       this.processFpsChange()
       this.processVolumeChange()
-      this.processSoundChange()
     },
     processResize() {
       var screenWidth = window.screen.width
@@ -573,62 +1051,199 @@ export default {
         this.canvas.style.width = Math.round(height * screenScale) + 'px'
         this.canvas.style.height = Math.round(height) + 'px'
       }
+      this.helperCanvas.width = this.canvas.width
+      this.helperCanvas.height = this.canvas.height
     },
     processLoadSong(event) {
-      console.log(event)
-      this.notes = event.detail.beatmap.notes
-      this.sound = event.detail.song
+      if(event.restart && this.difficulty == null) return
+      this.combo = 0
+      this.accuracy = 0
+      this.totalAccuracy = 0
+      this.judgements = [0,0,0,0,0,0,0]
+      this.playing = false
+      this.paused = false
+      this.loading = true
+      this.difficulty = event.detail
+      this.keyMode = event.detail.beatmap.keys
+      this.backgroundImage = new Image()
+      this.backgroundImage.src = event.detail.image
+      this.processKeyModeChange()
+      this.timingWindows = event.detail.timingWindows
+      this.songRate = event.detail.songRate
+      this.length = event.detail.beatmap.length * 1000 / this.songRate
+      this.notes = []
+      for(let i = 0; i < event.detail.beatmap.keys; i++) {
+        this.notes.push(new Queue())
+      }
+      for(let note of event.detail.beatmap.notes) {
+        this.notes[note.key].push({
+          startTime: (note.startTime + event.detail.beatmap.offset) / this.songRate ,
+          endTime: (note.endTime + event.detail.beatmap.offset) / this.songRate ,
+          hitSound: note.hitSound,
+          objectName: note.objectName,
+          timing: note.timing,
+        })
+      }
+      if(event.restart) {
+        for(let hitSound of Object.values(this.hitSounds)) {
+          hitSound.stop()
+          hitSound.seek(0)
+        }
+        for(let timeSound of this.timeSounds) {
+          if(timeSound.start) {
+            timeSound.howl.off('play')
+            timeSound.howl.off('end')
+            timeSound.howl.stop(timeSound.id)
+            timeSound.howl.seek(0, timeSound.id)
+            timeSound.start = false
+            timeSound.end = false
+          }
+          timeSound.howl.once('play', () => {
+            timeSound.howl.seek((Date.now() - this.playStartTime - timeSound.startTime - this.audioOffset) / 1000 / this.songRate, timeSound.id)
+          })
+          timeSound.howl.once('end', () => {
+            timeSound.end = true
+          })
+        }
+        this.startSong()
+      } else {
+        for(let hitSound of Object.values(this.hitSounds))
+          hitSound.unload()
+        this.hitSounds = {}
+        for(let timeSound of this.timeSounds)
+          timeSound.howl.unload()
+        this.timeSounds = []
+        this.loadedSounds = 0
+        this.totalSounds = 0
+        for(let hitSound of Object.entries(event.detail.hitSounds)) {
+          this.hitSounds[hitSound[0]] = new Howl({
+            src: [hitSound[1]],
+            rate: this.songRate,
+          })
+          this.totalSounds++
+          this.hitSounds[hitSound[0]].once('load', () => {
+            this.loadedSounds++
+            if(this.loadedSounds == this.totalSounds)
+              this.startSong()
+          })
+        }
+        for(let timeSound of event.detail.timeSounds) {
+          let timeSoundHowl = new Howl({
+            src: timeSound.sound,
+            rate: this.songRate,
+          })
+          let localTimeSound = {
+            start: false,
+            end: false,
+            startTime: timeSound.startTime,
+            howl: timeSoundHowl,
+          }
+          this.timeSounds.push(localTimeSound)
+          this.totalSounds++
+          timeSoundHowl.once('play', () => {
+              localTimeSound.start = true
+              localTimeSound.howl.seek((Date.now() - this.playStartTime - localTimeSound.startTime - this.audioOffset) / 1000 / this.songRate)
+            })
+          timeSoundHowl.once('end', () => {
+            localTimeSound.end = true
+          })
+          timeSoundHowl.once('load', () => {
+            this.loadedSounds++
+            if(this.loadedSounds == this.totalSounds)
+              this.startSong()
+          })
+        }
+
+        if(this.loadedSounds == this.totalSounds)
+          this.startSong()
+      }
+    },
+    startSong() {
+      this.loading = false
       this.playing = true
-      this.playStartTime = Date.now()
-      this.sound.play()
+      this.playStartTime = Date.now() + this.countdownTime
+      this.countdownStartTime = Date.now()
     },
     loadSkin() {
-      this.lightingImages = Array.from({length: info.skins[this.skin][this.keyMode].lightingImages.length}, () => new Image())
-      for(let i = 0; i < this.lightingImages.length; i++) {
-        this.lightingImages[i].src = info.skins[this.skin][this.keyMode].lightingImages[i]
+      this.skinData = {}
+
+      if(info.skins[this.skin].noteColored) {
+        this.skinData.noteColored = true
+        
+        this.skinData.lightingImage = new Image()
+        this.skinData.lightingImage.src = info.skins[this.skin].lightingImage
+
+        this.skinData.receptorImage = new Image()
+        this.skinData.receptorImage.src = info.skins[this.skin].receptorImage
+
+        this.skinData.receptorDownImage = new Image()
+        this.skinData.receptorDownImage.src = info.skins[this.skin].receptorDownImage
+
+        this.skinData.lnBodyImage = new Image()
+        this.skinData.lnBodyImage.src = info.skins[this.skin].lnBodyImage
+
+        this.skinData.lnCapImage = new Image()
+        this.skinData.lnCapImage.src = info.skins[this.skin].lnCapImage
+
+        this.skinData.noteImages = {}
+
+        if(info.skins[this.skin].rotate) {
+          this.skinData.rotate = info.skins[this.skin].rotate
+        }
+        let infoImages = Object.entries(info.skins[this.skin].noteImages)
+        for(let i = 0; i < infoImages.length; i++) {
+          this.skinData.noteImages[infoImages[i][0]] = new Image()
+          this.skinData.noteImages[infoImages[i][0]].src = infoImages[i][1]
+        }
+
+      } else {
+        this.skinData.lightingImages = Array.from({length: info.skins[this.skin][this.keyMode].lightingImages.length}, () => new Image())
+        for(let i = 0; i < this.skinData.lightingImages.length; i++) {
+          this.skinData.lightingImages[i].src = info.skins[this.skin][this.keyMode].lightingImages[i]
+        }
+
+        this.skinData.receptorImages = Array.from({length: info.skins[this.skin][this.keyMode].receptorImages.length}, () => new Image())
+        for(let i = 0; i < this.skinData.receptorImages.length; i++) {
+          this.skinData.receptorImages[i].src = info.skins[this.skin][this.keyMode].receptorImages[i]
+        }
+
+        this.skinData.receptorDownImages = Array.from({length: info.skins[this.skin][this.keyMode].receptorDownImages.length}, () => new Image())
+        for(let i = 0; i < this.skinData.receptorDownImages.length; i++) {
+          this.skinData.receptorDownImages[i].src = info.skins[this.skin][this.keyMode].receptorDownImages[i]
+        }
+
+        this.skinData.lnBodyImages = Array.from({length: info.skins[this.skin][this.keyMode].lnBodyImages.length}, () => new Image())
+        for(let i = 0; i < this.skinData.lnBodyImages.length; i++) {
+          this.skinData.lnBodyImages[i].src = info.skins[this.skin][this.keyMode].lnBodyImages[i]
+        }
+
+        this.skinData.lnCapImages = Array.from({length: info.skins[this.skin][this.keyMode].lnCapImages.length}, () => new Image())
+        for(let i = 0; i < this.skinData.lnCapImages.length; i++) {
+          this.skinData.lnCapImages[i].src = info.skins[this.skin][this.keyMode].lnCapImages[i]
+        }
+
+        this.skinData.noteImages = Array.from({length: info.skins[this.skin][this.keyMode].noteImages.length}, () => new Image())
+        for(let i = 0; i < this.skinData.noteImages.length; i++) {
+          this.skinData.noteImages[i].src = info.skins[this.skin][this.keyMode].noteImages[i]
+        }
       }
 
-      this.comboImages = Array.from({length: info.skins[this.skin].comboImages.length}, () => new Image())
-      for(let i = 0; i < this.comboImages.length; i++) {
-        this.comboImages[i].src = info.skins[this.skin].comboImages[i]
+      /*this.skinData.comboImages = Array.from({length: info.skins[this.skin].comboImages.length}, () => new Image())
+      for(let i = 0; i < this.skinData.comboImages.length; i++) {
+        this.skinData.comboImages[i].src = info.skins[this.skin].comboImages[i]
+      }*/
+
+      this.skinData.hintImage = new Image()
+      this.skinData.hintImage.src = info.skins[this.skin].hintImage
+
+      this.skinData.judgementImages = Array.from({length: info.skins[this.skin].judgementImages.length}, () => new Image())
+      for(let i = 0; i < this.skinData.judgementImages.length; i++) {
+        this.skinData.judgementImages[i].src = info.skins[this.skin].judgementImages[i]
       }
 
-      this.receptorImages = Array.from({length: info.skins[this.skin][this.keyMode].receptorImages.length}, () => new Image())
-      for(let i = 0; i < this.receptorImages.length; i++) {
-        this.receptorImages[i].src = info.skins[this.skin][this.keyMode].receptorImages[i]
-      }
-
-      this.pressedReceptorImages = Array.from({length: info.skins[this.skin][this.keyMode].pressedReceptorImages.length}, () => new Image())
-      for(let i = 0; i < this.pressedReceptorImages.length; i++) {
-        this.pressedReceptorImages[i].src = info.skins[this.skin][this.keyMode].pressedReceptorImages[i]
-      }
-
-      this.hintImage = new Image()
-      this.hintImage.src = info.skins[this.skin].hintImage
-
-      this.judgementImages = Array.from({length: info.skins[this.skin].judgementImages.length}, () => new Image())
-      for(let i = 0; i < this.judgementImages.length; i++) {
-        this.judgementImages[i].src = info.skins[this.skin].judgementImages[i]
-      }
-
-      this.effectImages = Array.from({length: info.skins[this.skin].effectImages.length}, () => new Image())
-      for(let i = 0; i < this.effectImages.length; i++) {
-        this.effectImages[i].src = info.skins[this.skin].effectImages[i]
-      }
-
-      this.noteImages = Array.from({length: info.skins[this.skin][this.keyMode].noteImages.length}, () => new Image());
-      for(let i = 0; i < this.noteImages.length; i++) {
-        this.noteImages[i].src = info.skins[this.skin][this.keyMode].noteImages[i]
-      }
-
-      this.lnBodyImages = Array.from({length: info.skins[this.skin][this.keyMode].lnBodyImages.length}, () => new Image());
-      for(let i = 0; i < this.lnBodyImages.length; i++) {
-        this.lnBodyImages[i].src = info.skins[this.skin][this.keyMode].lnBodyImages[i]
-      }
-
-      this.lnCapImages = Array.from({length: info.skins[this.skin][this.keyMode].lnCapImages.length}, () => new Image());
-      for(let i = 0; i < this.lnCapImages.length; i++) {
-        this.lnCapImages[i].src = info.skins[this.skin][this.keyMode].lnCapImages[i]
+      this.skinData.effectImages = Array.from({length: info.skins[this.skin].effectImages.length}, () => new Image())
+      for(let i = 0; i < this.skinData.effectImages.length; i++) {
+        this.skinData.effectImages[i].src = info.skins[this.skin].effectImages[i]
       }
     },
     loadKeyMode() {
@@ -641,20 +1256,12 @@ export default {
     }
   },
   destroyed () {
-    removeEventListener("keydown", this.processKeyDown);
-    removeEventListener("keyup", this.processKeyUp);
-    window.removeEventListener("resize", this.processResize)
-    this.canvas.removeEventListener("bpmChanged", this.processBpmChange)
-    this.canvas.removeEventListener("fpsChanged", this.processFpsChange)
-    this.canvas.removeEventListener("skinChanged", this.processSkinChange)
-    this.canvas.removeEventListener("keyModeChanged", this.processKeyModeChange)
-    this.canvas.removeEventListener("makeFullscreen", this.processFullScreen)
-    this.canvas.removeEventListener("volumeChanged", this.processVolumeChange)
-    this.canvas.removeEventListener("soundChanged", this.processSoundChange)
-    this.canvas.removeEventListener("resetGame", this.processReset)
-    this.canvas.removeEventListener("loadSong", this.processLoadSong)
+    removeEventListener('keydown', this.processKeyDown)
+    removeEventListener('keyup', this.processKeyUp)
+    window.removeEventListener('resize', this.processResize)
 
-    clearInterval(this.interval)
+    clearInterval(this.gameLoopInterval)
+    //clearInterval(this.addNotesInterval)
   }
 }
 </script>

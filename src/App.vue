@@ -22,16 +22,16 @@ export default {
   methods: mapActions([
     'loadGame',
     'resetGame',
-    'toggleLoading',
+    'changeLoading',
   ]),
   created: function () {
     this.loadGame()
-    if(this.$store.state.player == null || this.$store.state.player.version == null) {
-      let playerName = prompt('Please enter your username', 'Jadong');
-      if(playerName == null) playerName = 'Jadong'
-      this.resetGame({ value: playerName })
+    if(this.$store.state.configs == null) {
+      let name = prompt('Please enter your username', 'Jadong');
+      if(name == null) name = 'Jadong'
+      this.resetGame({ value: name })
     }
-    this.toggleLoading({ value: false })
+    this.changeLoading({ value: false })
   }
 
 }

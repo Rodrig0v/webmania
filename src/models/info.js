@@ -4,196 +4,9 @@ export default {
     'firststream',
     'firsttournament'
   ],
-  cheats: {
-    bot: {
-      id: 'bot',
-      ppRequirement: 0,
-      effectFunction: (level) => 1 + level,
-      costFunction: (level) => 1 + level,
-    },
-    macro: {
-      id: 'macro',
-      ppRequirement: 0,
-      effectFunction: (level) => 1 + level,
-      costFunction: (level) => 2 + level,
-    },
-    pause: {
-      id: 'pause',
-      ppRequirement: 0,
-      effectFunction: (level) => 1 + level,
-      costFunction: (level) => 2 + level,
-    },
-  },
-  genes: {
-    experience: {
-      id: 'experience'
-    },
-  },
-  judgementWindows: {
-    0: [16, 64, 97, 127, 151, 188],
-    1: [16, 61, 94, 124, 148, 185],
-    2: [16, 58, 91, 121, 145, 182],
-    3: [16, 55, 88, 118, 142, 179],
-    4: [16, 52, 85, 115, 139, 176],
-    5: [16, 49, 82, 112, 136, 173],
-    6: [16, 46, 79, 109, 133, 170],
-    7: [16, 43, 76, 106, 130, 167],
-    8: [16, 40, 73, 103, 127, 164],
-    9: [16, 37, 70, 100, 124, 161],
-    10: [16, 34, 67, 97, 121, 158],
-  },
-  setup: {
-    pc: [
-      {
-        id: 'magalhaes',
-        effect: 50,
-        cost: 1,
-      },
-      {
-        id: 'laptop',
-        effect: 100,
-        cost: 1,
-      },
-      {
-        id: 'desktop',
-        effect: 200,
-        cost: 1,
-      },
-      {
-        id: 'gamer',
-        effect: 400,
-        cost: 1,
-      },
-    ],
-    keyboard: [
-      {
-        id: 'membrane',
-        effect: 2,
-        cost: 1,
-      },
-      {
-        id: 'hybrid',
-        effect: 4,
-        cost: 1,
-      },
-      {
-        id: 'mechanical',
-        effect: 8,
-        cost: 1,
-      },
-      {
-        id: 'rgb',
-        effect: 16,
-        cost: 1,
-      },
-    ],
-    monitor: [
-      {
-        id: '60',
-        effect: 2,
-        cost: 1,
-      },
-      {
-        id: '100',
-        effect: 4,
-        cost: 1,
-      },
-      {
-        id: '144',
-        effect: 8,
-        cost: 1,
-      },
-      {
-        id: '240',
-        effect: 16,
-        cost: 1,
-      },
-    ],
-    chair: [
-      {
-        id: 'plastic',
-        effect: 2,
-        cost: 1,
-      },
-      {
-        id: 'wood',
-        effect: 4,
-        cost: 1,
-      },
-      {
-        id: 'office',
-        effect: 8,
-        cost: 1,
-      },
-      {
-        id: 'gamer',
-        effect: 16,
-        cost: 1,
-      },
-    ],
-    headset: [
-      {
-        id: 'speakers',
-        effect: 2,
-        cost: 1,
-      },
-      {
-        id: 'earphones',
-        effect: 4,
-        cost: 1,
-      },
-      {
-        id: 'headphones',
-        effect: 8,
-        cost: 1,
-      },
-      {
-        id: 'airpods',
-        effect: 16,
-        cost: 1,
-      },
-    ],
-  },
-  skills: {
-    reading: {
-      id: 'reading',
-      ppRequirement: 0,
-      effectFunction: (level) => 1 + level,
-      costFunction: (level) => 1 + level,
-    },
-    accuracy: {
-      id: 'accuracy',
-      ppRequirement: 0,
-      effectFunction: (level) => 1 + level,
-      costFunction: (level) => 2 + level,
-    },
-    focus: {
-      id: 'focus',
-      ppRequirement: 0,
-      effectFunction: (level) => 1 + level,
-      costFunction: (level) => 3 + level,
-    },
-    technique: {
-      id: 'technique',
-      ppRequirement: 0,
-      effectFunction: (level) => 1 + level,
-      costFunction: (level) => 4 + level,
-    },
-    jacks: {
-      id: 'jacks',
-      ppRequirement: 0,
-      effectFunction: (level) => 1 + level,
-      costFunction: (level) => 5 + level,
-    },
-    trilling: {
-      id: 'trilling',
-      ppRequirement: 0,
-      effectFunction: (level) => 1 + level,
-      costFunction: (level) => 6 + level,
-    },
-  },
   skins: {
     arrows: {
+      noteColored: false,
       1: {
         lightingImages: [
           require('@/assets/skins/blank.png'),
@@ -207,7 +20,7 @@ export default {
         noteImages: [
           require('@/assets/skins/arrows/note-center.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/arrows/receptor-center-pressed.png'),
         ],
         receptorImages: [
@@ -231,7 +44,7 @@ export default {
           require('@/assets/skins/arrows/note-left-red.png'),
           require('@/assets/skins/arrows/note-right-red.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/arrows/receptor-left-pressed.png'),
           require('@/assets/skins/arrows/receptor-right-pressed.png'),
         ],
@@ -261,7 +74,7 @@ export default {
           require('@/assets/skins/arrows/note-center.png'),
           require('@/assets/skins/arrows/note-right-red.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/arrows/receptor-left-pressed.png'),
           require('@/assets/skins/arrows/receptor-center-pressed.png'),
           require('@/assets/skins/arrows/receptor-right-pressed.png'),
@@ -297,7 +110,7 @@ export default {
           require('@/assets/skins/arrows/note-up-blue.png'),
           require('@/assets/skins/arrows/note-right-red.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/arrows/receptor-left-pressed.png'),
           require('@/assets/skins/arrows/receptor-down-pressed.png'),
           require('@/assets/skins/arrows/receptor-up-pressed.png'),
@@ -339,7 +152,7 @@ export default {
           require('@/assets/skins/arrows/note-up-blue.png'),
           require('@/assets/skins/arrows/note-right-red.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/arrows/receptor-left-pressed.png'),
           require('@/assets/skins/arrows/receptor-upleft-pressed.png'),
           require('@/assets/skins/arrows/receptor-center-pressed.png'),
@@ -387,7 +200,7 @@ export default {
           require('@/assets/skins/arrows/note-upright-red.png'),
           require('@/assets/skins/arrows/note-right-blue.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/arrows/receptor-left-pressed.png'),
           require('@/assets/skins/arrows/receptor-upleft-pressed.png'),
           require('@/assets/skins/arrows/receptor-down-pressed.png'),
@@ -441,7 +254,7 @@ export default {
           require('@/assets/skins/arrows/note-upright-red.png'),
           require('@/assets/skins/arrows/note-right-blue.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/arrows/receptor-left-pressed.png'),
           require('@/assets/skins/arrows/receptor-upleft-pressed.png'),
           require('@/assets/skins/arrows/receptor-down-pressed.png'),
@@ -485,7 +298,59 @@ export default {
         require('@/assets/skins/arrows/judgement-miss.png'),
       ],
     },
+    arrowsColor: {
+      noteColored: true,
+      rotate: {
+        1: [0],
+        2: [0, Math.PI],
+        3: [Math.PI/2, 0, -Math.PI/2],
+        4: [Math.PI/2, 0, Math.PI, -Math.PI/2],
+        5: [Math.PI/2, 3*Math.PI/4, 0, -3*Math.PI/4, -Math.PI/2],
+        6: [Math.PI/2, 3*Math.PI/4, 0, Math.PI, -3*Math.PI/4, -Math.PI/2],
+        7: [Math.PI/2, 3*Math.PI/4, Math.PI, 0, Math.PI, -3*Math.PI/4, -Math.PI/2],
+      },
+      lightingImage: require('@/assets/skins/blank.png'),
+      lnBodyImage: require('@/assets/skins/arrows-color/body.png'),
+      lnCapImage: require('@/assets/skins/arrows-color/cap.png'),
+      noteImages: {
+        1: require('@/assets/skins/arrows-color/note-1.png'),
+        2: require('@/assets/skins/arrows-color/note-2.png'),
+        3: require('@/assets/skins/arrows-color/note-3.png'),
+        4: require('@/assets/skins/arrows-color/note-4.png'),
+        6: require('@/assets/skins/arrows-color/note-6.png'),
+        8: require('@/assets/skins/arrows-color/note-8.png'),
+        12: require('@/assets/skins/arrows-color/note-12.png'),
+        16: require('@/assets/skins/arrows-color/note-16.png'),
+      },
+      receptorDownImage: require('@/assets/skins/arrows-color/receptor-down.png'),
+      receptorImage: require('@/assets/skins/arrows-color/receptor.png'),
+      comboImages: [
+        require('@/assets/skins/0.png'),
+        require('@/assets/skins/1.png'),
+        require('@/assets/skins/2.png'),
+        require('@/assets/skins/3.png'),
+        require('@/assets/skins/4.png'),
+        require('@/assets/skins/5.png'),
+        require('@/assets/skins/6.png'),
+        require('@/assets/skins/7.png'),
+        require('@/assets/skins/8.png'),
+        require('@/assets/skins/9.png'),
+      ],
+      effectImages: [
+        require('@/assets/skins/blank.png'),
+      ],
+      hintImage: require('@/assets/skins/blank.png'),
+      judgementImages: [
+        require('@/assets/skins/arrows/judgement-rainbow.png'),
+        require('@/assets/skins/arrows/judgement-300.png'),
+        require('@/assets/skins/arrows/judgement-200.png'),
+        require('@/assets/skins/arrows/judgement-100.png'),
+        require('@/assets/skins/arrows/judgement-50.png'),
+        require('@/assets/skins/arrows/judgement-miss.png'),
+      ],
+    },
     bars: {
+      noteColored: false,
       1: {
         lightingImages: [
           require('@/assets/skins/bars/lighting-yellow.png'),
@@ -499,7 +364,7 @@ export default {
         noteImages: [
           require('@/assets/skins/bars/note-yellow.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/bars/receptor-white-pressed.png'),
         ],
         receptorImages: [
@@ -523,7 +388,7 @@ export default {
           require('@/assets/skins/bars/note-white.png'),
           require('@/assets/skins/bars/note-white.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/bars/receptor-black-pressed.png'),
           require('@/assets/skins/bars/receptor-black-pressed.png'),
         ],
@@ -553,7 +418,7 @@ export default {
           require('@/assets/skins/bars/note-yellow.png'),
           require('@/assets/skins/bars/note-white.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/bars/receptor-black-pressed.png'),
           require('@/assets/skins/bars/receptor-white-pressed.png'),
           require('@/assets/skins/bars/receptor-black-pressed.png'),
@@ -589,7 +454,7 @@ export default {
           require('@/assets/skins/bars/note-white.png'),
           require('@/assets/skins/bars/note-blue.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/bars/receptor-white-pressed.png'),
           require('@/assets/skins/bars/receptor-black-pressed.png'),
           require('@/assets/skins/bars/receptor-black-pressed.png'),
@@ -631,7 +496,7 @@ export default {
           require('@/assets/skins/bars/note-white.png'),
           require('@/assets/skins/bars/note-blue.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/bars/receptor-white-pressed.png'),
           require('@/assets/skins/bars/receptor-black-pressed.png'),
           require('@/assets/skins/bars/receptor-white-pressed.png'),
@@ -679,7 +544,7 @@ export default {
           require('@/assets/skins/bars/note-blue.png'),
           require('@/assets/skins/bars/note-white.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/bars/receptor-black-pressed.png'),
           require('@/assets/skins/bars/receptor-white-pressed.png'),
           require('@/assets/skins/bars/receptor-black-pressed.png'),
@@ -733,7 +598,7 @@ export default {
           require('@/assets/skins/bars/note-blue.png'),
           require('@/assets/skins/bars/note-white.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/bars/receptor-black-pressed.png'),
           require('@/assets/skins/bars/receptor-white-pressed.png'),
           require('@/assets/skins/bars/receptor-black-pressed.png'),
@@ -785,7 +650,50 @@ export default {
         require('@/assets/skins/judgement-miss.png'),
       ],
     },
+    barsColor: {
+      noteColored: true,
+      lightingImage: require('@/assets/skins/blank.png'),
+      lnBodyImage: require('@/assets/skins/bars-color/body.png'),
+      lnCapImage: require('@/assets/skins/bars-color/cap.png'),
+      noteImages: {
+        1: require('@/assets/skins/bars-color/note-1.png'),
+        2: require('@/assets/skins/bars-color/note-2.png'),
+        3: require('@/assets/skins/bars-color/note-3.png'),
+        4: require('@/assets/skins/bars-color/note-4.png'),
+        6: require('@/assets/skins/bars-color/note-6.png'),
+        8: require('@/assets/skins/bars-color/note-8.png'),
+        12: require('@/assets/skins/bars-color/note-12.png'),
+        16: require('@/assets/skins/bars-color/note-16.png'),
+      },
+      receptorDownImage: require('@/assets/skins/bars-color/receptor-down.png'),
+      receptorImage: require('@/assets/skins/bars-color/receptor.png'),
+      comboImages: [
+        require('@/assets/skins/0.png'),
+        require('@/assets/skins/1.png'),
+        require('@/assets/skins/2.png'),
+        require('@/assets/skins/3.png'),
+        require('@/assets/skins/4.png'),
+        require('@/assets/skins/5.png'),
+        require('@/assets/skins/6.png'),
+        require('@/assets/skins/7.png'),
+        require('@/assets/skins/8.png'),
+        require('@/assets/skins/9.png'),
+      ],
+      effectImages: [
+        require('@/assets/skins/blank.png'),
+      ],
+      hintImage: require('@/assets/skins/blank.png'),
+      judgementImages: [
+        require('@/assets/skins/arrows/judgement-rainbow.png'),
+        require('@/assets/skins/arrows/judgement-300.png'),
+        require('@/assets/skins/arrows/judgement-200.png'),
+        require('@/assets/skins/arrows/judgement-100.png'),
+        require('@/assets/skins/arrows/judgement-50.png'),
+        require('@/assets/skins/arrows/judgement-miss.png'),
+      ],
+    },
     circles: {
+      noteColored: false,
       1: {
         lightingImages: [
           require('@/assets/skins/blank.png'),
@@ -799,7 +707,7 @@ export default {
         noteImages: [
           require('@/assets/skins/circles/note-yellow.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/circles/receptor-pressed.png'),
         ],
         receptorImages: [
@@ -823,7 +731,7 @@ export default {
           require('@/assets/skins/circles/note-white.png'),
           require('@/assets/skins/circles/note-white.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/circles/receptor-pressed.png'),
           require('@/assets/skins/circles/receptor-pressed.png'),
         ],
@@ -853,7 +761,7 @@ export default {
           require('@/assets/skins/circles/note-yellow.png'),
           require('@/assets/skins/circles/note-white.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/circles/receptor-pressed.png'),
           require('@/assets/skins/circles/receptor-pressed.png'),
           require('@/assets/skins/circles/receptor-pressed.png'),
@@ -889,7 +797,7 @@ export default {
           require('@/assets/skins/circles/note-white.png'),
           require('@/assets/skins/circles/note-blue.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/circles/receptor-pressed.png'),
           require('@/assets/skins/circles/receptor-pressed.png'),
           require('@/assets/skins/circles/receptor-pressed.png'),
@@ -931,7 +839,7 @@ export default {
           require('@/assets/skins/circles/note-white.png'),
           require('@/assets/skins/circles/note-blue.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/circles/receptor-pressed.png'),
           require('@/assets/skins/circles/receptor-pressed.png'),
           require('@/assets/skins/circles/receptor-pressed.png'),
@@ -979,7 +887,7 @@ export default {
           require('@/assets/skins/circles/note-blue.png'),
           require('@/assets/skins/circles/note-white.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/circles/receptor-pressed.png'),
           require('@/assets/skins/circles/receptor-pressed.png'),
           require('@/assets/skins/circles/receptor-pressed.png'),
@@ -1033,7 +941,7 @@ export default {
           require('@/assets/skins/circles/note-blue.png'),
           require('@/assets/skins/circles/note-white.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/circles/receptor-pressed.png'),
           require('@/assets/skins/circles/receptor-pressed.png'),
           require('@/assets/skins/circles/receptor-pressed.png'),
@@ -1075,9 +983,52 @@ export default {
         require('@/assets/skins/judgement-100.png'),
         require('@/assets/skins/judgement-50.png'),
         require('@/assets/skins/judgement-miss.png'),
+      ],
+    },
+    circlesColor: {
+      noteColored: true,
+      lightingImage: require('@/assets/skins/blank.png'),
+      lnBodyImage: require('@/assets/skins/circles-color/body.png'),
+      lnCapImage: require('@/assets/skins/circles-color/cap.png'),
+      noteImages: {
+        1: require('@/assets/skins/circles-color/note-1.png'),
+        2: require('@/assets/skins/circles-color/note-2.png'),
+        3: require('@/assets/skins/circles-color/note-3.png'),
+        4: require('@/assets/skins/circles-color/note-4.png'),
+        6: require('@/assets/skins/circles-color/note-6.png'),
+        8: require('@/assets/skins/circles-color/note-8.png'),
+        12: require('@/assets/skins/circles-color/note-12.png'),
+        16: require('@/assets/skins/circles-color/note-16.png'),
+      },
+      receptorDownImage: require('@/assets/skins/circles-color/receptor-down.png'),
+      receptorImage: require('@/assets/skins/circles-color/receptor.png'),
+      comboImages: [
+        require('@/assets/skins/0.png'),
+        require('@/assets/skins/1.png'),
+        require('@/assets/skins/2.png'),
+        require('@/assets/skins/3.png'),
+        require('@/assets/skins/4.png'),
+        require('@/assets/skins/5.png'),
+        require('@/assets/skins/6.png'),
+        require('@/assets/skins/7.png'),
+        require('@/assets/skins/8.png'),
+        require('@/assets/skins/9.png'),
+      ],
+      effectImages: [
+        require('@/assets/skins/blank.png'),
+      ],
+      hintImage: require('@/assets/skins/blank.png'),
+      judgementImages: [
+        require('@/assets/skins/arrows/judgement-rainbow.png'),
+        require('@/assets/skins/arrows/judgement-300.png'),
+        require('@/assets/skins/arrows/judgement-200.png'),
+        require('@/assets/skins/arrows/judgement-100.png'),
+        require('@/assets/skins/arrows/judgement-50.png'),
+        require('@/assets/skins/arrows/judgement-miss.png'),
       ],
     },
     diamonds: {
+      noteColored: false,
       1: {
         lightingImages: [
           require('@/assets/skins/blank.png'),
@@ -1091,7 +1042,7 @@ export default {
         noteImages: [
           require('@/assets/skins/diamonds/note-yellow.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/diamonds/receptor-pressed.png'),
         ],
         receptorImages: [
@@ -1115,7 +1066,7 @@ export default {
           require('@/assets/skins/diamonds/note-white.png'),
           require('@/assets/skins/diamonds/note-white.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/diamonds/receptor-pressed.png'),
           require('@/assets/skins/diamonds/receptor-pressed.png'),
         ],
@@ -1145,7 +1096,7 @@ export default {
           require('@/assets/skins/diamonds/note-yellow.png'),
           require('@/assets/skins/diamonds/note-white.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/diamonds/receptor-pressed.png'),
           require('@/assets/skins/diamonds/receptor-pressed.png'),
           require('@/assets/skins/diamonds/receptor-pressed.png'),
@@ -1181,7 +1132,7 @@ export default {
           require('@/assets/skins/diamonds/note-white.png'),
           require('@/assets/skins/diamonds/note-blue.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/diamonds/receptor-pressed.png'),
           require('@/assets/skins/diamonds/receptor-pressed.png'),
           require('@/assets/skins/diamonds/receptor-pressed.png'),
@@ -1223,7 +1174,7 @@ export default {
           require('@/assets/skins/diamonds/note-white.png'),
           require('@/assets/skins/diamonds/note-blue.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/diamonds/receptor-pressed.png'),
           require('@/assets/skins/diamonds/receptor-pressed.png'),
           require('@/assets/skins/diamonds/receptor-pressed.png'),
@@ -1271,7 +1222,7 @@ export default {
           require('@/assets/skins/diamonds/note-blue.png'),
           require('@/assets/skins/diamonds/note-white.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/diamonds/receptor-pressed.png'),
           require('@/assets/skins/diamonds/receptor-pressed.png'),
           require('@/assets/skins/diamonds/receptor-pressed.png'),
@@ -1325,7 +1276,7 @@ export default {
           require('@/assets/skins/diamonds/note-blue.png'),
           require('@/assets/skins/diamonds/note-white.png'),
         ],
-        pressedReceptorImages: [
+        receptorDownImages: [
           require('@/assets/skins/diamonds/receptor-pressed.png'),
           require('@/assets/skins/diamonds/receptor-pressed.png'),
           require('@/assets/skins/diamonds/receptor-pressed.png'),
@@ -1369,22 +1320,47 @@ export default {
         require('@/assets/skins/judgement-miss.png'),
       ],
     },
-  },
-  upgrades: {
-    1: {
-      id: '1',
-      cost: 1,
-      effect: 1
-    },
-    2: {
-      id: '2',
-      cost: 1,
-      effect: 1
-    },
-    3: {
-      id: '3',
-      cost: 1,
-      effect: 1
+    diamondsColor: {
+      noteColored: true,
+      lightingImage: require('@/assets/skins/blank.png'),
+      lnBodyImage: require('@/assets/skins/diamonds-color/body.png'),
+      lnCapImage: require('@/assets/skins/diamonds-color/cap.png'),
+      noteImages: {
+        1: require('@/assets/skins/diamonds-color/note-1.png'),
+        2: require('@/assets/skins/diamonds-color/note-2.png'),
+        3: require('@/assets/skins/diamonds-color/note-3.png'),
+        4: require('@/assets/skins/diamonds-color/note-4.png'),
+        6: require('@/assets/skins/diamonds-color/note-6.png'),
+        8: require('@/assets/skins/diamonds-color/note-8.png'),
+        12: require('@/assets/skins/diamonds-color/note-12.png'),
+        16: require('@/assets/skins/diamonds-color/note-16.png'),
+      },
+      receptorDownImage: require('@/assets/skins/diamonds-color/receptor-down.png'),
+      receptorImage: require('@/assets/skins/diamonds-color/receptor.png'),
+      comboImages: [
+        require('@/assets/skins/0.png'),
+        require('@/assets/skins/1.png'),
+        require('@/assets/skins/2.png'),
+        require('@/assets/skins/3.png'),
+        require('@/assets/skins/4.png'),
+        require('@/assets/skins/5.png'),
+        require('@/assets/skins/6.png'),
+        require('@/assets/skins/7.png'),
+        require('@/assets/skins/8.png'),
+        require('@/assets/skins/9.png'),
+      ],
+      effectImages: [
+        require('@/assets/skins/blank.png'),
+      ],
+      hintImage: require('@/assets/skins/blank.png'),
+      judgementImages: [
+        require('@/assets/skins/arrows/judgement-rainbow.png'),
+        require('@/assets/skins/arrows/judgement-300.png'),
+        require('@/assets/skins/arrows/judgement-200.png'),
+        require('@/assets/skins/arrows/judgement-100.png'),
+        require('@/assets/skins/arrows/judgement-50.png'),
+        require('@/assets/skins/arrows/judgement-miss.png'),
+      ],
     },
   },
 }

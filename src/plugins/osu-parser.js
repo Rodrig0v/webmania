@@ -1,15 +1,13 @@
 'use strict';
 
-import { exists as _exists, createReadStream } from 'fs';
-import Queue from 'denque';
-
 function beatmapParser() {
   var beatmap = {
     nbNotes: 0,
     nbLns: 0,
     timingPoints: [],
-    breakTimes: [],
-    notes: []
+    notes: [],
+    hitSounds: {},
+    timeSounds: [],
   };
 
   var osuSection;
@@ -20,6 +18,9 @@ function beatmapParser() {
   var eventsLines    = [];
   var sectionReg     = /^\[([a-zA-Z0-9]+)\]$/;
   var keyValReg      = /^([a-zA-Z0-9]+)[ ]*:[ ]*(.+)$/;
+  var backgroundReg  = /^0,(.+),"(.+)".*$/;
+  var sampleReg1     = /^Sample,(.+),(.+),"(.+)",(.+)$/;
+  var sampleReg2     = /^5,(.+),(.+),"(.+)",(.+)$/;
 
   /**
    * Get the timing point affecting a specific offset
@@ -31,6 +32,19 @@ function beatmapParser() {
       if (beatmap.timingPoints[i].offset <= offset) { return beatmap.timingPoints[i]; }
     }
     return beatmap.timingPoints[0];
+  };
+
+  /**
+   * Parse hitSound member
+   * @param  {String} str         hitSound member (sample:add:customSampleIndex:Volume:hitSound)
+   * @return {Object} hitSound    the hitSound filename
+   */
+   var parsehitSound = function (str) {
+    if (!str) return '';
+
+    var adds = str.split(':');
+
+    return adds[4]
   };
 
   /**
@@ -80,6 +94,7 @@ function beatmapParser() {
 
     var note = {
       startTime:  parseInt(members[2]),
+      hitSound: null,
       soundTypes: [],
     };
 
@@ -101,10 +116,9 @@ function beatmapParser() {
      var timing = getTimingPoint(note.startTime);
 
      if (timing) {
-      note.timing = Math.round(timing.beatLength / (timing.beatLength - ((note.startTime - timing.offset) % timing.beatLength)));
-      if(note.timing > 20) {
-        note.timing = 1;
-      }
+       note.timing = findTimingOfNote(timing.beatLength, (timing.beatLength - ((note.startTime - timing.offset) % timing.beatLength)))
+     } else {
+       note.timing = 1
      }
 
     /**
@@ -118,18 +132,61 @@ function beatmapParser() {
       // Note
       beatmap.nbNotes++;
       note.objectName = 'note';
+      note.endTime = note.startTime
+      let hitSound = parsehitSound(members[5])
+      if(hitSound != '') {
+        note.hitSound = hitSound
+        beatmap.hitSounds[hitSound] = true
+      }
     } else if ((objectType & 128) == 128) {
       // Longnote
       beatmap.nbLns++;
       note.objectName  = 'longnote';
       note.endTime  = parseInt(members[5]);
+      let hitSound = parsehitSound(members[6])
+      if(hitSound != '') {
+        note.hitSound = hitSound
+        beatmap.hitSounds[hitSound] = true
+      }
     } else {
       // Unknown
       return;
     }
 
-    beatmap.notes[Math.floor(parseInt(members[0]) * beatmap.CircleSize / 512)].push(note);
+    note.key = Math.floor(parseInt(members[0]) * beatmap.CircleSize / 512)
+
+    beatmap.notes.push(note);
   };
+
+  /**
+   * Parse an event line
+   * @param  {String} line
+   */
+  var findTimingOfNote = function (beatLength, noteTime) {
+    let timings = [
+      [1, [0, beatLength]],
+      [2, [beatLength / 2,]],
+      [3, [beatLength / 3, beatLength * 2 / 3]],
+      [4, [beatLength / 4, beatLength * 3 / 4]],
+      [6, [beatLength / 6, beatLength * 5 / 6]],
+      [8, [beatLength / 8, beatLength * 3 / 8, beatLength * 5 / 8, beatLength * 7 / 8]],
+      [12, [beatLength / 12, beatLength * 5 / 12, beatLength * 7 / 12, beatLength * 11 / 12]],
+      [16, [beatLength / 16, beatLength * 3 / 16, beatLength * 5 / 16, beatLength * 7 / 16, beatLength * 9 / 16, beatLength * 11 / 16, beatLength * 13 / 16, beatLength * 15 / 16]],
+    ]
+    let difference = Number.POSITIVE_INFINITY
+    let result = 16
+
+    for(let i = 0; i < timings.length; i++) {
+      for(let j = 0; j < timings[i][1].length; j++) {
+        if(Math.abs(noteTime - timings[i][1][j]) < difference) {
+          difference = Math.abs(noteTime - timings[i][1][j])
+          result = timings[i][0]
+        }
+      }
+    }
+
+    return result
+  }
 
   /**
    * Parse an event line
@@ -139,26 +196,22 @@ function beatmapParser() {
     /**
      * Background line : 0,0,"bg.jpg"
      * TODO: confirm that the second member is always zero
-     *
-     * Breaktimes lines : 2,1000,2000
-     * second integer is start offset
-     * third integer is end offset
      */
-    members = line.split(',');
-
-    if (members[0] == '0' && members[1] == '0' && members[2]) {
-      var bgName = members[2].trim();
-
-      if (bgName.charAt(0) == '"' && bgName.charAt(bgName.length - 1) == '"') {
-        beatmap.bgFilename = bgName.substring(1, bgName.length - 1);
-      } else {
-        beatmap.bgFilename = bgName;
-      }
-    } else if (members[0] == '2' && /^[0-9]+$/.test(members[1]) && /^[0-9]+$/.test(members[2])) {
-      beatmap.breakTimes.push({
-        startTime: parseInt(members[1]),
-        endTime: parseInt(members[2])
-      });
+    let match
+    match = backgroundReg.exec(line)
+    if(match) {
+      beatmap.bgFilename = match[2]
+      return
+    }
+    match = sampleReg1.exec(line)
+    if(match) {
+      beatmap.timeSounds.push({ startTime: Number(match[1]), name: match[3]})
+      return
+    }
+    match = sampleReg2.exec(line)
+    if(match) {
+      beatmap.timeSounds.push({ startTime: Number(match[1]), name: match[3]})
+      return
     }
   };
 
@@ -166,22 +219,7 @@ function beatmapParser() {
    * Compute the total time and the draining time of the beatmap
    */
   var computeDuration = function () {
-    var firstObject = beatmap.notes[0];
-    var lastObject  = beatmap.notes[beatmap.notes.length - 1];
-
-    var totalBreakTime = 0;
-
-    beatmap.breakTimes.forEach(function (breakTime) {
-      totalBreakTime += (breakTime.endTime - breakTime.startTime);
-    });
-
-    if (firstObject && lastObject) {
-      beatmap.totalTime    = Math.floor(lastObject.startTime / 1000);
-      beatmap.drainingTime = Math.floor((lastObject.startTime - firstObject.startTime - totalBreakTime) / 1000);
-    } else {
-      beatmap.totalTime    = 0;
-      beatmap.drainingTime = 0;
-    }
+    beatmap.totalTime = (beatmap.notes[beatmap.notes.length - 1].startTime - beatmap.notes[0].startTime) / 1000
   };
 
   /**
@@ -243,11 +281,6 @@ function beatmapParser() {
     }
 
     eventsLines.forEach(parseEvent);
-    beatmap.breakTimes.sort(function (a, b) { return (a.startTime > b.startTime ? 1 : -1); });
-
-    for(let i = 0; i < beatmap.CircleSize; i++) {
-      beatmap.notes.push(new Queue());
-    }
 
     timingLines.forEach(parseTimingPoint);
     beatmap.timingPoints.sort(function (a, b) { return (a.offset > b.offset ? 1 : -1); });
@@ -266,7 +299,27 @@ function beatmapParser() {
 
     computeDuration();
 
-    return beatmap;
+    if(beatmap.AudioFilename != 'virtual') {
+      beatmap.timeSounds.push({ startTime: Number(beatmap.AudioLeadIn), name: beatmap.AudioFilename })
+    }
+    beatmap.timeSounds.sort(function (a, b) { return (a.startTime > b.startTime ? 1 : -1); });
+
+    return {
+      artist: beatmap.Artist,
+      title: beatmap.Title,
+      length: beatmap.totalTime,
+      difficultyName: beatmap.Version,
+      bpm: beatmap.bpmMax,
+      timingWindows: parseInt(beatmap.OverallDifficulty),
+      keys: parseInt(beatmap.CircleSize),
+      numberNotes: beatmap.nbNotes,
+      numberLongnotes: beatmap.nbLns,
+      backgroundFilename: beatmap.bgFilename,
+      notes: beatmap.notes,
+      hitSoundsFilenames: Object.keys(beatmap.hitSounds),
+      timeSounds: beatmap.timeSounds,
+      offset: 70,
+    };
   };
 
   return {
@@ -277,66 +330,7 @@ function beatmapParser() {
 
 export default {
   /**
-   * Parse a .osu file
-   * @param  {String}   file  path to the file
-   * @param  {Function} callback(err, beatmap)
-   */
-  parseFile (file, callback) {
-    _exists(file, function (exists) {
-      if (!exists) {
-        callback(new Error('file does not exist'));
-        return;
-      }
-  
-      var parser = beatmapParser();
-      var stream = createReadStream(file);
-      var buffer = '';
-  
-  
-      stream.on('data', function (chunk) {
-        buffer   += chunk;
-        var lines = buffer.split(/\r?\n/);
-        buffer    = lines.pop() || '';
-        lines.forEach(parser.readLine);
-      });
-  
-      stream.on('error', function (err) {
-        callback(err);
-      });
-  
-      stream.on('end', function () {
-        buffer.split(/\r?\n/).forEach(parser.readLine);
-        callback(null, parser.buildBeatmap());
-      });
-    });
-  },
-  /**
-   * Parse a stream containing .osu content
-   * @param  {Stream}   stream
-   * @param  {Function} callback(err, beatmap)
-   */
-  parseStream (stream, callback) {
-    var parser = beatmapParser();
-    var buffer = '';
-  
-    stream.on('data', function (chunk) {
-      buffer   += chunk.toString();
-      var lines = buffer.split(/\r?\n/);
-      buffer    = lines.pop() || '';
-      lines.forEach(parser.readLine);
-    });
-  
-    stream.on('error', function (err) {
-      callback(err);
-    });
-  
-    stream.on('end', function () {
-      buffer.split(/\r?\n/).forEach(parser.readLine);
-      callback(null, parser.buildBeatmap());
-    });
-  },
-  /**
-   * Parse the content of a .osu
+   * Parse the content of a .osu file
    * @param  {String|Buffer} content
    * @return {Object} beatmap
    */

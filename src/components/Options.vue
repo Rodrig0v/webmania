@@ -5,7 +5,7 @@
       <v-card-title>
         <v-tabs v-model="tab" grow>
           <v-tab>
-            {{ $t('header.gameplay') }}
+            {{ $t('header.general') }}
           </v-tab>
           <v-tab>
             {{ $t('header.skin') }}
@@ -21,7 +21,7 @@
       <v-card-text>
         <v-tabs-items v-model="tab">
           <v-tab-item :key="0">
-            <OptionsGameplay/>
+            <OptionsGeneral/>
           </v-tab-item>
           <v-tab-item :key="1">
             <OptionsSkin/>
@@ -50,14 +50,14 @@
 </template>
 
 <script>
-import OptionsGameplay from './OptionsGameplay';
+import OptionsGeneral from './OptionsGeneral';
 import OptionsKeyBinds from './OptionsKeyBinds';
 import OptionsSkin from './OptionsSkin';
 
 export default {
   name: 'Options',
   components: {
-    OptionsGameplay,
+    OptionsGeneral,
     OptionsKeyBinds,
     OptionsSkin
   },

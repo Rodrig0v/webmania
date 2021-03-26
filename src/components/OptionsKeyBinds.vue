@@ -1,63 +1,97 @@
 <template>
   <div>
+    <KeyBindInput v-model="computedPauseKey" :label="$t('options.keybinds.pause')"/>
+    <KeyBindInput v-model="computedRestartKey" :label="$t('options.keybinds.restart')"/>
+    <KeyBindInput v-model="computedFullScreenKey" :label="$t('options.keybinds.fullscreen')"/>
+    <KeyBindInput v-model="computedIncrementAudioOffsetKey" :label="$t('options.keybinds.incrementoffset')"/>
+    <KeyBindInput v-model="computedDecrementAudioOffsetKey" :label="$t('options.keybinds.decrementoffset')"/>
+
     <v-tabs v-model="tab" grow>
-      <v-tab v-for="(keyMode) in Object.keys(allKeys)" :key="keyMode">
+      <v-tab v-for="(keyMode) in keyModes" :key="keyMode">
         {{ keyMode }} K
       </v-tab>
     </v-tabs>
 
-    <div style="width: 100%; display: flex; justify-content: center">
-      <v-btn color="primary" v-for="(key, index) in allKeys[tab+1]" :key="index" @click="keyBind(index)" style="margin: 8px;">{{ key.key | space }}</v-btn>
-    </div>
+    <KeyBindInput v-model="computedHitKeys" :showIndex="true" :label="$t('options.keybinds.column')"/>
 
-    <v-dialog
-      v-model="keybindDialog"
-      persistent
-    >
-      <v-card>
-        <v-card-title class="headline">
-          {{ $t('options.keybinds.changekeybind') }}
-        </v-card-title>
-        <v-card-text>
-          {{ $t('options.keybinds.presskey') }}
-        </v-card-text>
-      </v-card>
-    </v-dialog>
   </div>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import KeyBindInput from './KeyBindInput'
 
 export default {
   name: 'OptionsKeyBinds',
+  components: {
+    KeyBindInput,
+  },
   data() {
     return {
       tab: null,
       keybindDialog: false,
-      keyBeingChanged: null,
+      keyId: null,
+      keyModes: [1,2,3,4,5,6,7]
     };
   },
   computed: {
     ...mapGetters([
-      'allKeys',
+      'keyBindings',
     ]),
+    computedFullScreenKey: {
+      get () {
+        return [this.keyBindings['fullScreen']]
+      },
+      set (values) {
+        this.changeKeyBind({ id: 'fullScreen', value: values[0] })
+      }
+    },
+    computedIncrementAudioOffsetKey: {
+      get () {
+        return [this.keyBindings['incrementAudioOffset']]
+      },
+      set (values) {
+        this.changeKeyBind({ id: 'incrementAudioOffset', value: values[0] })
+      }
+    },
+    computedDecrementAudioOffsetKey: {
+      get () {
+        return [this.keyBindings['decrementAudioOffset']]
+      },
+      set (values) {
+        this.changeKeyBind({ id: 'decrementAudioOffset', value: values[0] })
+      }
+    },
+    computedPauseKey: {
+      get () {
+        return [this.keyBindings['pause']]
+      },
+      set (values) {
+        this.changeKeyBind({ id: 'pause', value: values[0] })
+      }
+    },
+    computedRestartKey: {
+      get () {
+        return [this.keyBindings['restart']]
+      },
+      set (values) {
+        this.changeKeyBind({ id: 'restart', value: values[0] })
+      }
+    },
+    computedHitKeys: {
+      get () {
+        return this.keyBindings[this.tab + 1]
+      },
+      set (values) {
+        this.changeHitKeyBinds({ id: this.tab + 1, values })
+      }
+    }
   },
   methods: {
     ...mapActions([
-    'changeKeyBind',
+      'changeHitKeyBinds',
+      'changeKeyBind',
   ]),
-  keyBind(keyId) {
-      this.keyBeingChanged = keyId
-      this.keybindDialog = true
-      addEventListener("keydown", this.newKeyBind)
-    },
-    newKeyBind(event) {
-      removeEventListener("keydown", this.newKeyBind)
-      this.changeKeyBind({ mode: this.tab + 1, id: this.keyBeingChanged, key: event.key == 'Dead' ? event.code : event.key, code: event.code})
-      this.keybindDialog = false
-      this.keyBeingChanged = null
-    }
 },
 
 }

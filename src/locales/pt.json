@@ -1,15 +1,21 @@
 {
   "general": {
     "apply": "Aplicar",
+    "error": "Erro",
     "loading": "A carregar...",
     "reset": "Reset",
-    "selectsong": "Seleciona uma música ou um padrão"
+    "pick": "Escolhe uma música ou um padrão",
+    "pressanykey": "Pressiona qualquer tecla de jogo para começar",
+    "paused": "Jogo pausado",
+    "newaudiooffset": "Nova sincronização auditiva: "
   },
   "header": {
     "fullscreen": "Ecrã inteiro",
-    "gameplay": "Jogo",
+    "general": "Geral",
     "keybinds": "Teclas",
     "options": "Opções",
+    "audioOffset": "Sincronização auditiva (-9999-9999 ms)",
+    "visualOffset": "Sincronização visual (-9999-9999 ms)",
     "pickpattern": "Escolher padrão",
     "picksong": "Escolher música",
     "skin": "Skin"
@@ -19,11 +25,9 @@
     "value": "Valor tem de estar entre {min} e {max}."
   },
   "options": {
-    "gameplay": {
+    "general": {
       "fps": "Fotogramas  por segundo (0-255)",
-      "mutesound": "Silenciar som",
       "name": "Nome",
-      "od": "Dificuldade",
       "scrollspeed": "Velocidade de deslizamento (0-9999 ms)",
       "showfps": "Mostrar FPS",
       "volume": "Volume (0-100%)"
@@ -39,8 +43,12 @@
       "effectSize": "Tamanho do efeito (0-100% do comprimento total)"
     },
     "keybinds": {
-      "changekeybind": "Mudar tecla",
-      "presskey": "Pressione a nova tecla."
+      "pause": "Pausar",
+      "restart": "Reiniciar",
+      "column": "Coluna",
+      "fullscreen": "Ecrã inteiro",
+      "incrementoffset": "Aumentar sincronização de áudio",
+      "decrementoffset": "Diminuir sincronização de áudio"
     }
   },
   "pickpattern": {
@@ -48,225 +56,38 @@
     "keymode": "Número de teclas"
   },
   "picksong": {
-    "play": "Jogar"
-    
+    "timingwindows":"Janelas para acertar",
+    "length": "Duração",
+    "notes": "Notas",
+    "longnotes": "Notas compridas",
+    "starrating": "Classificação estrela",
+    "play": "Jogar",
+    "keys": "Teclas",
+    "bpm": "BPM",
+    "songrate": "Velocidade da música"
+  },
+  "upload": {
+    "invalidformat": "Não foram encontrados ficheiros válidos.",
+    "nomusic": "Não foi possível ler o ficheiro de música.",
+    "nobackground": "Não foi possível ler a imagem de fundo.",
+    "corruptosz": "Não foi possível ler o ficheiro .osz.",
+    "picksong": "Arrasta os ficheiros/pasta da música de Osu!, O2jam, BMS ou Stepmania aqui.",
+    "warning": "Aviso: Arrasta uma música de cada vez."
+  },
+  "skins": {
+    "arrows": "Setas",
+    "arrowsColor": "Setas (Nota colorida)",
+    "bars": "Barras",
+    "barsColor": "Barras (Nota colorida)",
+    "circles": "Circulos",
+    "circlesColor": "Circulos (Nota colorida)",
+    "diamonds": "Diamantes",
+    "diamondsColor": "Diamantes (Nota colorida)"
   },
   "footer": {
-    "message": "— Feito por {author} e {community} — ",
-    "author": "Rodrig0v",
-    "community": "Comunidade do Osu!Mania PT",
-    "donate": "Doar"
-  },
-  "tooltip": {
-    "cost": "Custo"
-  },
-  "resources": {
-    "experience": "Experiência",
-    "money": "Dinheiro",
-    "clout": "Influência",
-    "combo": "Combo",
-    "stamina": "Energia",
-    "genes": "Genes"
-  },
-  "skills": {
-    "name": "Habilidades",
-    "description": " TO DO",
-    "reading": {
-      "name": "Leitura",
-      "buy": "Practicar reading",
-      "description": "Increases your accuracy rates.",
-      "effect": "Increases your accuracy rates by {value} %"
-    },
-    "accuracy": {
-      "name": "Precisão",
-      "buy": "Practicar accuracy",
-      "description": "Increases your accuracy rates.",
-      "effect": "Increases your accuracy rates by {value} %"
-    },
-    "focus": {
-      "name": "Concentração",
-      "buy": "Practicar focus",
-      "description": "Decreases your miss rate.",
-      "effect": "Decreases your miss rate by {value} %"
-    } ,
-    "technique": {
-      "name": "Técnica",
-      "buy": "Practicar technique",
-      "description": "Decreases your miss rate.",
-      "effect": "Decreases your miss rate by {value} %"
-    },
-    "jacks": {
-      "name": "Jacks",
-      "buy": "Practicar jacks",
-      "description": "Decreases your miss rate.",
-      "effect": "Increases star rating cap by {value}"
-    },
-    "trilling": {
-      "name": "Trilling",
-      "buy": "Practicar trilling",
-      "description": "Decreases your miss rate.",
-      "effect": "Increases star rating cap by {value}"
-    }
-  },
-  "setup": {
-    "name": "Setup",
-    "description": "TO DO",
-    "pc": {
-      "name": "Computer",
-      "description": "Increases your combo.",
-      "effect": "Increases your combo cap by {value}.",
-      "magalhaes": {
-        "name": "Magalhaes",
-        "description": "Magalhaes was the laptop of the future."
-      },
-      "laptop": {
-        "name": "Laptop",
-        "description": "A regular consumer laptop."
-      },
-      "desktop": {
-        "name": "Desktop PC",
-        "description": "A regular consumer desktop."
-      },
-      "gaming": {
-        "name": "Gaming PC",
-        "description": "The computer every gamer dreams of."
-      }
-    },
-    "keyboard": {
-      "name": "Keyboard",
-      "description": "Increases your Jacking and Reading skills.",
-      "effect": "Increases your Jacking and Reading skills by {value}.",
-      "membrane": {
-        "name": "Membrane keyboard",
-        "description": "TO DO"
-      },
-      "hybrid": {
-        "name": "Hybrid keyboard",
-        "description": "TO DO"
-      },
-      "mechanical": {
-        "name": "Mechanical keyboard",
-        "description": "TO DO"
-      },
-      "rgb": {
-        "name": "RGB Mechanical Keyboard",
-        "description": "TO DO"
-      }
-    },
-    "monitor": {
-      "name": "Monitor",
-      "description": "Increases your combo.",
-      "effect": "Increases your combo cap by {value}.",
-      "60": {
-        "name": "60 Hz Monitor",
-        "description": "TO DO"
-      },
-      "100": {
-        "name": "100 Hz Monitor",
-        "description": "TO DO"
-      },
-      "144": {
-        "name": "144 Hz Monitor",
-        "description": "TO DO"
-      },
-      "240": {
-        "name": "240 Hz Monitor",
-        "description": "TO DO"
-      }
-    },
-    "chair": {
-      "plastic": {
-        "name": "Plastic Chair",
-        "description": "TO DO"
-      },
-      "wood": {
-        "name": "Wooden Chair",
-        "description": "TO DO"
-      },
-      "office": {
-        "name": "Office Chair",
-        "description": "TO DO"
-      },
-      "gaming": {
-        "name": "Gaming Chair",
-        "description": "TO DO"
-      }
-    },
-    "headset": {
-      "speakers": {
-        "name": "Speakers",
-        "description": "TO DO"
-      },
-      "earphones": {
-        "name": "Earphones",
-        "description": "TO DO"
-      },
-      "headphones": {
-        "name": "Headphones",
-        "description": "TO DO"
-      },
-      "airpods": {
-        "name": "Airpods",
-        "description": "TO DO"
-      }
-    }
-  },
-  "cheats": {
-    "name": "Batotas",
-    "description": "Trade other players respect for #1 ranks in the leaderboard.",
-    "bot": {
-      "name": "Bot",
-      "buy": "Build a bot",
-      "description": "TO DO",
-      "effect": "Taps {value} key every second."
-    },
-    "macro": {
-      "name": "Macro",
-      "buy": "Program a macro",
-      "description": "Gengaozo Fucc time.",
-      "effect": "Every key tap counts as {value}."
-    },
-    "pause": {
-      "name": "Pause",
-      "buy": "Pause the game",
-      "description": "Pausing is not cheating.",
-      "effect": "Increases Stamina regeneration by {value}."
-    }
-  },
-  "upgrades": {
-    "name": "Melhoramentos",
-    "description": "TO DO"
-  },
-  "achievements": {
-    "name": "Conquistas",
-    "description": "TO DO",
-    "foolmoon": {
-      "name": "Fool Moon Night",
-      "description": "WTF 70 KPS PogChamp.",
-      "requirement": "Reach 70 kps.",
-      "effect": "TO DO"
-    },
-    "firststream": {
-      "name": "First stream",
-      "description": "0 viewers, but who cares.",
-      "requirement": "Enter streamer mode.",
-      "effect": "TO DO"
-    },
-    "firsttournament": {
-      "name": "First tournament",
-      "description": "Imagine the nerves.",
-      "requirement": "Enter tournament mode.",
-      "effect": "TO DO"
-    }
-  },
-  "mutations": {
-    "name": "Mutações",
-    "description": "TO DO",
-    "xp": {
-      "name": "Fool Moon Night",
-      "description": "WTF 70 KPS PogChamp.",
-      "requirement": "Reach 70 kps.",
-      "effect": "TO DO"
-    }
+    "madeby": "Feito por ",
+    "version": "Versão ",
+    "discord": "Discord",
+    "donate": "Doar"  
   }
 }
