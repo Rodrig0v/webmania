@@ -94,10 +94,10 @@ export default {
         for(let item of e.dataTransfer.items) {
           files.push(item.webkitGetAsEntry())
         }
-        let songPicker = document.getElementById('songPicker')
-        if(songPicker != null) {
+        let header = document.getElementById('header')
+        if(header != null) {
           let newDifficultiesEvent = new CustomEvent('newDifficulties', {'detail': await FileParser.parseFiles(files)})
-          songPicker.dispatchEvent(newDifficultiesEvent)
+          header.dispatchEvent(newDifficultiesEvent)
         }
       } catch(err) {
         this.errorCode = err

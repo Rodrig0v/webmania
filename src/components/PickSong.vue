@@ -1,5 +1,5 @@
 <template>
-  <div id="songPicker" v-on:newDifficulties="this.newDifficulties">
+  <div>
     <v-card v-if="difficulties.length == 0">
       <v-card-text>
         <v-row class="d-flex flex-column" dense align="center" justify="center">
@@ -80,7 +80,6 @@ export default {
   data() {
     return {
       difficultyLogo: require('@/assets/app/logo-dark.png'),
-      difficulties: [],
       selectedDifficulty: 0,
       songRate: 1,
       timingWindows: 0,
@@ -94,6 +93,7 @@ export default {
       ],
     }
   },
+  props: ['difficulties'],
   computed: {
     computedBpm: {
       get () {
@@ -135,13 +135,18 @@ export default {
       }
     },
   },
+  watch:
+  {
+    'difficulties'(){
+        this.newDifficulties()
+
+    }
+  },
   methods: {
-    newDifficulties(e) {
-      this.difficulties = e.detail
+    newDifficulties() {
       this.selectedDifficulty = 0
       this.songRate = 1
       this.calcStarRatings()
-      this.$emit('open')
     },
     changeDifficulty(index) {
       this.selectedDifficulty = index

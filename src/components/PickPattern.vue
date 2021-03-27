@@ -6,9 +6,12 @@
         {{ $t('header.pickpattern') }}
       </v-card-title>
 
+      <div style="text-align: center">
+        Coming soon
+        </div>
       <!--v-divider/-->
 
-      <v-card-text>
+      <!--<v-card-text>
         <v-select
           :items="keyModes"
           v-model="computedKeyMode"
@@ -19,7 +22,7 @@
           :rules="bpmRules"
           v-model="computedBpm"
             ></v-text-field>
-      </v-card-text>
+      </v-card-text>-->
 
       <!--v-divider/-->
 

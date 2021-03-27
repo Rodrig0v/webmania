@@ -2,7 +2,8 @@
 
 function beatmapParser() {
   var beatmap = {
-    keyTimings: []
+    timingPoints: [],
+    timingPointsLines: [],
   }
   
   var tags = {
@@ -62,6 +63,63 @@ function beatmapParser() {
     return 16;
   };
 
+  var processTimingPoints = function () {
+    let currentBPM = beatmap.timingPointsLines[0].bpm
+    let currentBeat = 0
+    let currentTime = - Number(beatmap.OFFSET) * 1000
+    for(let timing of beatmap.timingPointsLines) {
+      let beat = timing.beat
+      let time = currentTime + (beat - currentBeat) * 60000 / currentBPM
+      if(timing.bpm) {
+        currentBPM = timing.bpm
+        beatmap.timingPoints.push({
+          t: time,
+          x: beat,
+          dx: currentBPM / 60000,
+          bpm: currentBPM,
+          inclusive: true,
+        })
+      } else {
+        beatmap.timingPoints.push({
+          t: time,
+          x: beat,
+          dx: 0,
+          bpm: currentBPM,
+          inclusive: true,
+        })
+        time += timing.time
+        beatmap.timingPoints.push({
+          t: time,
+          x: beat,
+          dx: currentBPM / 60000,
+          bpm: currentBPM,
+          inclusive: false,
+        })
+      }
+      currentBeat = beat
+      currentTime = time
+    }
+  }
+
+  var getTimingPoint = function (beat) {
+    for(let i = 0; i < beatmap.timingPoints.length; i++) {
+      if(beatmap.timingPoints[i + 1]) {
+        if(beatmap.timingPoints[i + 1].inclusive && beat <= beatmap.timingPoints[i + 1].x) {
+          return beatmap.timingPoints[i]
+        } else if(!beatmap.timingPoints[i + 1].inclusive && beat < beatmap.timingPoints[i + 1].x) {
+          return beatmap.timingPoints[i]
+        }
+      } else {
+        return beatmap.timingPoints[i]
+      }
+    }
+  }
+
+  var getTime = function (beat) {
+    let timingPoint = getTimingPoint(beat)
+    return (beat - timingPoint.x) / (timingPoint.dx || 1) + timingPoint.t
+  }
+
   var buildBeatmap = function(str, opts) {
     if (!opts) opts = {};
     let lines = str.replace(/\/\/.*$/gm, "").replace(/;/gm, "").split("#");
@@ -95,6 +153,17 @@ function beatmapParser() {
             beatmap[tag] = val;
         }
     }
+
+    for(let bpm of beatmap.BPMS) {
+      beatmap.timingPointsLines.push({ beat: Number(bpm[0]), bpm: Number(bpm[1])})
+    }
+    for(let stop of beatmap.STOPS) {
+      beatmap.timingPointsLines.push({ beat: Number(stop[0]), time: Number(stop[1]) * 1000})
+    }
+    
+    beatmap.timingPointsLines.sort((a,b) => a.beat == b.beat ? a.time ? 1 : -1 : a.beat - b.beat)
+    processTimingPoints()
+
     beatmap.NUMBERLONGNOTES = []
     beatmap.NUMBERNOTES = []
     beatmap.TOTALTIME = []
@@ -107,27 +176,23 @@ function beatmapParser() {
         let notes = beatmap.NOTES[i].trim().split(/,\s*/);
         let bars = [];
         let pendingLns = [];
-        let currentBPMIndex = 0;
-        let currentSTOPIndex = 0;
-        let currentTime = -beatmap.OFFSET * 1000
         for (let j in notes) {
             let barNotes = notes[j].trim().replace(/\s+/gm, " ").split(/\s+/);
             for (let k in barNotes) {
                 barNotes[k] = barNotes[k].split("");
-                let beat = k
+                let measure = Number(j)
+                let beat = Number(k)
                 let barDivision = barNotes.length
-                let currentBar = j * 4 + (beat / barDivision * 4)
-                while(currentSTOPIndex < beatmap.STOPS.length && beatmap.STOPS[currentSTOPIndex][0] < currentBar) {
-                  currentTime += beatmap.STOPS[currentSTOPIndex][1] * 1000
-                  currentSTOPIndex++
-                }
+                let currentBeat = (measure + beat / barDivision) * 4
+                let currentTime = getTime(currentBeat)
+                let currentTiming = getTiming(beat, barDivision)
                 for(let l = 0; l < barNotes[k].length; l++) {
                   let lane = l
                   let notetype = barNotes[beat][lane]
                   if(notetype == '1') {
                     let note = {
                       startTime: currentTime,
-                      timing: getTiming(beat, barDivision),
+                      timing: currentTiming,
                       objectName: 'note',
                       hitSound: null,
                       soundTypes: [],
@@ -138,7 +203,7 @@ function beatmapParser() {
                   } else if(notetype == '2' || notetype == '4') {
                     let note = {
                       startTime: currentTime,
-                      timing: getTiming(beat, barDivision),
+                      timing: currentTiming,
                       objectName: 'longnote',
                       hitSound: null,
                       soundTypes: [],
@@ -153,10 +218,6 @@ function beatmapParser() {
                     note.endTime = currentTime
                   }
                 }
-                while(currentBPMIndex + 1 < beatmap.BPMS.length && beatmap.BPMS[currentBPMIndex + 1][0] <= currentBar) {
-                  currentBPMIndex++
-                }
-                currentTime += 60000 / beatmap.BPMS[currentBPMIndex][1] / barDivision * 4
             }
             bars.push([parseInt(j), barNotes]);
         }
@@ -178,7 +239,7 @@ function beatmapParser() {
           numberLongnotes: beatmap.NUMBERLONGNOTES[i],
           backgroundFilename: beatmap.BACKGROUND == '' ? 'BG.png' : beatmap.BACKGROUND,
           notes: beatmap.ACTUALNOTES[i],
-          hitSoundsFilenames: [],
+          hitSoundsFilenames: [beatmap.MUSIC],
           timeSounds: [{ startTime: 0, name: beatmap.MUSIC}],
           offset: 0,
         }

@@ -4,20 +4,90 @@ import BeatmaniaParser from '../plugins/beatmania-parser'
 import StepmaniaParser from '../plugins/stepmania-parser'
 import * as fflate from 'fflate';
 
+var findFile = function(fileName, files) {
+  let folder = files
+  let actualFileName = fileName
+  let path = fileName.split('\\')
+  if(path.length == 1)
+    path = fileName.split('/')
+  if(path.length > 1) {
+    for(let i = 0; i < path.length - 1; i++) {
+      folder = folder.find((file) => file.name.toLowerCase() == path[i].toLowerCase()).files
+    }
+    actualFileName = path[path.length - 1]
+  }
+  let file = folder.find((file) => file.name.toLowerCase() == actualFileName.toLowerCase())
+  if(file != null) return file
+  // try another file with same name but different extension
+  return folder.find(
+    (file) =>
+    file.name.match(/\.[a-zA-Z0-9]+/) != null && actualFileName.match(/\.[a-zA-Z0-9]+/) != null
+      ?
+        file.name.substring(0, file.name.length - file.name.match(/\.[a-zA-Z0-9]+/)[0].length).toLowerCase()
+        ==
+        actualFileName.substring(0, actualFileName.length - actualFileName.match(/\.[a-zA-Z0-9]+/)[0].length).toLowerCase()
+      :
+      false
+  )
+}
+
+var findFileInZip = function(fileName, zipContent) {
+  let folder = zipContent
+  let actualFileName = fileName
+  let path = fileName.split('\\')
+  if(path.length == 1)
+    path = fileName.split('/')
+  if(path.length > 1) {
+    for(let i = 0; i < path.length - 1; i++) {
+      folder = folder[path[i]]
+    }
+    actualFileName = path[path.length - 1]
+  }
+  let file = Object.keys(folder).find((filename) => filename == actualFileName)
+  if(file != null) return file
+  // try another file with same name but different extension
+  return Object.keys(folder).find(
+    (filename) =>
+    filename.match(/\.[a-zA-Z0-9]+/) != null && actualFileName.match(/\.[a-zA-Z0-9]+/) != null
+      ?
+        file.name.substring(0, filename.length - filename.match(/\.[a-zA-Z0-9]+/)[0].length).toLowerCase()
+        ==
+        actualFileName.substring(0, actualFileName.length - actualFileName.match(/\.[a-zA-Z0-9]+/)[0].length).toLowerCase()
+      :
+      false
+  )
+}
+
 var getFileEntriesFromDirectory = async function(directory) {
+  var dirReader = directory.createReader();
+  var allEntries = [];
+  var numEntries = -1
+  
+  while(numEntries != allEntries.length) {
+    numEntries = allEntries.length
+    allEntries = allEntries.concat(await readDirectory(dirReader))
+  }
+
+  return allEntries;
+}
+
+var readDirectory = async function(reader) {
   return new Promise((resolve, reject) => {
-    directory.createReader().readEntries((entries) => resolve(entries), (e) => reject(e))
+    reader.readEntries((entries) => resolve(entries), (e) => reject(e))
   })
 }
 
 var readAllFileEntries = async function(fileEntries) {
-  let promises = []
+  let files = []
   for(let fileEntry of fileEntries) {
     if(fileEntry.isFile) {
-      promises.push(readFileEntry(fileEntry))
+      files.push(await readFileEntry(fileEntry))
+    } else if(fileEntry.isDirectory) {
+      let fileEntries = await getFileEntriesFromDirectory(fileEntry);
+      files.push({ name: fileEntry.name, files: await readAllFileEntries(fileEntries) })
     }
   }
-  return Promise.all(promises)
+  return files
 }
 
 var readFileEntry = async function(fileEntry) {
@@ -53,24 +123,20 @@ var unzipFile = async function(zip) {
 var processBeatmaniaFolder = async function(files) {
   var difficultyFiles = []
   for(let file of files) {
-    if(file.name.match(/\.bms$/i) != null) {
+    if(file.name.match(/\.bms$/i) != null || file.name.match(/\.bme$/i) != null || file.name.match(/\.bml$/i) != null || file.name.match(/\.pms$/i) != null) {
       difficultyFiles.push(file)
     }
   }
   let difficulties = []
+  let hitSounds = {}
   var enc = new TextDecoder('utf-8');
   for(var difficultyFile of difficultyFiles) {
-    let beatmap = BeatmaniaParser.parseContent(enc.decode(await readFileAsArrayBuffer(difficultyFile)))
-    let difficulty = await processDifficulty(files, beatmap)
+    let beatmap = BeatmaniaParser.parseContent(enc.decode(await readFileAsArrayBuffer(difficultyFile)), difficultyFile.name.match(/\.([a-zA-Z0-9]+)$/i)[1])
+    let difficulty = await processDifficulty(files, beatmap, hitSounds)
     if(difficulty)
       difficulties.push(difficulty)
   }
   return difficulties
-}
-
-
-var processO2jamFolder = async function(files) {
-  O2jamParser.parseContent(files)
 }
 
 var processStepmaniaFolder = async function(files) {
@@ -81,6 +147,7 @@ var processStepmaniaFolder = async function(files) {
     }
   }
   let difficulties = []
+  let hitSounds = {}
   var enc = new TextDecoder('utf-8');
   for(var difficultyFile of difficultyFiles) {
     let beatmaps
@@ -90,7 +157,7 @@ var processStepmaniaFolder = async function(files) {
       console.log(err)
     }
     for(let beatmap of beatmaps) {
-      let difficulty = await processDifficulty(files, beatmap)
+      let difficulty = await processDifficulty(files, beatmap, hitSounds)
       if(difficulty)
         difficulties.push(difficulty)
     }
@@ -106,47 +173,67 @@ var processOsuFolder = async function(files) {
     }
   }
   let difficulties = []
+  let hitSounds = {}
   var enc = new TextDecoder('utf-8');
   for(var difficultyFile of difficultyFiles) {
     let beatmap = OsuParser.parseContent(enc.decode(await readFileAsArrayBuffer(difficultyFile)))
-    let difficulty = await processDifficulty(files, beatmap)
+    let difficulty = await processDifficulty(files, beatmap, hitSounds)
     if(difficulty)
       difficulties.push(difficulty)
   }
   return difficulties
 }
 
-var processDifficulty = async function(files, beatmap) {
+var processDifficulty = async function(files, beatmap, hitSounds) {
     let image
-    let hitSounds = {}
-    let timeSounds = []
     try {
+      let promises = []
       for(let hitSoundFilename of beatmap.hitSoundsFilenames) {
-        let hitSoundFile = files.find((file) => file.name.toLowerCase() == hitSoundFilename.toLowerCase())
-        if(hitSoundFile == null) {
-          hitSoundFile = files.find((file) => file.name.substring(0, file.name.length - file.name.match(/\.[a-zA-Z0-9]+/)[0].length).toLowerCase() == hitSoundFilename.substring(0, hitSoundFilename.length - hitSoundFilename.match(/\.[a-zA-Z0-9]+/)[0].length).toLowerCase())
-        }
-        if(hitSoundFile == null) continue
-        hitSounds[hitSoundFilename] = 'data:audio/' + hitSoundFile.name.match(/\.([a-zA-Z0-9]+)$/i)[1] + ';base64,' + Buffer.from(await readFileAsArrayBuffer(hitSoundFile)).toString('base64')
+        if(hitSounds[hitSoundFilename]) continue
+        promises.push(new Promise((resolve) => {
+          let hitSoundFile = findFile(hitSoundFilename, files)
+          if(hitSoundFile != null)
+            readFileAsArrayBuffer(hitSoundFile).then((value) => {
+              hitSounds[hitSoundFilename] = 'data:audio/' + hitSoundFile.name.match(/\.([a-zA-Z0-9]+)$/i)[1] + ';base64,' + Buffer.from(value).toString('base64')
+            })
+            resolve()
+        }))
       }
-      for(let timeSound of beatmap.timeSounds) {
-        let timeSoundFile = files.find((file) => file.name.toLowerCase() == timeSound.name.toLowerCase())
-        if(timeSoundFile == null) {
-          timeSoundFile = files.find((file) => file.name.substring(0, file.name.length - file.name.match(/\.[a-zA-Z0-9]+/)[0].length).toLowerCase() == timeSound.name.substring(0, timeSound.name.length - timeSound.name.match(/\.[a-zA-Z0-9]+/)[0].length).toLowerCase())
-        }
-        if(timeSoundFile == null) continue
-        timeSounds.push({ startTime: timeSound.startTime , sound: 'data:audio/' + timeSoundFile.name.match(/\.([a-zA-Z0-9]+)$/i)[1] + ';base64,' + Buffer.from(await readFileAsArrayBuffer(timeSoundFile)).toString('base64') })
-      }
-      let imageFile = files.find((file) => file.name == beatmap.backgroundFilename)
+      await Promise.all(promises)
+      let imageFile = await findFile(beatmap.backgroundFilename, files)
       if(imageFile != null)
         image = 'data:image/png;base64,' + Buffer.from(await readFileAsArrayBuffer(imageFile)).toString('base64')
-      else
-        image = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='
     } catch(err) {
       console.log(err)
       return null
     }
-    return { beatmap: beatmap, image: image, hitSounds: hitSounds, timeSounds: timeSounds }
+    return { beatmap: beatmap, image: image, hitSounds: hitSounds, starRating: 0 }
+}
+
+var processO2jamFolder = async function(files) {
+  var difficultyFiles = []
+  for(let file of files) {
+    if(file.name.match(/\.ojn$/i) != null) {
+      difficultyFiles.push(file)
+    }
+  }
+  let difficulties = []
+  let hitSounds = {}
+  var enc = new TextDecoder('utf-8');
+  for(var difficultyFile of difficultyFiles) {
+    let beatmaps
+    try {
+    beatmaps = O2jamParser.parseContent(enc.decode(await readFileAsArrayBuffer(difficultyFile)))
+    } catch(err) {
+      console.log(err)
+    }
+    for(let beatmap of beatmaps) {
+      let difficulty = await processDifficulty(files, beatmap, hitSounds)
+      if(difficulty)
+        difficulties.push(difficulty)
+    }
+  }
+  return difficulties
 }
 
 var processOsz = async function(file) {
@@ -164,34 +251,31 @@ var processOsz = async function(file) {
     }
   }
   let difficulties = []
+  let hitSounds = {}
   var enc = new TextDecoder('utf-8');
   for(var difficultyFile of difficultyFiles) {
     let image
     let beatmap = OsuParser.parseContent(enc.decode(difficultyFile))
-    let hitSounds = {}
-    let timeSounds = []
     try {
+      let promises = []
       for(let hitSoundFilename of beatmap.hitSoundsFilenames) {
-        console.log(hitSoundFilename)
-        let hitSoundFile = Object.keys(zipContent).find((filename) => filename == hitSoundFilename)
-        if(hitSoundFile == null) {
-          hitSoundFile = Object.keys(zipContent).find((filename) => filename.substring(0, filename.length - filename.match(/\.[a-zA-Z0-9]+/)[0].length) == hitSoundFilename.substring(0, hitSoundFilename.length - hitSoundFilename.match(/\.[a-zA-Z0-9]+/)[0].length))
-        }
-        hitSounds[hitSoundFilename] = 'data:audio/' + hitSoundFile.match(/\.([a-zA-Z0-9]+)$/i)[1] + ';base64,' + Buffer.from(zipContent[hitSoundFile]).toString('base64')
+        if(hitSounds[hitSoundFilename]) continue
+        promises.push(new Promise((resolve) => {
+          let hitSoundFile = findFileInZip(hitSoundFilename, zipContent)
+          if(hitSoundFile != null)
+            hitSounds[hitSoundFilename] = 'data:audio/' + hitSoundFile.match(/\.([a-zA-Z0-9]+)$/i)[1] + ';base64,' + Buffer.from(zipContent[hitSoundFile]).toString('base64')
+          resolve()
+        }))
       }
-      for(let timeSound of beatmap.timeSounds) {
-        let timeSoundFile = Object.keys(zipContent).find((filename) => filename.toLowerCase() == timeSound.name.toLowerCase())
-        if(timeSoundFile != null) {
-          timeSounds.push({ startTime: timeSound.startTime , sound: 'data:audio/' + timeSoundFile.match(/\.([a-zA-Z0-9]+)$/i)[1] + ';base64,' + Buffer.from(zipContent[timeSoundFile]).toString('base64') })
-        }
-      }
-      if(zipContent[beatmap.backgroundFilename] != null)
-        image ='data:image/png;base64,' + Buffer.from(zipContent[beatmap.backgroundFilename]).toString('base64');
+      await Promise.all(promises)
+      let imageFile = await findFileInZip(beatmap.backgroundFilename, zipContent)
+      if(imageFile != null)
+        image ='data:image/png;base64,' + Buffer.from(zipContent[imageFile]).toString('base64');
     } catch(err) {
       console.log(err)
       continue
     }
-    difficulties.push({ beatmap: beatmap, image: image, hitSounds: hitSounds, timeSounds: timeSounds })
+    difficulties.push({ beatmap: beatmap, image: image, hitSounds: hitSounds, starRating: 0 })
   }
   return difficulties
 }
@@ -200,15 +284,16 @@ export default {
   async parseFiles(items) {
     let files = []
     if(items.length == 0) return files
-    if(items[0].isDirectory) {
+    if(items.length == 1 && items[0].isDirectory) {
       let fileEntries = await getFileEntriesFromDirectory(items[0]);
       files = await readAllFileEntries(fileEntries)
     } else {
       files = await readAllFileEntries(items)
     }
     for(let file of files) {
-      let extension = file.name.match(/\.([a-zA-Z0-9]+)$/i)[1]
-      switch(extension) {
+      let extension = file.name.match(/\.([a-zA-Z0-9]+)$/i)
+      if(extension == null) continue
+      switch(extension[1]) {
         case 'osz':
           return processOsz(file)
         case 'osu':
@@ -216,6 +301,9 @@ export default {
         case 'ojn':
           return processO2jamFolder(files)
         case 'bms':
+        case 'bme':
+        case 'bml':
+        case 'pms':
           return processBeatmaniaFolder(files)
         case 'sm':
         case 'ssc':

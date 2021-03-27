@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar id="header" app flat color="primary">
+  <v-app-bar id="header" v-on:newDifficulties="newDifficulties" app flat color="primary">
     <div class="d-flex align-center">
       
         <v-img
@@ -61,7 +61,7 @@
           </v-btn>
         </template>
 
-        <PickSong v-on:open="pickSongDialog = true" v-on:close="pickSongDialog = false; blur()"/>
+        <PickSong :difficulties="difficulties" v-on:close="pickSongDialog = false; blur()"/>
       </v-dialog>
 
       <div style="width: 15px"></div>
@@ -88,6 +88,7 @@ export default {
   },
   data() {
     return {
+      difficulties: [],
       optionsDialog: false,
       pickPatternDialog: false,
       pickSongDialog: false,
@@ -112,6 +113,10 @@ export default {
     blur() {
       setTimeout(() => { document.activeElement.blur() }, 0)
     },
+    newDifficulties(event) {
+      this.difficulties = event.detail
+      this.pickSongDialog = true
+    }
   }
 }
 </script>

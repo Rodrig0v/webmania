@@ -216,13 +216,6 @@ function beatmapParser() {
   };
 
   /**
-   * Compute the total time and the draining time of the beatmap
-   */
-  var computeDuration = function () {
-    beatmap.totalTime = (beatmap.notes[beatmap.notes.length - 1].startTime - beatmap.notes[0].startTime) / 1000
-  };
-
-  /**
    * Read a single line, parse when key/value, store when further parsing needed
    * @param  {String|Buffer} line
    */
@@ -297,17 +290,16 @@ function beatmapParser() {
     objectLines.forEach(parseNote);
     beatmap.notes.sort(function (a, b) { return (a.startTime > b.startTime ? 1 : -1); });
 
-    computeDuration();
-
     if(beatmap.AudioFilename != 'virtual') {
       beatmap.timeSounds.push({ startTime: Number(beatmap.AudioLeadIn), name: beatmap.AudioFilename })
+      beatmap.hitSounds[beatmap.AudioFilename] = true
     }
     beatmap.timeSounds.sort(function (a, b) { return (a.startTime > b.startTime ? 1 : -1); });
 
     return {
       artist: beatmap.Artist,
       title: beatmap.Title,
-      length: beatmap.totalTime,
+      length: (beatmap.notes[beatmap.notes.length - 1].startTime - beatmap.notes[0].startTime) / 1000,
       difficultyName: beatmap.Version,
       bpm: beatmap.bpmMax,
       timingWindows: parseInt(beatmap.OverallDifficulty),

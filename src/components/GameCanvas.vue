@@ -20,12 +20,9 @@
 // TODOS
 // do pattern generator
 // pick column position start or center
-// Fix pausing on restart or restarting on pause
 // Do skin menu pretty
-// finish bms loader
-// fix load song from anywhere
 // show correct errors when parsing file fails
-// offset pause????
+// bms: add LN support
 
 import { mapActions, mapGetters } from 'vuex';
 import info from '../models/info';
@@ -77,8 +74,8 @@ export default {
       canvas: null,
       context: null,
       loading: false,
-      lastPauseTime: null,
       pauseStartTime: null,
+      pauseStopTime: null,
       paused: false,
       countdownStartTime: 0,
       playStartTime: 0,
@@ -174,10 +171,10 @@ export default {
     },
     processKeyDown(event) {
       if(!event.repeat) {
-        if (event.code == this.keyBindings['pause'].code) {
+        if (event.code == this.keyBindings['pause'].code && !this.loading) {
           this.playPause()
         }
-        if (event.code == this.keyBindings['restart'].code) {
+        if (event.code == this.keyBindings['restart'].code && !this.loading) {
           this.restart()
         }
         if (event.code == this.keyBindings['fullScreen'].code) {
@@ -187,35 +184,25 @@ export default {
           if(this.audioOffset + (event.shiftKey ? 1 : 5) <= 1500) {
             this.changeGeneralParameter({ id: 'audioOffset', value: this.audioOffset + (event.shiftKey ? 1 : 5) })
             if(this.playing) {
-              for(let timeSound of this.timeSounds) {
-                if(timeSound.start && !timeSound.end) {
-                  timeSound.howl.seek((Date.now() - this.playStartTime - timeSound.startTime - this.audioOffset) / 1000 / this.songRate, timeSound.id)
-                }
-              }
+             this.resetTimeSounds()
             }
           }
-            
           this.lastOffsetChangeTime = Date.now()
         }
         if (event.code == this.keyBindings['decrementAudioOffset'].code) {
           if(this.audioOffset - (event.shiftKey ? 1 : 5) >= -1500) {
             this.changeGeneralParameter({ id: 'audioOffset', value: this.audioOffset - (event.shiftKey ? 1 : 5) })
             if(this.playing) {
-              for(let timeSound of this.timeSounds) {
-                if(timeSound.start && !timeSound.end) {
-                  timeSound.howl.seek((Date.now() - this.playStartTime - timeSound.startTime - this.audioOffset) / 1000 / this.songRate, timeSound.id)
-                }
-              }
+              this.resetTimeSounds()
             }
           }
           this.lastOffsetChangeTime = Date.now()
         }
-        /*
-        if (event.code == 'KeyG') {
-          let now = Date.now()
-          console.log(this.song.seek() * 1000)
-          console.log(now - this.playStartTime)
-          this.song.seek((now - this.playStartTime) / 1000)
+        /*if (event.code == 'KeyG') {
+          for(let timeSound of this.timeSounds) {
+            console.log(timeSound.howl.seek())
+            console.log((Date.now() - this.playStartTime - timeSound.startTime - this.audioOffset) / 1000 / this.songRate)
+          }
         }*/
         let now = Date.now()
         let id = this.hasKey(event.code)
@@ -295,24 +282,23 @@ export default {
     playPause() {
       if(!this.playing) return
       if(this.paused) { // play
-        this.playStartTime += Date.now() - this.pauseStartTime + this.countdownTime
+        this.playStartTime = this.playStartTime + Date.now() - this.pauseStartTime + this.countdownTime
+        this.pauseStopTime = Date.now()
         this.countdownStartTime = Date.now()
         this.paused = false
-        for(let timeSound of this.timeSounds) {
-          if(timeSound.start && !timeSound.end) {
-            timeSound.howl.once('play', () => {
-              timeSound.howl.seek((Date.now() - this.playStartTime - timeSound.startTime - this.audioOffset) /  1000 / this.songRate, timeSound.id)
-            })
-            timeSound.howl.play(timeSound.id)
-          }
-        }
       } else { // pause
-        this.pauseStartTime = Date.now()
+        this.pauseStartTime = Date.now() - this.pauseStopTime < this.countdownTime ? Date.now() + this.countdownTime - (Date.now() - this.pauseStopTime) : Date.now()
+        this.countdownStartTime = 0
         this.paused = true
-        for(let timeSound of this.timeSounds) {
-          if(timeSound.start && !timeSound.end) {
-            timeSound.howl.pause(timeSound.id)
-          }
+        this.resetTimeSounds()
+      }
+    },
+    resetTimeSounds() {
+      for(let timeSound of this.timeSounds) {
+        if(timeSound.start) {
+          timeSound.start = false
+          if(this.hitSounds[timeSound.name] == null) continue
+          this.hitSounds[timeSound.name].stop(timeSound.id)
         }
       }
     },
@@ -402,7 +388,11 @@ export default {
       for(let timeSound of this.timeSounds) {
         if(!timeSound.start && Date.now() - this.playStartTime >= (timeSound.startTime + this.audioOffset) / this.songRate) {
           timeSound.start = true
-          timeSound.id = timeSound.howl.play()
+          if(this.hitSounds[timeSound.name] == null || (Date.now() - this.playStartTime - timeSound.startTime - this.audioOffset) / 1000 * this.songRate >= this.hitSounds[timeSound.name].duration()) continue
+          this.hitSounds[timeSound.name].once('play', () => {
+            this.hitSounds[timeSound.name].seek((Date.now() - this.playStartTime - timeSound.startTime - this.audioOffset) / 1000 * this.songRate , timeSound.id)
+          })
+          timeSound.id = this.hitSounds[timeSound.name].play()
         } 
       }
     },
@@ -896,15 +886,10 @@ export default {
       }
     },
     getFirstActiveNote(queue) {
-      let maxTimingWindow = this.getTimingWindow(5)
-      let now = Date.now()
       for(let i = 0; i < queue.length; i++) {
         let note = queue.peekAt(i)
         if(!note.missed) {
           return note
-        } else if(now - this.playStartTime - this.visualOffset - note.endTime >= maxTimingWindow) {
-          queue.shift()
-          i--
         }
       }
       return null
@@ -916,16 +901,16 @@ export default {
         let processed = false
         while(processed != true) {
           let note = this.getFirstActiveNote(queue)
-          note != null && ((note.objectName == 'longnote' && now - this.playStartTime - this.visualOffset - note.endTime >= lateTimingWindow) || now - this.playStartTime - this.visualOffset - note.startTime >= lateTimingWindow) && note.missed != true
+          note != null && ((note.objectName == 'longnote' && now - this.playStartTime - note.endTime >= lateTimingWindow) || now - this.playStartTime - note.startTime >= lateTimingWindow) && note.missed != true
           if(note == null) { // Empty
             processed = true
           } else if(note.objectName == 'longnote') { // Missed Longnote
-            if(now - this.playStartTime - this.visualOffset - note.startTime >= lateTimingWindow && !note.pressed) { // Missed start
+            if(now - this.playStartTime - note.startTime >= lateTimingWindow && !note.pressed) { // Missed start
               note.missed = true
               this.lastHitTime = now
               this.lastJudgement = 5
               this.breakCombo()
-            } else if(note.pressed && now - this.playStartTime - this.visualOffset - note.endTime >= lateTimingWindow) { // Missed end
+            } else if(note.pressed && now - this.playStartTime - note.endTime >= lateTimingWindow) { // Missed end
               queue.shift()
               this.lastHitTime = now
               this.lastJudgement = 5
@@ -934,7 +919,7 @@ export default {
               processed = true
             }
           } else { // Missed Normal note
-            if(now - this.playStartTime - this.visualOffset - note.startTime >= lateTimingWindow) {
+            if(now - this.playStartTime - note.startTime >= lateTimingWindow) {
               queue.shift()
               this.lastHitTime = now
               this.lastJudgement = 5
@@ -1065,8 +1050,10 @@ export default {
       this.loading = true
       this.difficulty = event.detail
       this.keyMode = event.detail.beatmap.keys
-      this.backgroundImage = new Image()
-      this.backgroundImage.src = event.detail.image
+      if(event.detail.image) {
+        this.backgroundImage = new Image()
+        this.backgroundImage.src = event.detail.image
+      }
       this.processKeyModeChange()
       this.timingWindows = event.detail.timingWindows
       this.songRate = event.detail.songRate
@@ -1086,36 +1073,28 @@ export default {
       }
       if(event.restart) {
         for(let hitSound of Object.values(this.hitSounds)) {
+          if(hitSound == null) continue
           hitSound.stop()
           hitSound.seek(0)
         }
         for(let timeSound of this.timeSounds) {
           if(timeSound.start) {
-            timeSound.howl.off('play')
-            timeSound.howl.off('end')
-            timeSound.howl.stop(timeSound.id)
-            timeSound.howl.seek(0, timeSound.id)
             timeSound.start = false
-            timeSound.end = false
           }
-          timeSound.howl.once('play', () => {
-            timeSound.howl.seek((Date.now() - this.playStartTime - timeSound.startTime - this.audioOffset) / 1000 / this.songRate, timeSound.id)
-          })
-          timeSound.howl.once('end', () => {
-            timeSound.end = true
-          })
         }
         this.startSong()
       } else {
-        for(let hitSound of Object.values(this.hitSounds))
+        for(let hitSound of Object.values(this.hitSounds)) {
+          if(hitSound == null) continue
           hitSound.unload()
+        }
         this.hitSounds = {}
-        for(let timeSound of this.timeSounds)
-          timeSound.howl.unload()
         this.timeSounds = []
         this.loadedSounds = 0
         this.totalSounds = 0
         for(let hitSound of Object.entries(event.detail.hitSounds)) {
+          if(hitSound[1] == null)
+            continue
           this.hitSounds[hitSound[0]] = new Howl({
             src: [hitSound[1]],
             rate: this.songRate,
@@ -1126,32 +1105,21 @@ export default {
             if(this.loadedSounds == this.totalSounds)
               this.startSong()
           })
-        }
-        for(let timeSound of event.detail.timeSounds) {
-          let timeSoundHowl = new Howl({
-            src: timeSound.sound,
-            rate: this.songRate,
-          })
-          let localTimeSound = {
-            start: false,
-            end: false,
-            startTime: timeSound.startTime,
-            howl: timeSoundHowl,
-          }
-          this.timeSounds.push(localTimeSound)
-          this.totalSounds++
-          timeSoundHowl.once('play', () => {
-              localTimeSound.start = true
-              localTimeSound.howl.seek((Date.now() - this.playStartTime - localTimeSound.startTime - this.audioOffset) / 1000 / this.songRate)
-            })
-          timeSoundHowl.once('end', () => {
-            localTimeSound.end = true
-          })
-          timeSoundHowl.once('load', () => {
+          this.hitSounds[hitSound[0]].once('loaderror', () => {
+            this.hitSounds[hitSound[0]] = null
             this.loadedSounds++
             if(this.loadedSounds == this.totalSounds)
               this.startSong()
           })
+        }
+        for(let timeSound of event.detail.beatmap.timeSounds) {
+          if(this.hitSounds[timeSound.name] == null) continue
+          let localTimeSound = {
+            start: false,
+            startTime: timeSound.startTime,
+            name: timeSound.name
+          }
+          this.timeSounds.push(localTimeSound)
         }
 
         if(this.loadedSounds == this.totalSounds)
@@ -1162,6 +1130,7 @@ export default {
       this.loading = false
       this.playing = true
       this.playStartTime = Date.now() + this.countdownTime
+      this.pauseStartTime = 0
       this.countdownStartTime = Date.now()
     },
     loadSkin() {
