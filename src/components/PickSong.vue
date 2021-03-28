@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-card v-if="difficulties.length == 0">
+    <v-card v-if="innerDifficulties.length == 0">
       <v-card-text>
         <v-row class="d-flex flex-column" dense align="center" justify="center">
           <v-icon class="mt-5" size="60">
@@ -16,22 +16,22 @@
       </v-card-text>
     </v-card>
 
-    <v-card v-if="difficulties.length != 0">
+    <v-card v-if="innerDifficulties.length != 0">
 
       <v-card-text>
         <div style="color: white">
-          <h2 class="text-center">{{ difficulties[selectedDifficulty].beatmap.artist }} - {{ difficulties[selectedDifficulty].beatmap.title }}</h2>
-          <h3 class="text-center ma-4">{{ difficulties[selectedDifficulty].beatmap.difficultyName }}</h3>
+          <h2 class="text-center">{{ innerDifficulties[selectedDifficulty].beatmap.artist }} - {{ innerDifficulties[selectedDifficulty].beatmap.title }}</h2>
+          <h3 class="text-center ma-4">{{ innerDifficulties[selectedDifficulty].beatmap.difficultyName }}</h3>
           <div class="d-flex flex-row justify-center align-center ma-4">
-            <img class="beatmap-image" :src="difficulties[selectedDifficulty].image"/>
+            <img class="beatmap-image" :src="innerDifficulties[selectedDifficulty].image"/>
             <div class="mx-4">
-              <div>{{ $t('picksong.starrating') }}: {{ difficulties[selectedDifficulty].starRating.toFixed(2) }}</div>
-              <div>{{ $t('picksong.length') }}: {{ difficulties[selectedDifficulty].beatmap.length / songRate | time }}</div>
-              <div>{{ $t('picksong.bpm') }}: {{ (difficulties[selectedDifficulty].beatmap.bpm * songRate).toFixed(0) }}</div>
-              <div>{{ $t('picksong.timingwindows') }}: {{ difficulties[selectedDifficulty].beatmap.timingWindows }}</div>
-              <div>{{ $t('picksong.keys') }}: {{ difficulties[selectedDifficulty].beatmap.keys }}</div>
-              <div>{{ $t('picksong.notes') }}: {{ difficulties[selectedDifficulty].beatmap.numberNotes }}</div>
-              <div>{{ $t('picksong.longnotes') }}: {{ difficulties[selectedDifficulty].beatmap.numberLongnotes }}</div>
+              <div>{{ $t('picksong.starrating') }}: {{ innerDifficulties[selectedDifficulty].starRating.toFixed(2) }}</div>
+              <div>{{ $t('picksong.length') }}: {{ innerDifficulties[selectedDifficulty].beatmap.length / songRate | time }}</div>
+              <div>{{ $t('picksong.bpm') }}: {{ (innerDifficulties[selectedDifficulty].beatmap.bpm * songRate).toFixed(0) }}</div>
+              <div>{{ $t('picksong.timingwindows') }}: {{ innerDifficulties[selectedDifficulty].beatmap.timingWindows }}</div>
+              <div>{{ $t('picksong.keys') }}: {{ innerDifficulties[selectedDifficulty].beatmap.keys }}</div>
+              <div>{{ $t('picksong.notes') }}: {{ innerDifficulties[selectedDifficulty].beatmap.numberNotes }}</div>
+              <div>{{ $t('picksong.longnotes') }}: {{ innerDifficulties[selectedDifficulty].beatmap.numberLongnotes }}</div>
             </div>
           </div>
           
@@ -40,7 +40,7 @@
             class="ma-2"
             large
             fab
-            v-for="(key, index) in difficulties"
+            v-for="(key, index) in innerDifficulties"
             :key="index"
             @click="changeDifficulty(index)"
           >
@@ -79,10 +79,12 @@ export default {
   name: 'PickSong',
   data() {
     return {
+      innerDifficulties: [],
       difficultyLogo: require('@/assets/app/logo-dark.png'),
       selectedDifficulty: 0,
       songRate: 1,
       timingWindows: 0,
+      starRatings: [],
       songRateRules: [
         v  => !isNaN(Number(v)) ? true : this.$t('rules.number'),
         v  => v >= 0.1 && v <= 20 ? true : this.$t('rules.value', {min: 0.1, max: 20}),
@@ -97,11 +99,11 @@ export default {
   computed: {
     computedBpm: {
       get () {
-        return this.difficulties[this.selectedDifficulty].beatmap.bpm * this.songRate
+        return this.innerDifficulties[this.selectedDifficulty].beatmap.bpm * this.songRate
       },
       set (value) {
         let number = Number(value)
-        let newRate = number / this.difficulties[this.selectedDifficulty].beatmap.bpm
+        let newRate = number / this.innerDifficulties[this.selectedDifficulty].beatmap.bpm
         for(var rule of this.songRateRules) {
           if (rule(newRate) != true) return
         }
@@ -138,32 +140,33 @@ export default {
   watch:
   {
     'difficulties'(){
+        this.innerDifficulties = [... this.difficulties]
         this.newDifficulties()
-
     }
   },
   methods: {
     newDifficulties() {
       this.selectedDifficulty = 0
       this.songRate = 1
+      this.starRatings = []
       this.calcStarRatings()
     },
     changeDifficulty(index) {
       this.selectedDifficulty = index
-      this.timingWindows = this.difficulties[this.selectedDifficulty].beatmap.timingWindows
+      this.timingWindows = this.innerDifficulties[this.selectedDifficulty].beatmap.timingWindows
     },
     calcStarRatings() {
-      this.timingWindows = this.difficulties[this.selectedDifficulty].beatmap.timingWindows
-      for(let difficulty of this.difficulties) {
+      this.timingWindows = this.innerDifficulties[this.selectedDifficulty].beatmap.timingWindows
+      for(let difficulty of this.innerDifficulties) {
         difficulty.starRating = StarRating.getStarRating(difficulty.beatmap.notes, parseInt(difficulty.beatmap.keys), this.songRate)
       }
-      this.difficulties.sort((difficulty1, difficulty2) => difficulty1.starRating - difficulty2.starRating)
+      this.innerDifficulties.sort((difficulty1, difficulty2) => difficulty1.starRating - difficulty2.starRating)
     },
     playSong() {
       this.$emit('close')
       let canvas = document.getElementById('gameCanvas')
       if(canvas != null) {
-        let loadSongEvent = new CustomEvent('loadSong', {'detail': {...this.difficulties[this.selectedDifficulty], songRate: this.songRate, timingWindows: this.timingWindows } })
+        let loadSongEvent = new CustomEvent('loadSong', {'detail': {...this.innerDifficulties[this.selectedDifficulty], songRate: this.songRate, timingWindows: this.timingWindows } })
         let makeFullscreenEvent = new CustomEvent('makeFullscreen')
         canvas.dispatchEvent(loadSongEvent)
         canvas.dispatchEvent(makeFullscreenEvent)

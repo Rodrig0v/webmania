@@ -1,8 +1,13 @@
 <template>
   <div>
     <Upload/>
-    <Header/>
-    <GameCanvas/>
+    <Header showSkinDrawer="showSkinDrawer" @toggleShowSkinDrawer="showSkinDrawer = !showSkinDrawer"/>
+    <v-main :style="mainStyle" id="main" v-resize="onResize">
+      <v-row style="height: 100%" class="justify-center ma-0">
+        <SkinDrawer v-if="showSkinDrawer"/>
+        <GameCanvas/>
+      </v-row>
+    </v-main>
     <Footer/>
   </div>
 </template>
@@ -13,6 +18,7 @@ import Upload from './Upload';
 import Header from './Header';
 import GameCanvas from './GameCanvas';
 import Footer from './Footer';
+import SkinDrawer from './SkinDrawer';
 
 export default {
   name: 'Game',
@@ -21,6 +27,13 @@ export default {
     GameCanvas,
     Footer,
     Upload,
+    SkinDrawer,
+  },
+  data() {
+    return {
+      showSkinDrawer: false,
+      mainStyle: '',
+    }
   },
   created () {
     addEventListener("beforeunload", this.processSave)
@@ -32,6 +45,10 @@ export default {
     processSave() {
       this.saveGame()
     },
+    onResize() {
+      var height = window.innerHeight - document.getElementById('footer').offsetHeight
+      this.mainStyle = 'height: ' + height + 'px'
+    }
   },
 }
 </script>

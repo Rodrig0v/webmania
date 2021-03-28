@@ -24,13 +24,13 @@ const mutations = {
   mutateConfigs(state, data) {
     state.configs = data.value
   },
-  reset(state, data) {
+  resetGame(state, data) {
     state.configs = {
       general: {
         fps: 255,
         name: data.value,
-        audioOffset: -20,
-        visualOffset: -10,
+        audioOffset: 0,
+        visualOffset: 0,
         scrollSpeed: 444,
         volume: 0.3,
       },
@@ -62,11 +62,11 @@ const mutations = {
         showOffset: true,
         showReceptors: true,
         showSongMeter: true,
-        skin: 'arrows',
+        skin: 'arrowsColor',
         songMeterSize: 0.05,
         upScroll: false,
       },
-      version: 0.3,
+      version: 0.31,
       patterns: [],
       keyBindings: {
         fullScreen: { code: 'Tab', key: 'Tab' },
@@ -125,6 +125,40 @@ const mutations = {
       }
     }
   },
+  resetSkin (state) {
+    state.configs.skin = {
+      accuracySize: 0.05,
+      backgroundOpacity: 0.4,
+      columnSize: 0.05,
+      comboPosition: 0.75,
+      comboSize: 0.05,
+      effectSize: 0.15,
+      fpsSize: 0.05,
+      hitPosition: 0.1,
+      infoSize: 0.025,
+      judgementPosition: 0.4,
+      judgementSize: 0.07,
+      judgementsSize: 0.05,
+      offsetSizeX: 0.25,
+      offsetSizeY: 0.05,
+      showAccuracy: true,
+      showBackground: true,
+      showCombo: true,
+      showEffects: true,
+      showFps: false,
+      showHint: true,
+      showInfo: true,
+      showJudgement: true,
+      showJudgements: true,
+      showLighting: true,
+      showOffset: true,
+      showReceptors: true,
+      showSongMeter: true,
+      skin: 'arrowsColor',
+      songMeterSize: 0.05,
+      upScroll: false,
+    }
+  },
   /* General */
   mutateGeneralParameter (state, data) {
     state.configs.general[data.id] = data.value
@@ -172,11 +206,19 @@ const actions = {
     })
   },
   resetGame({ commit }, data) {
-    commit('reset', data)
+    commit('resetGame', data)
     let canvas = document.getElementById('gameCanvas')
     if(canvas != null) {
       let resetGameEvent = new CustomEvent('resetGame')
       canvas.dispatchEvent(resetGameEvent)
+    }
+  },
+  resetSkin({ commit }) {
+    commit('resetSkin')
+    let canvas = document.getElementById('gameCanvas')
+    if(canvas != null) {
+      let skinChangedEvent = new CustomEvent('skinChanged')
+      canvas.dispatchEvent(skinChangedEvent)
     }
   },
   /* General */
@@ -185,8 +227,11 @@ const actions = {
   },
   changeVolume ({ commit }, data) {
     commit('mutateGeneralParameter', { id: 'volume', value: data.value })
-    let volumeChangedEvent = new CustomEvent('volumeChanged')
-    document.getElementById('gameCanvas').dispatchEvent(volumeChangedEvent)
+    let canvas = document.getElementById('gameCanvas')
+    if(canvas != null) {
+      let volumeChangedEvent = new CustomEvent('volumeChanged')
+      canvas.dispatchEvent(volumeChangedEvent)
+    }
   },
   changeFps ({ commit }, data) {
     commit('mutateGeneralParameter', { id: 'fps', value: data.value })

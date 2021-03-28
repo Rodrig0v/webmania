@@ -8,9 +8,6 @@
             {{ $t('header.general') }}
           </v-tab>
           <v-tab>
-            {{ $t('header.skin') }}
-          </v-tab>
-          <v-tab>
             {{ $t('header.keybinds') }}
           </v-tab>
         </v-tabs>
@@ -24,9 +21,6 @@
             <OptionsGeneral/>
           </v-tab-item>
           <v-tab-item :key="1">
-            <OptionsSkin/>
-          </v-tab-item>
-          <v-tab-item :key="2">
             <OptionsKeyBinds/>
           </v-tab-item>
         </v-tabs-items>
@@ -52,14 +46,12 @@
 <script>
 import OptionsGeneral from './OptionsGeneral';
 import OptionsKeyBinds from './OptionsKeyBinds';
-import OptionsSkin from './OptionsSkin';
 
 export default {
   name: 'Options',
   components: {
     OptionsGeneral,
     OptionsKeyBinds,
-    OptionsSkin
   },
   data() {
     return {

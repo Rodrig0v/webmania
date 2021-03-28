@@ -33,14 +33,20 @@
       "volume": "Volume (0-100%)"
     },
     "skin": {
+      "accuracy": "Accuracy",
+      "background": "Background",
+      "columns": "Columns",
+      "combo": "Combo",
+      "effects": "Effects",
+      "fps": "Fps",
+      "hint": "Hint line",
+      "info": "Info",
+      "judgement": "Judgement",
+      "score": "Score",
       "skin": "Skin",
-      "columnsize": "Column size (0-100% of total width)",
-      "comboposition": "Combo position (0-100% of total height)",
-      "combosize": "Combo size (0-100% of total height)",
-      "judgementposition": "Judgement position (0-100% of total height)",
-      "judgementsize": "Judgement size (0-100% of total height)",
-      "hitposition": "Hit position (0-100% of total height)",
-      "effectSize": "Effect Size (0-100% of total width)"
+      "time": "Time",
+      "timing": "Timing bar",
+      "upscroll": "Upscroll"
     },
     "keybinds": {
       "pause": "Pause",

@@ -3,7 +3,7 @@
     <v-col class="text-center" cols="12">
       <img width="16" height="12" class="locale" v-for="(locale) in locales" :key="locale.code" @click="$i18n.locale = locale.code" :src="locale.image">
       {{ $t('footer.version') }}
-      <strong>Beta 3</strong>
+      <strong>Beta 3.1</strong>
       {{ ' — ' }}
       {{ $t('footer.madeby') }}
       <strong>Rodrig0v</strong>

@@ -15,6 +15,13 @@
 
       <div style="width: 15px"></div>
 
+      <v-btn @click="$emit('toggleShowSkinDrawer')">
+        <v-icon left>mdi-palette</v-icon>
+        <span class="mr-2">{{ $t('header.skin') }}</span>
+      </v-btn>
+
+      <div style="width: 15px"></div>
+
       <v-dialog
         v-model="optionsDialog"
         max-width="700"
@@ -29,6 +36,8 @@
 
         <Options v-on:close="optionsDialog = false; blur()"/>
       </v-dialog>
+
+      
 
       <v-spacer></v-spacer>
 
@@ -94,6 +103,7 @@ export default {
       pickSongDialog: false,
     }
   },
+  props: ['showSkinDrawer'],
   computed: {
     getLogo() {
       return this.$vuetify.theme.dark ? require('@/assets/app/logo-dark.png') : require('@/assets/app/logo-light.png')

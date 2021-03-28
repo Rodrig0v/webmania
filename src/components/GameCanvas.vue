@@ -1,18 +1,16 @@
 <template>
-  <v-main>
-    <div id='canvasWrapper'>
-      <canvas
-      id='gameCanvas'
-      v-on:fpsChanged="this.processFpsChange"
-      v-on:keyModeChanged="this.processKeyModeChange"
-      v-on:skinChanged="this.processSkinChange"
-      v-on:makeFullscreen="this.processFullScreen"
-      v-on:volumeChanged="this.processVolumeChange"
-      v-on:resetGame="this.processReset"
-      v-on:loadSong="this.processLoadSong"
-      ></canvas>
-    </div>
-  </v-main>
+  <div id='canvasWrapper'>
+    <canvas
+    id='gameCanvas'
+    v-on:fpsChanged="this.processFpsChange"
+    v-on:keyModeChanged="this.processKeyModeChange"
+    v-on:skinChanged="this.processSkinChange"
+    v-on:makeFullscreen="this.processFullScreen"
+    v-on:volumeChanged="this.processVolumeChange"
+    v-on:resetGame="this.processReset"
+    v-on:loadSong="this.processLoadSong"
+    ></canvas>
+  </div>
 </template>
 
 <script>
@@ -20,7 +18,6 @@
 // TODOS
 // do pattern generator
 // pick column position start or center
-// Do skin menu pretty
 // show correct errors when parsing file fails
 // bms: add LN support
 
@@ -128,6 +125,7 @@ export default {
     'comboSize',
     'effectSize',
     'fps',
+    'fpsSize',
     'hitPosition',
     'hitPosition',
     'infoSize',
@@ -318,15 +316,20 @@ export default {
       }*/
       this.webmaniaBackgroundImage = new Image()
       this.webmaniaBackgroundImage.src = require('@/assets/app/background.jpg')
+
       this.canvas = document.getElementById('gameCanvas')
-      this.helperCanvas = document.createElement("canvas")
-      this.processResize()
       this.context = this.canvas.getContext('2d')
+      this.canvas.width = window.screen.width
+      this.canvas.height = window.screen.height
+
+      this.helperCanvas = document.createElement("canvas")
       this.helperContext = this.helperCanvas.getContext('2d')
+      this.helperCanvas.width = this.canvas.width
+      this.helperCanvas.height = this.canvas.height
+      
       //this.addNotes()
       //this.addNotesInterval = setInterval(() => this.addNotes(), 1000.0)
       this.gameLoopInterval = setInterval(this.updateCanvas, 1000.0 / this.fps)
-      window.addEventListener('resize', this.processResize)
     },
     updateCanvas() {
       if(this.playing && !this.paused)
@@ -398,6 +401,11 @@ export default {
     },
     clear() {
       this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+      this.context.fillStyle = 'black'
+      this.context.beginPath();
+      this.context.rect(0, 0, this.canvas.width, this.canvas.height);
+      this.context.closePath();
+      this.context.fill();
     },
     drawPaused() {
       this.context.font = (this.canvas.height * this.textSize).toFixed(0) + 'px Arial'
@@ -421,7 +429,12 @@ export default {
         this.canvas.width,
         this.canvas.height)
       this.context.globalAlpha = 1.0;
-      this.context.clearRect(this.canvas.width / 2 - this.columnSize * this.keyMode * this.canvas.width / 2, 0, this.columnSize * this.keyMode * this.canvas.width, this.canvas.height)
+
+      this.context.fillStyle = 'black'
+      this.context.beginPath();
+      this.context.rect(this.canvas.width / 2 - this.columnSize * this.keyMode * this.canvas.width / 2, 0, this.columnSize * this.keyMode * this.canvas.width, this.canvas.height);
+      this.context.closePath();
+      this.context.fill();
       /*} else {
         /*let now = Date.now()
         if(!this.lastFrameTime)
@@ -1013,32 +1026,6 @@ export default {
       this.processFpsChange()
       this.processVolumeChange()
     },
-    processResize() {
-      var screenWidth = window.screen.width
-      var screenHeight = window.screen.height
-      var width = window.innerWidth
-      var height = document.fullscreenElement ? window.innerHeight : window.innerHeight - document.getElementById('header').offsetHeight - document.getElementById('footer').offsetHeight
-      var screenScale = screenWidth / screenHeight
-      var scale = width / height
-      var canvasWrapper = document.getElementById('canvasWrapper')
-      canvasWrapper.style.width = Math.round(width) + 'px'
-      canvasWrapper.style.height = Math.round(height) + 'px'
-
-      if ( screenScale > scale ) {
-        this.canvas.width = width
-        this.canvas.height = width / screenScale
-        this.canvas.style.width = Math.round(width) + 'px'
-        this.canvas.style.height = Math.round(width / screenScale) + 'px'
-      }
-      else {
-        this.canvas.width = height * screenScale
-        this.canvas.height = height
-        this.canvas.style.width = Math.round(height * screenScale) + 'px'
-        this.canvas.style.height = Math.round(height) + 'px'
-      }
-      this.helperCanvas.width = this.canvas.width
-      this.helperCanvas.height = this.canvas.height
-    },
     processLoadSong(event) {
       if(event.restart && this.difficulty == null) return
       this.combo = 0
@@ -1227,7 +1214,6 @@ export default {
   destroyed () {
     removeEventListener('keydown', this.processKeyDown)
     removeEventListener('keyup', this.processKeyUp)
-    window.removeEventListener('resize', this.processResize)
 
     clearInterval(this.gameLoopInterval)
     //clearInterval(this.addNotesInterval)
@@ -1239,9 +1225,11 @@ export default {
 #gameCanvas {
     width: 100%;
     height: 100%;
-    background: black;
+    object-fit: contain;
 }
 #canvasWrapper {
+  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
