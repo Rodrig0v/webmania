@@ -1,5 +1,6 @@
 import OsuParser from '../plugins/osu-parser'
-import O2jamParser from '../plugins/o2jam-parser'
+import OJNParser from '../plugins/ojn-parser'
+import OJMParser from '../plugins/ojm-parser'
 import BeatmaniaParser from '../plugins/beatmania-parser'
 import StepmaniaParser from '../plugins/stepmania-parser'
 import * as fflate from 'fflate';
@@ -105,15 +106,6 @@ var readFileAsArrayBuffer = async function(file) {
   });
 }
 
-/*var readFileAsDataURL = async function(file) {
-  return new Promise((resolve, reject) => {
-      let fileReader = new FileReader();
-      fileReader.onload = (e) => resolve(e.target.result);
-      fileReader.onerror = (e) => reject(e.target.error.message);
-      fileReader.readAsArrayBuffer(file);
-  });
-}*/
-
 var unzipFile = async function(zip) {
   return new Promise((resolve, reject) => {
       fflate.unzip(new Uint8Array(zip), (err, unzipped) => !err ? resolve(unzipped) : reject(err));
@@ -211,28 +203,18 @@ var processDifficulty = async function(files, beatmap, hitSounds) {
 }
 
 var processO2jamFolder = async function(files) {
-  var difficultyFiles = []
+  let ojnFile
+  let ojmFile
   for(let file of files) {
     if(file.name.match(/\.ojn$/i) != null) {
-      difficultyFiles.push(file)
+      ojnFile = file
+    }
+    if(file.name.match(/\.ojm$/i) != null) {
+      ojmFile = file
     }
   }
-  let difficulties = []
-  let hitSounds = {}
-  var enc = new TextDecoder('utf-8');
-  for(var difficultyFile of difficultyFiles) {
-    let beatmaps
-    try {
-    beatmaps = O2jamParser.parseContent(enc.decode(await readFileAsArrayBuffer(difficultyFile)))
-    } catch(err) {
-      console.log(err)
-    }
-    for(let beatmap of beatmaps) {
-      let difficulty = await processDifficulty(files, beatmap, hitSounds)
-      if(difficulty)
-        difficulties.push(difficulty)
-    }
-  }
+  let hitSounds = OJMParser.parseContent(await readFileAsArrayBuffer(ojmFile))
+  let difficulties = OJNParser.parseContent(await readFileAsArrayBuffer(ojnFile), hitSounds)
   return difficulties
 }
 

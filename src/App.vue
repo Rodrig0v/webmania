@@ -27,9 +27,7 @@ export default {
   created: function () {
     this.loadGame()
     if(this.$store.state.configs == null) {
-      let name = prompt('Please enter your username', 'Jadong');
-      if(name == null) name = 'Jadong'
-      this.resetGame({ value: name })
+      this.resetGame()
     }
     this.changeLoading({ value: false })
   }

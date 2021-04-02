@@ -95,6 +95,10 @@ export default {
       ],
     }
   },
+  mounted() {
+    this.innerDifficulties = this.difficulties
+    this.newDifficulties()
+  },
   props: ['difficulties'],
   computed: {
     computedBpm: {

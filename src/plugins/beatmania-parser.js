@@ -312,7 +312,7 @@ function beatmapParser(extension) {
     return {
       artist: beatmap.artist,
       title: beatmap.title,
-      length: (beatmap.notes[beatmap.notes.length - 1].startTime - beatmap.notes[0].startTime) / 1000,
+      length: beatmap.notes[beatmap.notes.length - 1].startTime / 1000,
       difficultyName: beatmap.difficulty,
       bpm: beatmap.bpm,
       timingWindows: 7,

@@ -299,7 +299,7 @@ function beatmapParser() {
     return {
       artist: beatmap.Artist,
       title: beatmap.Title,
-      length: (beatmap.notes[beatmap.notes.length - 1].startTime - beatmap.notes[0].startTime) / 1000,
+      length: beatmap.notes[beatmap.notes.length - 1].startTime / 1000,
       difficultyName: beatmap.Version,
       bpm: beatmap.bpmMax,
       timingWindows: parseInt(beatmap.OverallDifficulty),
