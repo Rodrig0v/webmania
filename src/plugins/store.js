@@ -33,6 +33,7 @@ const mutations = {
         visualOffset: 0,
         scrollSpeed: 444,
         volume: 0.3,
+        fullscreen: true,
       },
       skin: {
         accuracySize: 0.05,
@@ -66,7 +67,7 @@ const mutations = {
         songMeterSize: 0.05,
         upScroll: false,
       },
-      version: 0.31,
+      version: 0.4,
       patterns: [],
       keyBindings: {
         fullScreen: { code: 'Tab', key: 'Tab' },
@@ -198,8 +199,8 @@ const actions = {
       return
     }
 
-    if(configs.version <= 0.3) {
-      //stuff
+    if(configs.version <= 0.31) {
+      configs.general.fullscreen = true
     }
     commit('mutateConfigs', {
       value: configs
@@ -285,6 +286,7 @@ const getters = {
   comboPosition: state => state.configs.skin.comboPosition,
   comboSize: state => state.configs.skin.comboSize,
   effectSize: state => state.configs.skin.effectSize,
+  fullscreen: state => state.configs.general.fullscreen,
   fpsSize: state => state.configs.skin.fpsSize,
   hitPosition: state => state.configs.skin.hitPosition,
   infoSize: state => state.configs.skin.infoSize,

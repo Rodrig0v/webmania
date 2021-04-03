@@ -28,7 +28,7 @@
               <div>{{ $t('picksong.starrating') }}: {{ innerDifficulties[selectedDifficulty].starRating.toFixed(2) }}</div>
               <div>{{ $t('picksong.length') }}: {{ innerDifficulties[selectedDifficulty].beatmap.length / songRate | time }}</div>
               <div>{{ $t('picksong.bpm') }}: {{ (innerDifficulties[selectedDifficulty].beatmap.bpm * songRate).toFixed(0) }}</div>
-              <div>{{ $t('picksong.timingwindows') }}: {{ innerDifficulties[selectedDifficulty].beatmap.timingWindows }}</div>
+              <!--div>{{ $t('picksong.timingwindows') }}: {{ innerDifficulties[selectedDifficulty].beatmap.timingWindows }}</div-->
               <div>{{ $t('picksong.keys') }}: {{ innerDifficulties[selectedDifficulty].beatmap.keys }}</div>
               <div>{{ $t('picksong.notes') }}: {{ innerDifficulties[selectedDifficulty].beatmap.numberNotes }}</div>
               <div>{{ $t('picksong.longnotes') }}: {{ innerDifficulties[selectedDifficulty].beatmap.numberLongnotes }}</div>
@@ -50,9 +50,9 @@
         </div>
 
         <div class="d-flex flex-row">
-          <v-text-field :label="$t('picksong.timingwindows')" class="mx-4" v-model="computedTimingWindows"></v-text-field>
-          <v-text-field :label="$t('picksong.bpm')" class="mx-4" v-model="computedBpm"></v-text-field>
-          <v-text-field :label="$t('picksong.songrate')" class="mx-4" v-model="computedSongRate"></v-text-field>
+          <v-text-field :rules="timingWindowsRules" :label="$t('picksong.timingwindows')" class="mx-4" v-model="computedTimingWindows"></v-text-field>
+          <v-text-field :rules="bpmRules" :label="$t('picksong.bpm')" class="mx-4" v-model="computedBpm"></v-text-field>
+          <v-text-field :rules="songRateRules" :label="$t('picksong.songrate')" class="mx-4" v-model="computedSongRate"></v-text-field>
         </div>
       </v-card-text>
 
@@ -61,9 +61,16 @@
         <v-btn
           color="blue darken-1"
           @click="playSong"
+          class="mx-4"
         >
           {{ $t('picksong.play') }}
         </v-btn>
+        <v-checkbox
+          :label="$t('header.fullscreen')"
+          v-model="computedFullScreen"
+          class="mx-4"
+        >
+        </v-checkbox>
         <v-spacer></v-spacer>
       </v-card-actions>
 
@@ -74,6 +81,7 @@
 
 <script>
 import StarRating from '../plugins/star-rating'
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
   name: 'PickSong',
@@ -92,6 +100,10 @@ export default {
         v  => !isNaN(Number(v)) ? true : this.$t('rules.number'),
         v  => v >= 0 && v <= 10 ? true : this.$t('rules.value', {min: 0, max: 10}),
       ],
+      bpmRules: [
+        v  => !isNaN(Number(v)) ? true : this.$t('rules.number'),
+        v  => v >= this.innerDifficulties[this.selectedDifficulty].beatmap.bpm * 0.1 && v <= this.innerDifficulties[this.selectedDifficulty].beatmap.bpm * 20 ? true : this.$t('rules.value', {min: this.innerDifficulties[this.selectedDifficulty].beatmap.bpm * 0.1 , max: this.innerDifficulties[this.selectedDifficulty].beatmap.bpm * 20 }),
+      ],
     }
   },
   mounted() {
@@ -100,6 +112,15 @@ export default {
   },
   props: ['difficulties'],
   computed: {
+    ...mapGetters(['fullscreen']),
+    computedFullScreen: {
+      get () {
+        return this.fullscreen
+      },
+      set (value) {
+        this.changeGeneralParameter({ id: 'fullscreen', value})
+      }
+    },
     computedBpm: {
       get () {
         return this.innerDifficulties[this.selectedDifficulty].beatmap.bpm * this.songRate
@@ -148,6 +169,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions(['changeGeneralParameter']),
     newDifficulties() {
       this.selectedDifficulty = 0
       this.songRate = 1
@@ -170,9 +192,11 @@ export default {
       let canvas = document.getElementById('gameCanvas')
       if(canvas != null) {
         let loadSongEvent = new CustomEvent('loadSong', {'detail': {...this.innerDifficulties[this.selectedDifficulty], songRate: this.songRate, timingWindows: this.timingWindows } })
-        let makeFullscreenEvent = new CustomEvent('makeFullscreen')
         canvas.dispatchEvent(loadSongEvent)
-        canvas.dispatchEvent(makeFullscreenEvent)
+        if(this.fullscreen) {
+          let makeFullscreenEvent = new CustomEvent('makeFullscreen')
+          canvas.dispatchEvent(makeFullscreenEvent)
+        }
       }
     }
   }
