@@ -24,11 +24,11 @@ const mutations = {
   mutateConfigs(state, data) {
     state.configs = data.value
   },
-  resetGame(state, data) {
+  resetGame(state) {
     state.configs = {
       general: {
         fps: 255,
-        name: data.value,
+        name: 'Jadong',
         audioOffset: 0,
         visualOffset: 0,
         scrollSpeed: 444,
@@ -205,8 +205,8 @@ const actions = {
       value: configs
     })
   },
-  resetGame({ commit }, data) {
-    commit('resetGame', data)
+  resetGame({ commit }) {
+    commit('resetGame')
     let canvas = document.getElementById('gameCanvas')
     if(canvas != null) {
       let resetGameEvent = new CustomEvent('resetGame')

@@ -22,7 +22,7 @@
 // bms: add LN support
 // add up to 10k mode
 
-// trocar para dropzone js?
+// fix weird ln glitch
 // fullscreen automatico button
 // probably best to add a lane cover feature at some point rather than just column movement
 // option to enable zero animation judgments

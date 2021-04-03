@@ -84,7 +84,6 @@ export default {
       selectedDifficulty: 0,
       songRate: 1,
       timingWindows: 0,
-      starRatings: [],
       songRateRules: [
         v  => !isNaN(Number(v)) ? true : this.$t('rules.number'),
         v  => v >= 0.1 && v <= 20 ? true : this.$t('rules.value', {min: 0.1, max: 20}),
@@ -152,7 +151,6 @@ export default {
     newDifficulties() {
       this.selectedDifficulty = 0
       this.songRate = 1
-      this.starRatings = []
       this.calcStarRatings()
     },
     changeDifficulty(index) {
@@ -160,7 +158,8 @@ export default {
       this.timingWindows = this.innerDifficulties[this.selectedDifficulty].beatmap.timingWindows
     },
     calcStarRatings() {
-      this.timingWindows = this.innerDifficulties[this.selectedDifficulty].beatmap.timingWindows
+      if(this.innerDifficulties[this.selectedDifficulty] != null)
+        this.timingWindows = this.innerDifficulties[this.selectedDifficulty].beatmap.timingWindows
       for(let difficulty of this.innerDifficulties) {
         difficulty.starRating = StarRating.getStarRating(difficulty.beatmap.notes, parseInt(difficulty.beatmap.keys), this.songRate)
       }

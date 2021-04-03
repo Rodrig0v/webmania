@@ -87,13 +87,14 @@ export default {
   },
   methods: {
     async onDrop(e) {
-      this.dragover = false;
       this.loading = true
       try {
         let files = []
         for(let item of e.dataTransfer.items) {
-          files.push(item.webkitGetAsEntry())
+          if (item != null && item.kind == 'file')
+            files.push(item.webkitGetAsEntry())
         }
+        if(files.length == 0) return
         let header = document.getElementById('header')
         if(header != null) {
           let newDifficultiesEvent = new CustomEvent('newDifficulties', {'detail': await FileParser.parseFiles(files)})

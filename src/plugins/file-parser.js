@@ -169,6 +169,7 @@ var processOsuFolder = async function(files) {
   var enc = new TextDecoder('utf-8');
   for(var difficultyFile of difficultyFiles) {
     let beatmap = OsuParser.parseContent(enc.decode(await readFileAsArrayBuffer(difficultyFile)))
+    if(beatmap == null) continue
     let difficulty = await processDifficulty(files, beatmap, hitSounds)
     if(difficulty)
       difficulties.push(difficulty)
@@ -238,6 +239,7 @@ var processOsz = async function(file) {
   for(var difficultyFile of difficultyFiles) {
     let image
     let beatmap = OsuParser.parseContent(enc.decode(difficultyFile))
+    if(beatmap == null) continue
     try {
       let promises = []
       for(let hitSoundFilename of beatmap.hitSoundsFilenames) {
