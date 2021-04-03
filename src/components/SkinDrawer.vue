@@ -9,6 +9,15 @@
         :label="$t('options.skin.skin')"
       ></v-select>
     </v-row>
+    <v-row class="my-0 mx-4">
+      <v-select
+        :items="bmsStyles"
+        item-text="label"
+        item-value="value"
+        v-model="computedBmsStyle"
+        :label="$t('options.skin.bmsstyle')"
+      ></v-select>
+    </v-row>
     <v-row v-for="(item, index) in items"
       :key="index"
       class="my-0 mx-4"
@@ -120,6 +129,20 @@ export default {
   data() {
     return {
       self: this,
+      bmsStyles: [
+        {
+          value: 'bmsnone',
+          label: this.$t('options.skin.bmsnone'),
+        },
+        {
+          value: 'bmsleft',
+          label: this.$t('options.skin.bmsleft'),
+        },
+        {
+          value: 'bmsright',
+          label: this.$t('options.skin.bmsright'),
+        },
+      ],
       skins: Object.keys(info.skins).map((skin) => { return { value: skin, label: this.$t('skins.' + skin) } }),
       items: [
         { id: 'options.skin.upscroll', toggle: 'upScroll' },
@@ -150,6 +173,7 @@ export default {
     ...mapGetters([
       'accuracySize',
       'backgroundOpacity',
+      'bmsStyle',
       'columnSize',
       'comboPosition',
       'comboSize',
@@ -191,19 +215,24 @@ export default {
         return this.skin
       },
       set (value) {
-        this.changeSkin({ value: value })
+        this.changeSkinParameterWithEvent({ id: 'skin', value })
       }
     },
+    computedBmsStyle: {
+      get () {
+        return this.bmsStyle
+      },
+      set (value) {
+        this.changeSkinParameterWithEvent({ id: 'bmsStyle', value })
+      }
+    }
   },
   methods: {
     ...mapActions([
-      'changeSkin',
+      'changeSkinParameterWithEvent',
       'changeSkinParameter',
       'resetSkin',
     ]),
-    onChangeSkin(value) {
-      this.changeSkin({ value })
-    },
     onChangeShowParameter(id, value) {
       this.changeSkinParameter({ id, value: value ? true : false })
     },
@@ -212,7 +241,7 @@ export default {
     },
     onResetSkin() {
       this.resetSkin()
-    }
+    },
   }
 }
 </script>

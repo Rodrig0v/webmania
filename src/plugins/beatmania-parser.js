@@ -279,6 +279,8 @@ function beatmapParser(extension) {
    * @return {Object} beatmap
    */
   var buildBeatmap = function () {
+    if(beatmap.player == '2') return null
+
     beatmap.timingPointsLines.sort((a,b) => a.beat == b.beat ? a.time ? 1 : -1 : a.beat - b.beat)
     processTimingPoints()
     beatmap.notes.sort((a,b) => a.beat - b.beat)
@@ -296,13 +298,13 @@ function beatmapParser(extension) {
     let keyMode
     switch(extension) { // THERES PROBABLY A BETTER WAY
       case 'bms':
-        keyMode = 7
+        keyMode = 8
         break;
       case 'bme':
-        keyMode = 7
+        keyMode = 8
         break;
       case 'bml':
-        keyMode = 7
+        keyMode = 8
         break;
       case 'pms':
         keyMode = 9

@@ -120,6 +120,7 @@ export default {
   computed: mapGetters([
     'accuracySize',
     'audioOffset',
+    'bmsStyle',
     'backgroundOpacity',
     'columnSize',
     'comboPosition',
@@ -1083,7 +1084,6 @@ export default {
         this.backgroundImage = new Image()
         this.backgroundImage.src = event.detail.image
       }
-      this.processKeyModeChange()
       this.timingWindows = event.detail.timingWindows
       this.songRate = event.detail.songRate
       this.length = event.detail.beatmap.length * 1000 / this.songRate
@@ -1100,6 +1100,35 @@ export default {
           timing: note.timing,
         })
       }
+      let scratchNotes = []
+      if(this.keyMode == 8 && event.detail.mods.noscratch) {
+        this.keyMode = 7
+        scratchNotes = this.notes[0]
+        this.notes[0] = this.notes[1]
+        this.notes[1] = this.notes[2]
+        this.notes[2] = this.notes[3]
+        this.notes[3] = this.notes[4]
+        this.notes[4] = this.notes[5]
+        this.notes[5] = this.notes[6]
+        this.notes[6] = this.notes[7]
+        this.notes.pop()
+      } else {
+        if(this.keyMode == 8 && this.bmsStyle == 'bmsright') {
+          this.bmsLeft = false
+          let temp = this.notes[0]
+          this.notes[0] = this.notes[7]
+          this.notes[7] = temp
+        } else {
+          this.bmsLeft = true
+        }
+      }
+      if(event.detail.mods.mirror) {
+        this.notes = this.notes.reverse(this.notes)
+      }
+      if(event.detail.mods.random) {
+        this.shuffle(this.notes)
+      }
+      this.processKeyModeChange()
       if(event.restart) {
         for(let hitSound of Object.values(this.hitSounds)) {
           if(hitSound == null) continue
@@ -1150,6 +1179,15 @@ export default {
           }
           this.timeSounds.push(localTimeSound)
         }
+        for(let i = 0; i < scratchNotes.length; i++) {
+          if(scratchNotes.peekAt(i).hitSound != null && this.hitSounds[scratchNotes.peekAt(i).hitSound] != null)
+            this.timeSounds.push({
+              start: false,
+              startTime: scratchNotes.peekAt(i).startTime,
+              name: scratchNotes.peekAt(i).hitSound
+            })
+        }
+        this.timeSounds.sort((a,b) => a.startTime - b.startTime)
 
         if(this.loadedSounds == this.totalSounds)
           this.startSong()
@@ -1195,34 +1233,61 @@ export default {
         }
 
       } else {
-        this.skinData.lightingImages = Array.from({length: info.skins[this.skin][this.keyMode].lightingImages.length}, () => new Image())
+        let skinmode = this.keyMode
+        if(skinmode == 8) {
+          switch(this.bmsStyle) {
+            case 'bmsnone':
+              break;
+            case 'bmsleft':
+              skinmode = this.bmsStyle
+              break;
+            case 'bmsright':
+              skinmode = this.bmsStyle
+              break;
+          }
+          if(this.playing) {
+            if(this.bmsLeft && skinmode == 'bmsright') {
+              this.bmsLeft = false
+              let temp = this.notes[0]
+              this.notes[0] = this.notes[7]
+              this.notes[7] = temp
+            }
+            else if(!this.bmsLeft && skinmode != 'bmsright') {
+              this.bmsLeft = true
+              let temp = this.notes[0]
+              this.notes[0] = this.notes[7]
+              this.notes[7] = temp
+            }
+          }
+        }
+        this.skinData.lightingImages = Array.from({length: info.skins[this.skin][skinmode].lightingImages.length}, () => new Image())
         for(let i = 0; i < this.skinData.lightingImages.length; i++) {
-          this.skinData.lightingImages[i].src = info.skins[this.skin][this.keyMode].lightingImages[i]
+          this.skinData.lightingImages[i].src = info.skins[this.skin][skinmode].lightingImages[i]
         }
 
-        this.skinData.receptorImages = Array.from({length: info.skins[this.skin][this.keyMode].receptorImages.length}, () => new Image())
+        this.skinData.receptorImages = Array.from({length: info.skins[this.skin][skinmode].receptorImages.length}, () => new Image())
         for(let i = 0; i < this.skinData.receptorImages.length; i++) {
-          this.skinData.receptorImages[i].src = info.skins[this.skin][this.keyMode].receptorImages[i]
+          this.skinData.receptorImages[i].src = info.skins[this.skin][skinmode].receptorImages[i]
         }
 
-        this.skinData.receptorDownImages = Array.from({length: info.skins[this.skin][this.keyMode].receptorDownImages.length}, () => new Image())
+        this.skinData.receptorDownImages = Array.from({length: info.skins[this.skin][skinmode].receptorDownImages.length}, () => new Image())
         for(let i = 0; i < this.skinData.receptorDownImages.length; i++) {
-          this.skinData.receptorDownImages[i].src = info.skins[this.skin][this.keyMode].receptorDownImages[i]
+          this.skinData.receptorDownImages[i].src = info.skins[this.skin][skinmode].receptorDownImages[i]
         }
 
-        this.skinData.lnBodyImages = Array.from({length: info.skins[this.skin][this.keyMode].lnBodyImages.length}, () => new Image())
+        this.skinData.lnBodyImages = Array.from({length: info.skins[this.skin][skinmode].lnBodyImages.length}, () => new Image())
         for(let i = 0; i < this.skinData.lnBodyImages.length; i++) {
-          this.skinData.lnBodyImages[i].src = info.skins[this.skin][this.keyMode].lnBodyImages[i]
+          this.skinData.lnBodyImages[i].src = info.skins[this.skin][skinmode].lnBodyImages[i]
         }
 
-        this.skinData.lnCapImages = Array.from({length: info.skins[this.skin][this.keyMode].lnCapImages.length}, () => new Image())
+        this.skinData.lnCapImages = Array.from({length: info.skins[this.skin][skinmode].lnCapImages.length}, () => new Image())
         for(let i = 0; i < this.skinData.lnCapImages.length; i++) {
-          this.skinData.lnCapImages[i].src = info.skins[this.skin][this.keyMode].lnCapImages[i]
+          this.skinData.lnCapImages[i].src = info.skins[this.skin][skinmode].lnCapImages[i]
         }
 
-        this.skinData.noteImages = Array.from({length: info.skins[this.skin][this.keyMode].noteImages.length}, () => new Image())
+        this.skinData.noteImages = Array.from({length: info.skins[this.skin][skinmode].noteImages.length}, () => new Image())
         for(let i = 0; i < this.skinData.noteImages.length; i++) {
-          this.skinData.noteImages[i].src = info.skins[this.skin][this.keyMode].noteImages[i]
+          this.skinData.noteImages[i].src = info.skins[this.skin][skinmode].noteImages[i]
         }
       }
 
@@ -1246,12 +1311,16 @@ export default {
     },
     loadKeyMode() {
       this.keysDown = []
-      this.notes = []
       for(let i = 0; i < this.keyMode; i++) {
         this.keysDown.push(false)
-        this.notes.push(new Queue())
       }
-    }
+    },
+    shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    },
   },
   destroyed () {
     removeEventListener('keydown', this.processKeyDown)

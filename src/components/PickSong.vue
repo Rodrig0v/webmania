@@ -54,6 +54,11 @@
           <v-text-field :rules="bpmRules" :label="$t('picksong.bpm')" class="mx-4" v-model="computedBpm"></v-text-field>
           <v-text-field :rules="songRateRules" :label="$t('picksong.songrate')" class="mx-4" v-model="computedSongRate"></v-text-field>
         </div>
+        <div class="d-flex flex-row">
+          <v-checkbox :label="$t('picksong.noscratch')" class="mx-4" v-model="mods.noscratch"></v-checkbox>
+          <v-checkbox :label="$t('picksong.mirror')" class="mx-4" v-model="mods.mirror"></v-checkbox>
+          <v-checkbox :label="$t('picksong.random')" class="mx-4" v-model="mods.random"></v-checkbox>
+        </div>
       </v-card-text>
 
       <v-card-actions>
@@ -87,6 +92,11 @@ export default {
   name: 'PickSong',
   data() {
     return {
+      mods: {
+        noscratch: false,
+        random: false,
+        mirror: false,
+      },
       innerDifficulties: [],
       difficultyLogo: require('@/assets/app/logo-dark.png'),
       selectedDifficulty: 0,
@@ -191,7 +201,7 @@ export default {
       this.$emit('close')
       let canvas = document.getElementById('gameCanvas')
       if(canvas != null) {
-        let loadSongEvent = new CustomEvent('loadSong', {'detail': {...this.innerDifficulties[this.selectedDifficulty], songRate: this.songRate, timingWindows: this.timingWindows } })
+        let loadSongEvent = new CustomEvent('loadSong', {'detail': {...this.innerDifficulties[this.selectedDifficulty], songRate: this.songRate, timingWindows: this.timingWindows, mods: this.mods } })
         canvas.dispatchEvent(loadSongEvent)
         if(this.fullscreen) {
           let makeFullscreenEvent = new CustomEvent('makeFullscreen')

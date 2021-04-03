@@ -29,10 +29,18 @@
       "fps": "Fotogramas  por segundo (0-255)",
       "name": "Nome",
       "scrollspeed": "Velocidade de deslizamento (0-9999 ms)",
+      "osutoms": "Velocidade de deslizamento do Osu! para ms",
+      "hitposition": "Posição de toque",
+      "calculate": "Calcular",
+      "fromosu": "Do Osu!",
       "showfps": "Mostrar FPS",
       "volume": "Volume (0-100%)"
     },
     "skin": {
+      "bmsstyle": "Estilo bms",
+      "bmsnone": "8K",
+      "bmsleft": "7+1K Esquerda",
+      "bmsright": "7+1K Direita",
       "lanecovertop": "Cobrir em cima",
       "lanecoverbottom": "Cobrir em baixo",
       "accuracy": "Precisão",
@@ -66,6 +74,9 @@
     "keymode": "Número de teclas"
   },
   "picksong": {
+    "noscratch": "Sem Scratch",
+    "mirror": "Espelho",
+    "random": "Aleatório",
     "timingwindows":"OD (Janela para acertar)",
     "length": "Duração",
     "notes": "Notas",

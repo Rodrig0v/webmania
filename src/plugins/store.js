@@ -38,6 +38,7 @@ const mutations = {
       skin: {
         accuracySize: 0.05,
         backgroundOpacity: 0.4,
+        bmsStyle: 'bmsnone',
         columnSize: 0.05,
         comboPosition: 0.75,
         comboSize: 0.05,
@@ -170,6 +171,7 @@ const mutations = {
     state.configs.skin = {
       accuracySize: 0.05,
       backgroundOpacity: 0.4,
+      bmsStyle: 'bmsnone',
       columnSize: 0.05,
       comboPosition: 0.75,
       comboSize: 0.05,
@@ -248,6 +250,7 @@ const actions = {
 
     if(configs.version <= 0.31) {
       configs.general.fullscreen = true
+      configs.skin.bmsStyle = 'bmsnone'
       configs.skin.judgementBounce = 0.5
       configs.skin.laneCoverBottomFade = 0.1
       configs.skin.laneCoverBottomPosition = 0.1
@@ -334,8 +337,8 @@ const actions = {
   changeSkinParameter ({ commit }, data) {
     commit('mutateSkinParameter', data)
   },
-  changeSkin ({ commit }, data) {
-    commit('mutateSkinParameter', { id: 'skin', value: data.value })
+  changeSkinParameterWithEvent ({ commit }, data) {
+    commit('mutateSkinParameter', data)
     let canvas = document.getElementById('gameCanvas')
     if(canvas != null) {
       let skinChangedEvent = new CustomEvent('skinChanged')
@@ -370,6 +373,7 @@ const getters = {
   /* Skin */
   accuracySize: state => state.configs.skin.accuracySize,
   backgroundOpacity: state => state.configs.skin.backgroundOpacity,
+  bmsStyle:  state => state.configs.skin.bmsStyle,
   columnSize: state => state.configs.skin.columnSize,
   comboPosition: state => state.configs.skin.comboPosition,
   comboSize: state => state.configs.skin.comboSize,

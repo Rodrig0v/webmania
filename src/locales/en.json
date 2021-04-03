@@ -29,10 +29,18 @@
       "audioOffset": "Audio offset (-9999-9999 ms)",
       "visualOffset": "Visual offset (-9999-9999 ms)",
       "scrollspeed": "Scroll Speed (0-9999 ms)",
+      "osutoms": "Osu! Scroll Speed to ms",
+      "hitposition": "Hit Position",
+      "calculate": "Calculate",
+      "fromosu": "From Osu!",
       "showfps": "Show FPS",
       "volume": "Volume (0-100%)"
     },
     "skin": {
+      "bmsstyle": "Bms Style",
+      "bmsnone": "8K",
+      "bmsleft": "7+1K Left",
+      "bmsright": "7+1K Right",
       "lanecovertop": "Top Cover",
       "lanecoverbottom": "Bottom Cover",
       "accuracy": "Accuracy",
@@ -66,6 +74,9 @@
     "keymode": "Key mode"
   },
   "picksong": {
+    "noscratch": "No scratch",
+    "mirror": "Mirror",
+    "random": "Random",
     "timingwindows":"OD (Timing Windows)",
     "length": "Length",
     "notes": "Notes",

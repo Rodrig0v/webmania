@@ -124,6 +124,7 @@ var processBeatmaniaFolder = async function(files) {
   var enc = new TextDecoder('utf-8');
   for(var difficultyFile of difficultyFiles) {
     let beatmap = BeatmaniaParser.parseContent(enc.decode(await readFileAsArrayBuffer(difficultyFile)), difficultyFile.name.match(/\.([a-zA-Z0-9]+)$/i)[1])
+    if(beatmap == null) continue
     let difficulty = await processDifficulty(files, beatmap, hitSounds)
     if(difficulty)
       difficulties.push(difficulty)
@@ -134,7 +135,7 @@ var processBeatmaniaFolder = async function(files) {
 var processStepmaniaFolder = async function(files) {
   var difficultyFiles = []
   for(let file of files) {
-    if(file.name.match(/\.sm$/i) != null || file.name.match(/\.scc$/i) != null) {
+    if(file.name.match(/\.sm$/i) != null || file.name.match(/\.ssc$/i) != null) {
       difficultyFiles.push(file)
     }
   }

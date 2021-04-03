@@ -1,14 +1,51 @@
 <template>
   <div>
+    <v-dialog
+      v-model="calculatorDialog"
+      max-width="350"
+    >
+      <v-card>
+        <v-card-title class="headline">
+          {{ $t('options.general.osutoms') }}
+        </v-card-title>
+        <v-card-text>
+          <v-text-field
+            :label="$t('options.general.scrollspeed')"
+            type="number"
+            v-model="osuScrollSpeed"
+          ></v-text-field>
+          <v-text-field
+            :label="$t('options.general.hitposition')"
+            type="number"
+            v-model="osuHitPosition"
+          ></v-text-field>
+          <v-btn
+            color="blue darken-1"
+            @click="changeGeneralParameter({ id: 'scrollSpeed', value: 13720 * (osuHitPosition / 480) / osuScrollSpeed }); calculatorDialog = false;"
+          >
+            {{ $t('options.general.calculate')}}
+          </v-btn>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
     <v-text-field
       :label="$t('options.general.name')"
       v-model="computedName"
     ></v-text-field>
-    <v-text-field
-      :label="$t('options.general.scrollspeed')"
-      :rules="scrollSpeedRules"
-      v-model="computedScrollSpeed"
-    ></v-text-field>
+    <v-row class="my-0 mx-0">
+      <v-text-field
+        :label="$t('options.general.scrollspeed')"
+        :rules="scrollSpeedRules"
+        v-model="computedScrollSpeed"
+      ></v-text-field>
+      <v-btn
+        color="blue darken-1"
+        @click="calculatorDialog = true"
+      >
+        {{ $t('options.general.fromosu')}}
+      </v-btn>
+    </v-row>
     <v-text-field
       :label="$t('options.general.audioOffset')"
       :rules="offsetRules"
@@ -39,6 +76,9 @@ export default {
   name: 'OptionsGeneral',
   data() {
     return {
+      calculatorDialog: false,
+      osuScrollSpeed: 25,
+      osuHitPosition: 402,
       percentageRules: [
         v  => !isNaN(Number(v)) ? true : this.$t('rules.number'),
         v  => v >= 0 && v <= 100 ? true : this.$t('rules.value', {min: 0, max: 100}),
