@@ -256,8 +256,8 @@ const actions = {
       configs.skin.laneCoverBottomPosition = 0.1
       configs.skin.laneCoverTopFade = 0.1
       configs.skin.laneCoverTopPosition = 0.1
-      configs.skin.showLaneCoverBottom = true
-      configs.skin.showLaneCoverTop = true
+      configs.skin.showLaneCoverBottom = false
+      configs.skin.showLaneCoverTop = false
       configs.keyBindings[8] = [
         { code: 'KeyA', key: 'A' },
         { code: 'KeyS', key: 'S' },
