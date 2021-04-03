@@ -45,7 +45,7 @@ const mutations = {
         fpsSize: 0.05,
         hitPosition: 0.1,
         infoSize: 0.025,
-        judgementBounce: 1.5,
+        judgementBounce: 0.5,
         judgementPosition: 0.4,
         judgementSize: 0.07,
         judgementsSize: 0.05,
@@ -177,7 +177,7 @@ const mutations = {
       fpsSize: 0.05,
       hitPosition: 0.1,
       infoSize: 0.025,
-      judgementBounce: 1.5,
+      judgementBounce: 0.5,
       judgementPosition: 0.4,
       judgementSize: 0.07,
       judgementsSize: 0.05,
@@ -248,7 +248,7 @@ const actions = {
 
     if(configs.version <= 0.31) {
       configs.general.fullscreen = true
-      configs.skin.judgementBounce = 1.5
+      configs.skin.judgementBounce = 0.5
       configs.skin.laneCoverBottomFade = 0.1
       configs.skin.laneCoverBottomPosition = 0.1
       configs.skin.laneCoverTopFade = 0.1

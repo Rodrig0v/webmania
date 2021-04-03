@@ -89,6 +89,18 @@
           @input="onChangeSkinParameter(item.gradient, $event)"
         ></v-text-field>
       </div>
+      <div v-if="item.expand != null" class="d-flex align-center pr-4">
+        <v-icon>mdi-arrow-expand-all</v-icon>
+        <v-text-field
+          :value="self[item.expand] * 100"
+          class="mt-0 pt-0"
+          hide-details
+          single-line
+          type="number"
+          style="width: 45px"
+          @input="onChangeSkinParameter(item.expand, $event)"
+        ></v-text-field>
+      </div>
     </v-row>
     <v-row class="my-0 mx-4">
       <v-btn color="blue darken-1" @click="onResetSkin">
@@ -115,7 +127,7 @@ export default {
         { id: 'options.skin.columns', toggle: 'showReceptors', position: 'hitPosition', sizeX: 'columnSize' },
         { id: 'options.skin.background', toggle: 'showBackground', opacity: 'backgroundOpacity' },
         { id: 'options.skin.combo', toggle: 'showCombo', position: 'comboPosition', size: 'comboSize' },
-        { id: 'options.skin.judgement', toggle: 'showJudgement', position: 'judgementPosition', size: 'judgementSize' },
+        { id: 'options.skin.judgement', toggle: 'showJudgement', position: 'judgementPosition', size: 'judgementSize', expand: 'judgementBounce' },
         { id: 'options.skin.effects', toggle: 'showEffects', size: 'effectSize' },
         { id: 'options.skin.info', toggle: 'showInfo', size: 'infoSize' },
         { id: 'options.skin.score', toggle: 'showJudgements', size: 'judgementsSize' },
@@ -145,6 +157,7 @@ export default {
       'fpsSize',
       'hitPosition',
       'infoSize',
+      'judgementBounce',
       'judgementPosition',
       'judgementSize',
       'judgementsSize',

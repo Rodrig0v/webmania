@@ -621,7 +621,7 @@ export default {
       let difference = Date.now() - this.lastHitTime
       if(difference < this.judgementTime) {
         let judgementImage = this.skinData.judgementImages[this.lastJudgement]
-        let judgementHeight = Math.max(this.canvas.height * this.judgementSize * this.judgementBounce - difference / this.judgementEffectTime * (this.canvas.height * this.judgementSize * this.judgementBounce - this.canvas.height * this.judgementSize), this.canvas.height * this.judgementSize)
+        let judgementHeight = Math.max(this.canvas.height * this.judgementSize * (1 + this.judgementBounce) - difference / this.judgementEffectTime * (this.canvas.height * this.judgementSize * (1 + this.judgementBounce) - this.canvas.height * this.judgementSize), this.canvas.height * this.judgementSize)
         let judgementWidth = judgementHeight * judgementImage.width / judgementImage.height
         this.context.drawImage(
           judgementImage,
