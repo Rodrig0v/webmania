@@ -33,6 +33,8 @@
       "volume": "Volume (0-100%)"
     },
     "skin": {
+      "lanecovertop": "Cobrir em cima",
+      "lanecoverbottom": "Cobrir em baixo",
       "accuracy": "Precisão",
       "background": "Fundo",
       "columns": "Colunas",

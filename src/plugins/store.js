@@ -45,9 +45,14 @@ const mutations = {
         fpsSize: 0.05,
         hitPosition: 0.1,
         infoSize: 0.025,
+        judgementBounce: 1.5,
         judgementPosition: 0.4,
         judgementSize: 0.07,
         judgementsSize: 0.05,
+        laneCoverBottomFade: 0.1,
+        laneCoverBottomPosition: 0.1,
+        laneCoverTopFade: 0.1,
+        laneCoverTopPosition: 0.1,
         offsetSizeX: 0.25,
         offsetSizeY: 0.05,
         showAccuracy: true,
@@ -59,6 +64,8 @@ const mutations = {
         showInfo: true,
         showJudgement: true,
         showJudgements: true,
+        showLaneCoverBottom: false,
+        showLaneCoverTop: false,
         showLighting: true,
         showOffset: true,
         showReceptors: true,
@@ -170,9 +177,14 @@ const mutations = {
       fpsSize: 0.05,
       hitPosition: 0.1,
       infoSize: 0.025,
+      judgementBounce: 1.5,
       judgementPosition: 0.4,
       judgementSize: 0.07,
       judgementsSize: 0.05,
+      laneCoverBottomFade: 0.1,
+      laneCoverBottomPosition: 0.1,
+      laneCoverTopFade: 0.1,
+      laneCoverTopPosition: 0.1,
       offsetSizeX: 0.25,
       offsetSizeY: 0.05,
       showAccuracy: true,
@@ -184,6 +196,8 @@ const mutations = {
       showInfo: true,
       showJudgement: true,
       showJudgements: true,
+      showLaneCoverBottom: false,
+      showLaneCoverTop: false,
       showLighting: true,
       showOffset: true,
       showReceptors: true,
@@ -234,6 +248,13 @@ const actions = {
 
     if(configs.version <= 0.31) {
       configs.general.fullscreen = true
+      configs.skin.judgementBounce = 1.5
+      configs.skin.laneCoverBottomFade = 0.1
+      configs.skin.laneCoverBottomPosition = 0.1
+      configs.skin.laneCoverTopFade = 0.1
+      configs.skin.laneCoverTopPosition = 0.1
+      configs.skin.showLaneCoverBottom = true
+      configs.skin.showLaneCoverTop = true
       configs.keyBindings[8] = [
         { code: 'KeyA', key: 'A' },
         { code: 'KeyS', key: 'S' },
@@ -267,7 +288,7 @@ const actions = {
         { code: 'Numpad6', key: '6' },
         { code: 'NumpadAdd', key: '+' },
       ]
-      //configs.version = 0.4
+      configs.version = 0.4
     }
     commit('mutateConfigs', {
       value: configs
@@ -353,13 +374,18 @@ const getters = {
   comboPosition: state => state.configs.skin.comboPosition,
   comboSize: state => state.configs.skin.comboSize,
   effectSize: state => state.configs.skin.effectSize,
-  fullscreen: state => state.configs.general.fullscreen,
   fpsSize: state => state.configs.skin.fpsSize,
+  fullscreen: state => state.configs.general.fullscreen,
   hitPosition: state => state.configs.skin.hitPosition,
   infoSize: state => state.configs.skin.infoSize,
+  judgementBounce: state => state.configs.skin.judgementBounce,
   judgementPosition: state => state.configs.skin.judgementPosition,
   judgementSize: state => state.configs.skin.judgementSize,
   judgementsSize: state => state.configs.skin.judgementsSize,
+  laneCoverBottomFade: state => state.configs.skin.laneCoverBottomFade,
+  laneCoverBottomPosition: state => state.configs.skin.laneCoverBottomPosition,
+  laneCoverTopFade: state => state.configs.skin.laneCoverTopFade,
+  laneCoverTopPosition: state => state.configs.skin.laneCoverTopPosition,
   offsetSizeX: state => state.configs.skin.offsetSizeX,
   offsetSizeY: state => state.configs.skin.offsetSizeY,
   showAccuracy: state => state.configs.skin.showAccuracy,
@@ -371,6 +397,8 @@ const getters = {
   showInfo: state => state.configs.skin.showInfo,
   showJudgement: state => state.configs.skin.showJudgement,
   showJudgements: state => state.configs.skin.showJudgements,
+  showLaneCoverBottom: state => state.configs.skin.showLaneCoverBottom,
+  showLaneCoverTop: state => state.configs.skin.showLaneCoverTop,
   showLighting: state => state.configs.skin.showLighting,
   showOffset: state => state.configs.skin.showOffset,
   showReceptors: state => state.configs.skin.showReceptors,

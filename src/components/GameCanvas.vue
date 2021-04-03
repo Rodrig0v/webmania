@@ -87,8 +87,6 @@ export default {
       offsetChangeTime: 3000,
       countdownTime: 2000,
       effectTime: 250,
-      offsetTime: 3000,
-      judgementEffectSize: 1.5,
       judgementEffectTime: 200,
       judgementTime: 400,
       lineWidth: 0.003,
@@ -132,10 +130,15 @@ export default {
     'hitPosition',
     'hitPosition',
     'infoSize',
+    'judgementBounce',
     'judgementPosition',
     'judgementSize',
     'judgementsSize',
     'keyBindings',
+    'laneCoverBottomFade',
+    'laneCoverBottomPosition',
+    'laneCoverTopFade',
+    'laneCoverTopPosition',
     'offsetSizeX',
     'offsetSizeY',
     'scrollSpeed',
@@ -148,6 +151,8 @@ export default {
     'showInfo',
     'showJudgement',
     'showJudgements',
+    'showLaneCoverBottom',
+    'showLaneCoverTop',
     'showLighting',
     'showOffset',
     'showReceptors',
@@ -354,6 +359,10 @@ export default {
         this.drawLighting()
       if(this.playing)
         this.drawNotes()
+      if(this.showLaneCoverTop)
+        this.drawLaneCoverTop()
+      if(this.showLaneCoverBottom)
+        this.drawLaneCoverBottom()
       if(this.showReceptors)
         this.drawReceptors()
       if(this.showEffects)
@@ -409,6 +418,36 @@ export default {
       this.context.rect(0, 0, this.canvas.width, this.canvas.height);
       this.context.closePath();
       this.context.fill();
+    },
+    drawLaneCoverTop() {
+      let widthStart = this.canvas.width / 2 - this.canvas.width * this.columnSize * this.keyMode / 2
+      let widthLength = this.canvas.width * this.columnSize * this.keyMode
+      let gradientHeight = this.canvas.height * this.laneCoverTopFade
+      let coverHeight = this.canvas.height * this.laneCoverTopPosition
+      let gradient = this.context.createLinearGradient(0, coverHeight, 0, coverHeight + gradientHeight)
+      gradient.addColorStop(0, "black");
+      gradient.addColorStop(1, "transparent");
+
+      this.context.fillStyle = 'black';
+      this.context.fillRect(widthStart, 0, widthLength, coverHeight);
+
+      this.context.fillStyle = gradient;
+      this.context.fillRect(widthStart, coverHeight, widthLength, gradientHeight)
+    },
+    drawLaneCoverBottom() {
+      let widthStart = this.canvas.width / 2 - this.canvas.width * this.columnSize * this.keyMode / 2
+      let widthLength = this.canvas.width * this.columnSize * this.keyMode
+      let gradientHeight = this.canvas.height * this.laneCoverBottomFade
+      let coverHeight = this.canvas.height * this.laneCoverBottomPosition
+      let gradient = this.context.createLinearGradient(0, this.canvas.height - coverHeight, 0, this.canvas.height - coverHeight - gradientHeight)
+      gradient.addColorStop(0, "black");
+      gradient.addColorStop(1, "transparent");
+
+      this.context.fillStyle = 'black';
+      this.context.fillRect(widthStart, this.canvas.height - coverHeight, widthLength, coverHeight);
+
+      this.context.fillStyle = gradient;
+      this.context.fillRect(widthStart, this.canvas.height - coverHeight - gradientHeight, widthLength, gradientHeight)
     },
     drawPaused() {
       this.context.font = (this.canvas.height * this.textSize).toFixed(0) + 'px Arial'
@@ -582,7 +621,7 @@ export default {
       let difference = Date.now() - this.lastHitTime
       if(difference < this.judgementTime) {
         let judgementImage = this.skinData.judgementImages[this.lastJudgement]
-        let judgementHeight = Math.max(this.canvas.height * this.judgementSize * this.judgementEffectSize - difference / this.judgementEffectTime * (this.canvas.height * this.judgementSize * this.judgementEffectSize - this.canvas.height * this.judgementSize), this.canvas.height * this.judgementSize)
+        let judgementHeight = Math.max(this.canvas.height * this.judgementSize * this.judgementBounce - difference / this.judgementEffectTime * (this.canvas.height * this.judgementSize * this.judgementBounce - this.canvas.height * this.judgementSize), this.canvas.height * this.judgementSize)
         let judgementWidth = judgementHeight * judgementImage.width / judgementImage.height
         this.context.drawImage(
           judgementImage,
@@ -755,7 +794,7 @@ export default {
     },
     drawOffset() {
       let now = Date.now()
-      while(this.lastOffsets.peekFront() != null && now - this.lastOffsets.peekFront().startTime >= this.offsetTime) {
+      while(this.lastOffsets.peekFront() != null && now - this.lastOffsets.peekFront().startTime >= this.offsetChangeTime) {
         this.lastOffsets.shift()
       }
 

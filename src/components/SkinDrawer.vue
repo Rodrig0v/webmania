@@ -77,6 +77,18 @@
           @input="onChangeSkinParameter(item.opacity, $event)"
         ></v-text-field>
       </div>
+      <div v-if="item.gradient != null" class="d-flex align-center pr-4">
+        <v-icon>mdi-gradient</v-icon>
+        <v-text-field
+          :value="self[item.gradient] * 100"
+          class="mt-0 pt-0"
+          hide-details
+          single-line
+          type="number"
+          style="width: 45px"
+          @input="onChangeSkinParameter(item.gradient, $event)"
+        ></v-text-field>
+      </div>
     </v-row>
     <v-row class="my-0 mx-4">
       <v-btn color="blue darken-1" @click="onResetSkin">
@@ -110,6 +122,8 @@ export default {
         { id: 'options.skin.timing', toggle: 'showOffset', sizeX: 'offsetSizeX', sizeY: 'offsetSizeY' },
         { id: 'options.skin.accuracy', toggle: 'showAccuracy', size: 'accuracySize' },
         { id: 'options.skin.time', toggle: 'showSongMeter', size: 'songMeterSize' },
+        { id: 'options.skin.lanecovertop', toggle: 'showLaneCoverTop', position: 'laneCoverTopPosition', gradient: 'laneCoverTopFade' },
+        { id: 'options.skin.lanecoverbottom', toggle: 'showLaneCoverBottom', position: 'laneCoverBottomPosition', gradient: 'laneCoverBottomFade' },
         { id: 'options.skin.fps', toggle: 'showFps', size: 'fpsSize' },
       ]
     };
@@ -134,6 +148,10 @@ export default {
       'judgementPosition',
       'judgementSize',
       'judgementsSize',
+      'laneCoverBottomFade',
+      'laneCoverBottomPosition',
+      'laneCoverTopFade',
+      'laneCoverTopPosition',
       'offsetSizeX',
       'offsetSizeY',
       'showAccuracy',
@@ -145,6 +163,8 @@ export default {
       'showInfo',
       'showJudgement',
       'showJudgements',
+      'showLaneCoverBottom',
+      'showLaneCoverTop',
       'showLighting',
       'showOffset',
       'showReceptors',
