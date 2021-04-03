@@ -20,15 +20,8 @@
 // pick column position start or center
 // show correct errors when parsing file fails
 // bms: add LN support
-// add up to 10k mode
-
 // fix weird ln glitch
-// fullscreen automatico button
-// probably best to add a lane cover feature at some point rather than just column movement
-// option to enable zero animation judgments
-// ssc files seem to not open in the game, so many sm files will not work
 // clicking pick a song when a file is already uploaded doesn't have any indication to drag again if you'd like to add more songs (don't know if this is intentional to not overload the engine)
-// convert osu!mania scroll to ms
 // Hide LN Cap
 
 import { mapActions, mapGetters } from 'vuex';

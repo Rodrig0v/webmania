@@ -49,9 +49,11 @@
       "upscroll": "Upscroll"
     },
     "keybinds": {
+      "newkeybind": "New keybind",
+      "pressakey": "Press any key",
+      "change": "Change",
       "pause": "Pause",
       "restart": "Restart",
-      "column": "Column",
       "fullscreen": "Fullscreen",
       "incrementoffset": "Increment Audio Offset",
       "decrementoffset": "Decrement Audio Offset"

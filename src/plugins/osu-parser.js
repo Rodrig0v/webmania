@@ -265,7 +265,7 @@ function beatmapParser() {
       return null;
     }
 
-    if(beatmap.CircleSize < 1 || beatmap.CircleSize > 7) {
+    if(beatmap.CircleSize < 1 || beatmap.CircleSize > 10) {
       return null;
     }
 
@@ -299,7 +299,7 @@ function beatmapParser() {
     return {
       artist: beatmap.Artist,
       title: beatmap.Title,
-      length: beatmap.notes[beatmap.notes.length - 1].startTime / 1000,
+      length: (beatmap.notes[beatmap.notes.length - 1].endTime ? beatmap.notes[beatmap.notes.length - 1].endTime : beatmap.notes[beatmap.notes.length - 1].startTime) / 1000,
       difficultyName: beatmap.Version,
       bpm: beatmap.bpmMax,
       timingWindows: parseInt(beatmap.OverallDifficulty),

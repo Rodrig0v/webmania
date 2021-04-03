@@ -222,7 +222,7 @@ function beatmapParser() {
             bars.push([parseInt(j), barNotes]);
         }
         beatmap.NOTES[i] = bars;
-        beatmap.TOTALTIME[i] = beatmap.ACTUALNOTES[i][beatmap.ACTUALNOTES[i].length - 1].startTime
+        beatmap.TOTALTIME[i] = beatmap.ACTUALNOTES[i][beatmap.ACTUALNOTES[i].length - 1].endTime ? beatmap.ACTUALNOTES[i][beatmap.ACTUALNOTES[i].length - 1].endTime : beatmap.ACTUALNOTES[i][beatmap.ACTUALNOTES[i].length - 1].startTime
     }
     let returnvalue = []
     for(let i in beatmap.NOTES) {

@@ -6,13 +6,16 @@
     <KeyBindInput v-model="computedIncrementAudioOffsetKey" :label="$t('options.keybinds.incrementoffset')"/>
     <KeyBindInput v-model="computedDecrementAudioOffsetKey" :label="$t('options.keybinds.decrementoffset')"/>
 
-    <v-tabs v-model="tab" grow>
-      <v-tab v-for="(keyMode) in keyModes" :key="keyMode">
-        {{ keyMode }} K
-      </v-tab>
-    </v-tabs>
-
-    <KeyBindInput v-model="computedHitKeys" :showIndex="true" :label="$t('options.keybinds.column')"/>
+    <KeyBindInput v-model="computed1K" label="1K"/>
+    <KeyBindInput v-model="computed2K" label="2K"/>
+    <KeyBindInput v-model="computed3K" label="3K"/>
+    <KeyBindInput v-model="computed4K" label="4K"/>
+    <KeyBindInput v-model="computed5K" label="5K"/>
+    <KeyBindInput v-model="computed6K" label="6K"/>
+    <KeyBindInput v-model="computed7K" label="7K"/>
+    <KeyBindInput v-model="computed8K" label="8K"/>
+    <KeyBindInput v-model="computed9K" label="9K"/>
+    <KeyBindInput v-model="computed10K" label="10K"/>
 
   </div>
 </template>
@@ -31,7 +34,6 @@ export default {
       tab: null,
       keybindDialog: false,
       keyId: null,
-      keyModes: [1,2,3,4,5,6,7]
     };
   },
   computed: {
@@ -78,14 +80,86 @@ export default {
         this.changeKeyBind({ id: 'restart', value: values[0] })
       }
     },
-    computedHitKeys: {
+    computed1K: {
       get () {
-        return this.keyBindings[this.tab + 1]
+        return this.keyBindings[1]
       },
       set (values) {
-        this.changeHitKeyBinds({ id: this.tab + 1, values })
+        this.changeHitKeyBinds({ id: 1, values })
       }
-    }
+    },
+    computed2K: {
+      get () {
+        return this.keyBindings[2]
+      },
+      set (values) {
+        this.changeHitKeyBinds({ id: 2, values })
+      }
+    },
+    computed3K: {
+      get () {
+        return this.keyBindings[3]
+      },
+      set (values) {
+        this.changeHitKeyBinds({ id: 3, values })
+      }
+    },
+    computed4K: {
+      get () {
+        return this.keyBindings[4]
+      },
+      set (values) {
+        this.changeHitKeyBinds({ id: 4, values })
+      }
+    },
+    computed5K: {
+      get () {
+        return this.keyBindings[5]
+      },
+      set (values) {
+        this.changeHitKeyBinds({ id: 5, values })
+      }
+    },
+    computed6K: {
+      get () {
+        return this.keyBindings[6]
+      },
+      set (values) {
+        this.changeHitKeyBinds({ id: 6, values })
+      }
+    },
+    computed7K: {
+      get () {
+        return this.keyBindings[7]
+      },
+      set (values) {
+        this.changeHitKeyBinds({ id: 7, values })
+      }
+    },
+    computed8K: {
+      get () {
+        return this.keyBindings[8]
+      },
+      set (values) {
+        this.changeHitKeyBinds({ id: 8, values })
+      }
+    },
+    computed9K: {
+      get () {
+        return this.keyBindings[9]
+      },
+      set (values) {
+        this.changeHitKeyBinds({ id: 9, values })
+      }
+    },
+    computed10K: {
+      get () {
+        return this.keyBindings[10]
+      },
+      set (values) {
+        this.changeHitKeyBinds({ id: 10, values })
+      }
+    },
   },
   methods: {
     ...mapActions([

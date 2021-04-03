@@ -148,40 +148,40 @@ function beatmapParser(extension) {
         parseBGALayer2(measure, data)
         break;*/
       case 11:
-        parseNote(measure, 0, data)
-        break;
-      case 12:
         parseNote(measure, 1, data)
         break;
-      case 13:
+      case 12:
         parseNote(measure, 2, data)
         break;
-      case 14:
+      case 13:
         parseNote(measure, 3, data)
         break;
-      case 15:
+      case 14:
         parseNote(measure, 4, data)
         break;
+      case 15:
+        parseNote(measure, 5, data)
+        break;
       case 16:
-        parseTimeSound(measure, data)
+        parseNote(measure, 0, data)
         break;
       case 18:
-        parseNote(measure, 5, data)
+        parseNote(measure, 6, data)
         break;
       case 19:
-        parseNote(measure, 6, data)
-        break;
-      case 22:
-        parseNote(measure, 5, data)
-        break;
-      case 23:
-        parseNote(measure, 6, data)
-        break;
-      case 24:
         parseNote(measure, 7, data)
         break;
-      case 25:
+      case 22:
+        parseNote(measure, 6, data)
+        break;
+      case 23:
+        parseNote(measure, 7, data)
+        break;
+      case 24:
         parseNote(measure, 8, data)
+        break;
+      case 25:
+        parseNote(measure, 9, data)
         break;
       default:
         break;
@@ -312,7 +312,7 @@ function beatmapParser(extension) {
     return {
       artist: beatmap.artist,
       title: beatmap.title,
-      length: beatmap.notes[beatmap.notes.length - 1].startTime / 1000,
+      length: (beatmap.notes[beatmap.notes.length - 1].endTime ? beatmap.notes[beatmap.notes.length - 1].endTime :beatmap.notes[beatmap.notes.length - 1].startTime) / 1000,
       difficultyName: beatmap.difficulty,
       bpm: beatmap.bpm,
       timingWindows: 7,

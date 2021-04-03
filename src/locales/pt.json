@@ -49,9 +49,11 @@
       "upscroll": "Rolar para cima"
     },
     "keybinds": {
+      "newkeybind": "Nova tecla",
+      "pressakey": "Pressione qualquer tecla",
+      "change": "Mudar",
       "pause": "Pausar",
       "restart": "Reiniciar",
-      "column": "Coluna",
       "fullscreen": "Ecrã inteiro",
       "incrementoffset": "Aumentar sincronização de áudio",
       "decrementoffset": "Diminuir sincronização de áudio"

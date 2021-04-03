@@ -116,6 +116,39 @@ const mutations = {
           { code: 'KeyJ', key: 'J' },
           { code: 'KeyK', key: 'K' },
           { code: 'KeyL', key: 'L' },
+        ],
+        8: [
+          { code: 'KeyA', key: 'A' },
+          { code: 'KeyS', key: 'S' },
+          { code: 'KeyD', key: 'D' },
+          { code: 'KeyF', key: 'F' },
+          { code: 'KeyJ', key: 'J' },
+          { code: 'KeyK', key: 'K' },
+          { code: 'KeyL', key: 'L' },
+          { code: 'Semicolon', key: ';' },
+        ],
+        9: [
+          { code: 'KeyA', key: 'A' },
+          { code: 'KeyS', key: 'S' },
+          { code: 'KeyD', key: 'D' },
+          { code: 'KeyF', key: 'F' },
+          { code: 'Space', key: 'SPACE' },
+          { code: 'KeyJ', key: 'J' },
+          { code: 'KeyK', key: 'K' },
+          { code: 'KeyL', key: 'L' },
+          { code: 'Semicolon', key: ';' },
+        ],
+        10: [
+          { code: 'KeyA', key: 'A' },
+          { code: 'KeyS', key: 'S' },
+          { code: 'KeyD', key: 'D' },
+          { code: 'KeyF', key: 'F' },
+          { code: 'Space', key: 'SPACE' },
+          { code: 'ArrowRight', key: 'ARROWRIGHT' },
+          { code: 'Numpad4', key: '4' },
+          { code: 'Numpad5', key: '5' },
+          { code: 'Numpad6', key: '6' },
+          { code: 'NumpadAdd', key: '+' },
         ]
       },
       challenges: {
@@ -201,6 +234,40 @@ const actions = {
 
     if(configs.version <= 0.31) {
       configs.general.fullscreen = true
+      configs.keyBindings[8] = [
+        { code: 'KeyA', key: 'A' },
+        { code: 'KeyS', key: 'S' },
+        { code: 'KeyD', key: 'D' },
+        { code: 'KeyF', key: 'F' },
+        { code: 'KeyJ', key: 'J' },
+        { code: 'KeyK', key: 'K' },
+        { code: 'KeyL', key: 'L' },
+        { code: 'Semicolon', key: ';' },
+      ],
+      configs.keyBindings[9] = [
+        { code: 'KeyA', key: 'A' },
+        { code: 'KeyS', key: 'S' },
+        { code: 'KeyD', key: 'D' },
+        { code: 'KeyF', key: 'F' },
+        { code: 'Space', key: 'SPACE' },
+        { code: 'KeyJ', key: 'J' },
+        { code: 'KeyK', key: 'K' },
+        { code: 'KeyL', key: 'L' },
+        { code: 'Semicolon', key: ';' },
+      ],
+      configs.keyBindings[10] = [
+        { code: 'KeyA', key: 'A' },
+        { code: 'KeyS', key: 'S' },
+        { code: 'KeyD', key: 'D' },
+        { code: 'KeyF', key: 'F' },
+        { code: 'Space', key: 'SPACE' },
+        { code: 'ArrowRight', key: 'ARROWRIGHT' },
+        { code: 'Numpad4', key: '4' },
+        { code: 'Numpad5', key: '5' },
+        { code: 'Numpad6', key: '6' },
+        { code: 'NumpadAdd', key: '+' },
+      ]
+      //configs.version = 0.4
     }
     commit('mutateConfigs', {
       value: configs

@@ -396,7 +396,7 @@ function OJNParser(hitSounds) {
         beatmap: {
           artist: data.header.artist,
           title: data.header.title,
-          length: data[currentDiff].notes[data[currentDiff].notes.length - 1].startTime / 1000,
+          length: (data[currentDiff].notes[data[currentDiff].notes.length - 1].endTime ? data[currentDiff].notes[data[currentDiff].notes.length - 1].endTime : data[currentDiff].notes[data[currentDiff].notes.length - 1].startTime) / 1000,
           difficultyName: currentDiff + ' - lvl ' + data[currentDiff].level,
           bpm: data.header.bpm,
           timingWindows: 5,
